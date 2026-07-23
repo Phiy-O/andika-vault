@@ -1,10 +1,17 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Cormorant_Garamond, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+});
+
+const calligraphy = Cormorant_Garamond({
+  variable: "--font-calligraphy",
+  subsets: ["latin"],
+  style: ["italic"],
+  weight: ["400", "500", "600"],
 });
 
 const geistMono = Geist_Mono({
@@ -13,7 +20,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Andika | Software Engineer & Digital Craftsman",
+  title: "Andika | Portofolio",
   description: "The portfolio and journal of Andika, a software engineer creating thoughtful digital products.",
 };
 
@@ -25,7 +32,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${inter.variable} ${calligraphy.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
