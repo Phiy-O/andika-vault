@@ -32,7 +32,7 @@ export function HomeCertificatesSection({
       id="certificates"
       aria-labelledby="home-cert-title"
     >
-      <div className="items-end grid gap-[60px] grid-cols-[1.1fr_.9fr] mx-auto mb-[64px] max-w-[1280px] max-md:items-start max-md:gap-[34px] max-md:grid-cols-1 max-md:mb-[44px]">
+      <div className="items-end grid gap-[60px] grid-cols-[1.1fr_.9fr] mx-auto mb-[64px] w-full max-md:items-start max-md:gap-[34px] max-md:grid-cols-1 max-md:mb-[44px]">
         <div>
           <p className="text-muted border border-line w-fit px-3 py-1.5 rounded-full text-[10px] tracking-[.18em] mb-6 uppercase">Certificates</p>
           <h2
@@ -59,7 +59,7 @@ export function HomeCertificatesSection({
         </div>
       </div>
 
-      <div className="grid gap-[18px] grid-cols-3 mx-auto max-w-[1280px] max-md:grid-cols-1">
+      <div className="grid gap-[18px] grid-cols-3 mx-auto w-full max-md:grid-cols-1">
         {visibleCertificates.map((cert, index) => (
           <Link
             className="bg-[rgba(16,14,23,.48)] border border-line rounded-[18px] flex flex-col min-h-[360px] overflow-hidden relative transition-all duration-200 hover:border-[rgba(169,139,255,.42)] hover:shadow-[0_22px_50px_rgba(0,0,0,.24)] hover:-translate-y-[5px] max-md:min-h-0"

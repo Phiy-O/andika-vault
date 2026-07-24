@@ -1,4 +1,5 @@
-import { ContentPage, ContentSection } from "../../components/content/ContentPage";
+import Link from "next/link";
+import { ProjectsContent } from "../../components/projects/ProjectsContent";
 import { PublicShell } from "../../components/layout/PublicShell";
 
 export const metadata = {
@@ -6,56 +7,34 @@ export const metadata = {
   description: "Selected projects by Andika, from product concepts to full-stack builds.",
 };
 
-const projects = [
-  {
-    number: "01",
-    name: "Rentalin",
-    type: "Product design · Full-stack development",
-    detail: "A clearer way to discover and manage rentals.",
-    tone: "art-violet",
-  },
-  {
-    number: "02",
-    name: "Andika Vault",
-    type: "Design system · Development",
-    detail: "A personal home for projects, writing, and ideas.",
-    tone: "art-amber",
-  },
-];
-
 export default function ProjectsPage() {
   return (
     <PublicShell>
-      <ContentPage
-        eyebrow="Projects"
-        title={
-          <>
-            Things I&apos;ve <em>shaped.</em>
-          </>
-        }
-        description="A selection of work where product thinking, design, and engineering meet."
-      >
-        <ContentSection title="Selected work">
-          <div className="grid gap-7 grid-cols-[1.4fr_1fr] mt-[70px] m-0 max-md:grid-cols-1 max-md:mt-10">
-            {projects.map((project) => (
-              <article className="project-card" key={project.name}>
-                <div className={`flex flex-col items-center justify-center h-[450px] relative max-md:h-[310px] ${project.tone === "art-violet" ? "bg-[#6f5a9f] text-[#211b2d]" : "bg-amber text-[#493324]"}`}>
-                  <span className="text-[11px] left-[25px] absolute top-6">{project.number}</span>
-                  <strong className="text-[clamp(28px,4vw,57px)] tracking-[-.08em]">{project.name.toUpperCase()}</strong>
-                  <i className={`[font-family:Georgia,serif] text-lg mt-2 ${project.tone === "art-violet" ? "text-[#d4c4f4]" : "text-[#93613c]"}`}>{project.detail}</i>
-                </div>
-                <div className="flex items-start justify-between pt-[18px]">
-                  <div>
-                    <h3 className="text-base font-medium mb-[7px]">{project.name}</h3>
-                    <p className="text-muted text-[11px] m-0">{project.type}</p>
-                  </div>
-                  <span className="text-muted text-[11px] m-0">2025</span>
-                </div>
-              </article>
-            ))}
-          </div>
-        </ContentSection>
-      </ContentPage>
+      <header className="mx-auto w-full py-[150px] px-[10vw] pb-[110px] max-md:py-[100px] max-md:px-[6vw] max-md:pb-[75px]">
+        <p className="text-muted border border-line w-fit px-3 py-1.5 rounded-full text-[10px] tracking-[.18em] mb-6 uppercase">
+          Projects
+        </p>
+        <h1>
+          Things I&apos;ve <em>shaped.</em>
+        </h1>
+        <p className="text-muted text-[17px] leading-[1.7] max-w-[510px]">
+          A selection of work where product thinking, design, and engineering meet.
+        </p>
+      </header>
+
+      <ProjectsContent />
+
+      <div className="mx-auto w-full py-0 px-[10vw] pb-[130px] max-md:px-[6vw] max-md:pb-[90px]">
+        <Link
+          className="border border-line rounded-lg text-foreground inline-flex items-center w-fit text-xs px-5 py-3 transition-all duration-200 hover:shadow-[0_0_2px_var(--foreground)] hover:-translate-y-0.5"
+          href="/contact"
+        >
+          Have a project in mind{" "}
+          <span className="text-foreground text-[17px] ml-2" aria-hidden="true">
+            ↗
+          </span>
+        </Link>
+      </div>
     </PublicShell>
   );
 }

@@ -14,7 +14,7 @@ export default function Home() {
       <Navbar />
 
       <section
-        className="flex items-center justify-between gap-10 mx-auto max-w-full min-h-[640px] overflow-hidden py-[12vh] px-[10vw] relative after:content-[''] after:absolute after:right-[15%] after:top-[21%] after:h-[5px] after:w-[5px] after:rounded-full after:bg-purple max-md:items-start max-md:flex-col max-md:min-h-0 max-md:py-[90px] max-md:px-[6vw] max-md:pb-[50px]"
+        className="flex items-center justify-between gap-10 mx-auto max-w-full min-h-[640px] mt-16 overflow-hidden py-[12vh] px-[10vw] relative after:content-[''] after:absolute after:right-[15%] after:top-[21%] after:h-[5px] after:w-[5px] after:rounded-full after:bg-purple max-md:items-start max-md:flex-col max-md:min-h-0 max-md:py-[90px] max-md:px-[6vw] max-md:pb-[50px]"
         id="top"
         aria-labelledby="hero-title"
       >

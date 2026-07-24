@@ -7,6 +7,7 @@ export type HomeProject = {
   techStack: string[];
   githubUrl?: string;
   liveUrl?: string;
+  category: "product" | "tool";
   featured: boolean;
   sortOrder: number;
   isVisible: boolean;
@@ -22,6 +23,7 @@ export const homeProjects: HomeProject[] = [
     thumbnail: "/images/thumbnails/projects-thumbnail.png",
     techStack: ["Next.js", "TypeScript", "Prisma", "PostgreSQL"],
     liveUrl: "#",
+    category: "product",
     featured: true,
     sortOrder: 1,
     isVisible: true,
@@ -35,6 +37,7 @@ export const homeProjects: HomeProject[] = [
     thumbnail: "/images/thumbnails/projects-thumbnail.png",
     techStack: ["Next.js", "React", "Tailwind CSS", "Prisma"],
     githubUrl: "#",
+    category: "tool",
     featured: true,
     sortOrder: 2,
     isVisible: true,
@@ -48,6 +51,7 @@ export const homeProjects: HomeProject[] = [
     thumbnail: "/images/thumbnails/projects-thumbnail.png",
     techStack: ["Next.js", "Auth.js", "Zod", "shadcn/ui"],
     githubUrl: "#",
+    category: "tool",
     featured: false,
     sortOrder: 3,
     isVisible: true,
