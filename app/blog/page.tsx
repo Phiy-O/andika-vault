@@ -37,13 +37,13 @@ export default function BlogPage() {
         description="Thoughts on product, engineering, design, and the lessons hiding inside the work."
       >
         <ContentSection title="Latest notes">
-          <div className="journal-list page-journal-list">
+          <div className="border-t border-line mt-0">
             {posts.map((post) => (
-              <a href="#" className="journal-item" key={post.number}>
-                <span>{post.number}</span>
-                <h3>{post.title}</h3>
-                <small>{post.detail}</small>
-                <b aria-hidden="true">↗</b>
+              <a href="#" className="items-center border-b border-line grid gap-5 grid-cols-[.15fr_1fr_.55fr_20px] py-[25px] px-0 max-md:gap-[10px] max-md:grid-cols-[.18fr_1fr_15px]" key={post.number}>
+                <span className="text-muted text-[11px]">{post.number}</span>
+                <h3 className="text-xl font-normal m-0">{post.title}</h3>
+                <small className="text-muted text-[11px] max-md:col-start-2 max-md:row-start-2">{post.detail}</small>
+                <b className="text-purple text-lg font-normal max-md:col-start-3 max-md:row-span-2 max-md:row-start-1" aria-hidden="true">↗</b>
               </a>
             ))}
           </div>

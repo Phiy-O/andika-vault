@@ -37,13 +37,13 @@ export default function AchievementsPage() {
         description="A growing record of projects, learning milestones, and work that shaped how I build."
       >
         <ContentSection title="Selected milestones">
-          <div className="timeline-list">
+          <div className="border-t border-line">
             {achievements.map((item) => (
-              <article className="timeline-item" key={item.year}>
-                <span>{item.year}</span>
+              <article className="items-start border-b border-line grid gap-[30px] grid-cols-[80px_1fr_20px] py-7 px-0 max-md:gap-[15px] max-md:grid-cols-[45px_1fr_15px]" key={item.year}>
+                <span className="text-purple text-xs">{item.year}</span>
                 <div>
-                  <h2>{item.title}</h2>
-                  <p>{item.detail}</p>
+                  <h2 className="text-[25px] mb-2.5 mt-0 mx-0 max-md:text-xl">{item.title}</h2>
+                  <p className="text-muted text-sm leading-[1.6]">{item.detail}</p>
                 </div>
                 <b aria-hidden="true">↗</b>
               </article>
@@ -51,8 +51,8 @@ export default function AchievementsPage() {
           </div>
         </ContentSection>
         <ContentSection title="Certificates">
-          <div className="empty-state">
-            <p>Certificates and credentials will be added here as the portfolio grows.</p>
+          <div className="border border-dashed border-line text-muted p-[35px]">
+            <p className="m-0">Certificates and credentials will be added here as the portfolio grows.</p>
           </div>
         </ContentSection>
       </ContentPage>

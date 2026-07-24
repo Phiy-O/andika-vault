@@ -36,20 +36,20 @@ export default function ProjectsPage() {
         description="A selection of work where product thinking, design, and engineering meet."
       >
         <ContentSection title="Selected work">
-          <div className="project-grid page-project-grid">
+          <div className="grid gap-7 grid-cols-[1.4fr_1fr] mt-[70px] m-0 max-md:grid-cols-1 max-md:mt-10">
             {projects.map((project) => (
               <article className="project-card" key={project.name}>
-                <div className={`project-art ${project.tone}`}>
-                  <span>{project.number}</span>
-                  <strong>{project.name.toUpperCase()}</strong>
-                  <i>{project.detail}</i>
+                <div className={`flex flex-col items-center justify-center h-[450px] relative max-md:h-[310px] ${project.tone === "art-violet" ? "bg-[#6f5a9f] text-[#211b2d]" : "bg-amber text-[#493324]"}`}>
+                  <span className="text-[11px] left-[25px] absolute top-6">{project.number}</span>
+                  <strong className="text-[clamp(28px,4vw,57px)] tracking-[-.08em]">{project.name.toUpperCase()}</strong>
+                  <i className={`[font-family:Georgia,serif] text-lg mt-2 ${project.tone === "art-violet" ? "text-[#d4c4f4]" : "text-[#93613c]"}`}>{project.detail}</i>
                 </div>
-                <div className="project-meta">
+                <div className="flex items-start justify-between pt-[18px]">
                   <div>
-                    <h3>{project.name}</h3>
-                    <p>{project.type}</p>
+                    <h3 className="text-base font-medium mb-[7px]">{project.name}</h3>
+                    <p className="text-muted text-[11px] m-0">{project.type}</p>
                   </div>
-                  <span>2025</span>
+                  <span className="text-muted text-[11px] m-0">2025</span>
                 </div>
               </article>
             ))}
