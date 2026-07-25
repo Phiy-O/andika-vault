@@ -8,6 +8,9 @@ import {
   homeBlogPosts,
   type HomeBlogPost,
 } from "../../data/home-blog-posts";
+import { SectionEyebrow } from "../content/SectionEyebrow";
+import { Card } from "../content/Card";
+import { FilterButton } from "../content/FilterButton";
 
 type Category = "all" | "perspective" | "personal" | "process";
 
@@ -160,18 +163,16 @@ export function BlogContent() {
             {/* Featured post */}
             {latestPost && (
               <div>
-                <p className="text-muted border border-line w-fit px-3 py-1.5 rounded-full text-[10px] tracking-[.18em] mb-5 uppercase">
+                <SectionEyebrow>
                   Featured
-                </p>
-                <Link
-                  className="bg-[rgba(16,14,23,.48)] border border-line rounded-[18px] flex flex-col overflow-hidden relative transition-all duration-200 hover:border-[rgba(169,139,255,.42)] hover:shadow-[0_22px_50px_rgba(0,0,0,.24)] hover:-translate-y-[5px]"
-                  href="/blog"
-                >
+                </SectionEyebrow>
+                <Card href={`/blog/${latestPost.slug}`}>
                   <div className="h-[160px] overflow-hidden relative">
                     <Image
                       src={latestPost.thumbnail || DEFAULT_BLOG_THUMBNAIL}
                       alt=""
                       fill
+                      className="object-cover"
                       sizes="300px"
                     />
                   </div>
@@ -187,45 +188,39 @@ export function BlogContent() {
                       {latestPost.excerpt}
                     </p>
                   </div>
-                </Link>
-              </div>
+                  </Card>
+                  </div>
             )}
 
             {/* Categories */}
             <div>
-              <p className="text-muted border border-line w-fit px-3 py-1.5 rounded-full text-[10px] tracking-[.18em] mb-5 uppercase">
+              <SectionEyebrow>
                 Categories
-              </p>
+              </SectionEyebrow>
               <div className="flex flex-col gap-3">
                 {categories
                   .filter((cat) => cat.value !== "all")
                   .map((cat) => (
-                    <button
+                    <FilterButton
                       key={cat.value}
+                      isActive={activeCategory === cat.value}
+                      count={categoryCounts[cat.value] || 0}
                       onClick={() => {
                         setActiveCategory(cat.value);
                         setVisibleCount(ITEMS_PER_PAGE);
                       }}
-                      className={`items-center border border-line rounded-lg text-xs px-4 py-3 transition-all duration-200 cursor-pointer flex justify-between ${
-                        activeCategory === cat.value
-                          ? "border-purple text-purple bg-[rgba(169,139,255,.08)]"
-                          : "border-line text-muted hover:border-foreground hover:text-foreground"
-                      }`}
                     >
-                      <span>{cat.label}</span>
-                      <span className="text-muted text-[10px]">
-                        {categoryCounts[cat.value] || 0}
-                      </span>
-                    </button>
+                      {cat.label}
+                    </FilterButton>
                   ))}
               </div>
             </div>
 
             {/* About */}
             <div>
-              <p className="text-muted border border-line w-fit px-3 py-1.5 rounded-full text-[10px] tracking-[.18em] mb-5 uppercase">
+              <SectionEyebrow>
                 About
-              </p>
+              </SectionEyebrow>
               <p className="text-muted text-sm leading-[1.7] m-0">
                 Thoughts on product, engineering, design, and the lessons
                 hiding inside the work.
@@ -246,15 +241,13 @@ function BlogCard({
   index: number;
 }) {
   return (
-    <Link
-      className="bg-[rgba(16,14,23,.48)] border border-line rounded-[18px] flex flex-col min-h-[360px] overflow-hidden relative transition-all duration-200 hover:border-[rgba(169,139,255,.42)] hover:shadow-[0_22px_50px_rgba(0,0,0,.24)] hover:-translate-y-[5px] max-md:min-h-0"
-      href="/blog"
-    >
+    <Card href={`/blog/${post.slug}`} className="min-h-[360px] max-md:min-h-0">
       <div className="h-[200px] mb-5 overflow-hidden relative max-md:h-[180px]">
         <Image
           src={post.thumbnail || DEFAULT_BLOG_THUMBNAIL}
           alt=""
           fill
+          className="object-cover"
           sizes="(max-width: 768px) 100vw, 50vw"
         />
       </div>
@@ -277,6 +270,6 @@ function BlogCard({
         <span>{post.readTime}</span>
         <ArrowUpRight className="text-purple" size={18} aria-hidden="true" />
       </div>
-    </Link>
+</Card>
   );
 }

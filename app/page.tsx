@@ -1,6 +1,7 @@
 import { Navbar } from "../components/layout/Navbar";
 import { Footer } from "../components/layout/Footer";
 import { CodeSnippet } from "../components/content/CodeSnippet";
+import { SectionEyebrow } from "../components/content/SectionEyebrow";
 import { HomeBlogSection } from "../components/blog";
 import { HomeCertificatesSection } from "../components/certificates";
 import { HomeProjectsSection } from "../components/projects";
@@ -19,9 +20,9 @@ export default function Home() {
         aria-labelledby="hero-title"
       >
         <div className="max-w-[610px] relative z-20 max-md:max-w-none max-md:w-full">
-          <p className="text-muted border border-line w-fit px-3 py-1.5 rounded-full text-[10px] tracking-[.18em] mb-6 uppercase max-md:text-[9px]">
+          <SectionEyebrow>
             <span className="bg-purple rounded-full inline-block h-[6px] w-[6px] mr-[10px] align-[1px]" /> I&apos;m a software engineer
-          </p>
+          </SectionEyebrow>
           <h1 id="hero-title" className="text-[clamp(46px,5vw,72px)] font-medium tracking-[-.065em] leading-[.96] mb-7 max-md:text-[clamp(42px,9vw,72px)]">Hi, I&apos;m <em>Andika</em><br />I build things for <em>Fun</em></h1>
           <p className="text-muted text-xl leading-[1.7] max-w-[640px] max-md:text-base max-md:leading-[1.7]">I&apos;m passionate about creating thoughtful digital products that are clear, useful, and built to last.</p>
           <div className="flex items-center gap-[27px] mt-[38px]">
@@ -52,7 +53,7 @@ export default function Home() {
           </div>
         </div>
         <div className="relative z-20 max-md:order-1">
-          <p className="text-muted border border-line w-fit px-3 py-1.5 rounded-full text-[10px] tracking-[.18em] mb-6 uppercase">A little things about me</p>
+          <SectionEyebrow>A little things about me</SectionEyebrow>
           <h2 id="about-title" className="text-[clamp(43px,6vw,77px)] font-medium tracking-[-.065em] leading-[.96] mb-8 max-md:text-[clamp(36px,8vw,56px)]">I don&apos;t just write code.<br /><em>I craft experiences.</em></h2>
           <p className="text-muted text-base leading-[1.75] max-w-[520px]">I&apos;m Andika, a software engineer who believes the best products are born from curiosity, precision, and a deep respect for the people who use them. Every line of code I write is a step toward something that feels effortless on the surface and solid underneath.</p><br />
           <p className="text-muted text-base leading-[1.75] max-w-[520px] mt-[18px] max-md:mt-[50px]">I care about the details that most people skip the micro-interactions, the edge cases, the architecture that holds everything together when things get complex.</p>

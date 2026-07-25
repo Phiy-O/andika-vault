@@ -17,7 +17,7 @@ export function SkillsSection({ skills = homeSkills }: SkillsSectionProps) {
       aria-labelledby="skills-title"
     >
       <div className="flex flex-col items-center mx-auto mb-[64px] max-w-[760px] relative text-center z-10 max-md:items-start max-md:mb-[46px] max-md:text-left">
-        <p className="text-muted border border-line w-fit px-3 py-1.5 rounded-full text-[10px] tracking-[.18em] mb-6 mt-0 mx-0 uppercase">
+        <p className="text-muted text-[11px] tracking-[.18em] mb-5 mt-0 mx-0 uppercase">
           Skills
         </p>
         <h2 className="text-[clamp(56px,2vw,64px)] mb-0 max-md:text-[clamp(32px,8vw,52px)]" id="skills-title">

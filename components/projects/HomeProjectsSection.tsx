@@ -2,6 +2,8 @@ import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { homeProjects, type HomeProject } from "../../data/home-projects";
+import { SectionEyebrow } from "../content/SectionEyebrow";
+import { Card } from "../content/Card";
 
 type HomeProjectsSectionProps = {
   projects?: HomeProject[];
@@ -25,7 +27,7 @@ export function HomeProjectsSection({
     >
       <div className="items-end grid gap-[60px] grid-cols-[1.1fr_.9fr] mx-auto mb-[64px] w-full max-md:items-start max-md:gap-[34px] max-md:grid-cols-1 max-md:mb-[44px]">
         <div>
-          <p className="text-muted border border-line w-fit px-3 py-1.5 rounded-full text-[10px] tracking-[.18em] mb-6 uppercase">Projects</p>
+          <SectionEyebrow>Projects</SectionEyebrow>
           <h2
             className="text-[clamp(48px,6vw,78px)] mb-0 max-md:text-[clamp(36px,8vw,56px)]"
             id="home-projects-title"
@@ -52,16 +54,13 @@ export function HomeProjectsSection({
 
       <div className="grid gap-[18px] grid-cols-3 mx-auto w-full max-md:grid-cols-1">
         {visibleProjects.map((project, index) => (
-          <Link
-            className="bg-[rgba(16,14,23,.48)] border border-line rounded-[18px] flex flex-col min-h-[360px] overflow-hidden relative transition-all duration-200 hover:border-[rgba(169,139,255,.42)] hover:shadow-[0_22px_50px_rgba(0,0,0,.24)] hover:-translate-y-[5px] max-md:min-h-0"
-            href={project.liveUrl || project.githubUrl || "/projects"}
-            key={project.id}
-          >
+          <Card href={`/projects/${project.slug}`} className="min-h-[360px] max-md:min-h-0" key={project.id}>
             <div className="rounded-tl-[14px] h-[220px] mb-6 overflow-hidden relative max-md:h-[180px]">
               <Image
                 src={project.thumbnail || DEFAULT_PROJECT_THUMBNAIL}
                 alt=""
                 fill
+                className="object-cover"
                 sizes="(max-width: 768px) 100vw, 33vw"
               />
             </div>
@@ -90,7 +89,7 @@ export function HomeProjectsSection({
               <span>View project</span>
               <ArrowUpRight className="text-purple" size={18} aria-hidden="true" />
             </div>
-          </Link>
+          </Card>
         ))}
       </div>
     </section>

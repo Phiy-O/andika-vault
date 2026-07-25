@@ -1,47 +1,200 @@
-import { ContentPage, ContentSection } from "../../components/content/ContentPage";
+import Image from "next/image";
+import Link from "next/link";
 import { PublicShell } from "../../components/layout/PublicShell";
+import { PageHero } from "../../components/content/PageHero";
+import { CTAButton } from "../../components/content/CTAButton";
+import { Mail, MapPin, Clock, ArrowUpRight, Send } from "lucide-react";
 
 export const metadata = {
   title: "Contact | Andika",
   description: "Get in touch with Andika about a thoughtful digital project.",
 };
 
+const socialLinks = [
+  { label: "LinkedIn", href: "https://linkedin.com", icon: "/icons/linkedin-svgrepo-com.svg" },
+  { label: "GitHub", href: "https://github.com", icon: "/icons/github-svgrepo-com.svg" },
+  { label: "Instagram", href: "https://instagram.com", icon: "/icons/instagram-svgrepo-com.svg" },
+];
+
 export default function ContactPage() {
   return (
     <PublicShell>
-      <ContentPage
+      <PageHero
         eyebrow="Contact"
-        title={
-          <>
-            Let&apos;s make <em>it real.</em>
-          </>
-        }
-        description="Have a product idea, a collaboration in mind, or simply want to say hello? I&apos;d love to hear from you."
-      >
-        <ContentSection title="Start a conversation">
-          <div className="grid gap-[90px] grid-cols-[1.3fr_1fr] max-md:grid-cols-1 max-md:gap-[45px]">
-            <div className="text-muted text-[17px] leading-[1.7] max-w-[450px]">
-              <p>
-                The best way to reach me is by email. Share a little about what you&apos;re building, where you are in the process, and what you need next.
+        title={<>Let&apos;s make <em>it real.</em></>}
+        description="Have a product idea, a collaboration in mind, or simply want to say hello? I'd love to hear from you."
+      />
+
+      {/* ── Form + Info grid ── */}
+      <section className="mx-auto w-full px-[10vw] max-md:px-[6vw] border-t border-line pt-[80px] pb-[100px] max-md:pt-[65px] max-md:pb-[70px]">
+        <div className="grid gap-[70px] grid-cols-[1.3fr_1fr] max-md:grid-cols-1 max-md:gap-[50px]">
+
+          {/* ── Contact form ── */}
+          <div>
+            <p className="text-muted text-[11px] tracking-[.18em] mb-4 uppercase">
+              <Mail size={12} className="inline mr-[6px] -mt-[2px]" aria-hidden="true" />
+              Send a message
+            </p>
+            <p className="text-muted text-[17px] leading-[1.7] max-w-[450px] mb-0">
+              Fill in the form below and I&apos;ll get back to you as soon as I
+              can.
+            </p>
+
+            <form
+              className="mt-10 flex flex-col gap-5"
+              action="mailto:andikapiyo12@gmail.com"
+              method="post"
+              encType="text/plain"
+            >
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="name" className="text-foreground text-[13px] tracking-[.06em] uppercase">
+                  Name
+                </label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  required
+                  placeholder="Your name"
+                  className="bg-transparent border border-line rounded-lg px-5 py-4 text-foreground text-[15px] outline-none transition-all duration-200 placeholder:text-muted/50 focus:border-purple focus:shadow-[0_0_8px_rgba(169,139,255,.15)]"
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="email" className="text-foreground text-[13px] tracking-[.06em] uppercase">
+                  Email
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  placeholder="you@example.com"
+                  className="bg-transparent border border-line rounded-lg px-5 py-4 text-foreground text-[15px] outline-none transition-all duration-200 placeholder:text-muted/50 focus:border-purple focus:shadow-[0_0_8px_rgba(169,139,255,.15)]"
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="message" className="text-foreground text-[13px] tracking-[.06em] uppercase">
+                  Message
+                </label>
+                <textarea
+                  id="message"
+                  name="message"
+                  required
+                  rows={5}
+                  placeholder="Tell me about your project…"
+                  className="bg-transparent border border-line rounded-lg px-5 py-4 text-foreground text-[15px] outline-none transition-all duration-200 placeholder:text-muted/50 focus:border-purple focus:shadow-[0_0_8px_rgba(169,139,255,.15)] resize-y min-h-[120px]"
+                />
+              </div>
+              <button
+                type="submit"
+                className="inline-flex items-center justify-center gap-3 rounded-lg text-base py-4 px-7 transition-all duration-200 hover:-translate-y-0.5 bg-gradient-to-br from-[#a98bff] to-[#7391ff] text-[#f0f0f0] hover:brightness-[1.05] hover:shadow-[0_0_16px_rgba(255,255,255,.25)] w-fit max-md:w-full max-md:py-3 max-md:px-5 max-md:text-xs"
+              >
+                Send message
+                <Send size={16} aria-hidden="true" />
+              </button>
+              <p className="text-muted/60 text-[11px] mt-0">
+                Your email will be shared via your default mail client. No data
+                is stored on this server.
               </p>
-              <a className="border-b border-line block text-lg pb-[15px] text-foreground mt-[45px]" href="mailto:hello@andika.dev">
-                hello@andika.dev <span className="text-purple float-right" aria-hidden="true">↗</span>
+            </form>
+          </div>
+
+          {/* ── Email + Social ── */}
+          <div className="flex flex-col gap-10">
+            {/* Email card */}
+            <div className="border border-line rounded-xl p-8 transition-all duration-200 hover:border-purple/30 hover:shadow-[0_0_20px_rgba(169,139,255,.06)]">
+            <p className="text-muted text-[11px] tracking-[.18em] mb-4 uppercase">
+                <Mail size={12} className="inline mr-[6px] -mt-[2px]" aria-hidden="true" />
+                Email
+              </p>
+              <a
+                className="text-foreground text-lg font-medium block mb-3 transition-colors duration-200 hover:text-purple"
+                href="mailto:andikapiyo12@gmail.com"
+              >
+                andikapiyo12@gmail.com
               </a>
+              <p className="text-muted text-[14px] leading-[1.7] m-0">
+                The best way to reach me. Share what you&apos;re building and
+                where you are in the process.
+              </p>
             </div>
-            <div className="text-foreground text-[15px] leading-[1.8]">
-              <p>
-                <span className="text-muted block text-[10px] tracking-[.12em] mb-1 uppercase">Based in</span>
-                Indonesia<br />
-                Working worldwide
+
+            {/* Social cards */}
+            <div>
+              <p className="text-muted text-[11px] tracking-[.18em] mb-[18px] uppercase">
+                Social
               </p>
-              <p className="mt-[30px]">
-                <span className="text-muted block text-[10px] tracking-[.12em] mb-1 uppercase">Response time</span>
-                Usually within 2–3 days
-              </p>
+              <div className="flex flex-col gap-2.5">
+                {socialLinks.map((social) => (
+                  <a
+                    className="group flex items-center gap-4 border border-line rounded-xl px-5 py-4 transition-all duration-200 hover:border-purple/30 hover:shadow-[0_0_16px_rgba(169,139,255,.06)] hover:-translate-y-0.5 no-underline"
+                    href={social.href}
+                    key={social.label}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <Image
+                      src={social.icon}
+                      alt=""
+                      width={22}
+                      height={22}
+                      className="opacity-50 transition-opacity duration-200 group-hover:opacity-90"
+                    />
+                    <span className="text-foreground text-[15px] flex-1">
+                      {social.label}
+                    </span>
+                    <ArrowUpRight
+                      size={16}
+                      className="text-purple opacity-0 -translate-y-1 translate-x-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0 group-hover:translate-x-0"
+                      aria-hidden="true"
+                    />
+                  </a>
+                ))}
+              </div>
             </div>
           </div>
-        </ContentSection>
-      </ContentPage>
+        </div>
+      </section>
+
+      {/* ── Info row ── */}
+      <section className="mx-auto w-full px-[10vw] max-md:px-[6vw] border-t border-line">
+        <div className="grid grid-cols-3 divide-x divide-line max-md:grid-cols-1 max-md:divide-x-0 max-md:divide-y max-md:divide-line">
+          <div className="py-[50px] pr-[50px] max-md:py-[35px] max-md:pr-0">
+            <MapPin size={16} className="text-purple mb-4" aria-hidden="true" />
+            <span className="text-muted block text-[10px] tracking-[.12em] mb-2 uppercase">
+              Based in
+            </span>
+            <span className="text-foreground text-[15px]">Indonesia</span>
+            <span className="text-muted text-[15px] ml-2">· Working worldwide</span>
+          </div>
+          <div className="py-[50px] px-[50px] max-md:py-[35px] max-md:px-0">
+            <Clock size={16} className="text-purple mb-4" aria-hidden="true" />
+            <span className="text-muted block text-[10px] tracking-[.12em] mb-2 uppercase">
+              Response time
+            </span>
+            <span className="text-foreground text-[15px]">Usually within 2–3 days</span>
+          </div>
+          <div className="py-[50px] pl-[50px] max-md:py-[35px] max-md:pl-0">
+            <div className="text-purple mb-4" aria-hidden="true">
+              <span className="relative flex h-3 w-3">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
+                <span className="relative inline-flex h-3 w-3 rounded-full bg-red-500" />
+              </span>
+            </div>
+            <span className="text-muted block text-[10px] tracking-[.12em] mb-2 uppercase">
+              Availability
+            </span>
+            <span className="inline-flex items-center gap-2 text-foreground text-[15px]">
+              Unavailable for freelance
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA ── */}
+      <div className="mx-auto w-full py-0 px-[10vw] pb-[130px] max-md:px-[6vw] max-md:pb-[90px]">
+        <CTAButton href="/" label="Back to home" />
+      </div>
     </PublicShell>
   );
 }

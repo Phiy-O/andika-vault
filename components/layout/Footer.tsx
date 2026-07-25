@@ -1,6 +1,7 @@
 import { label } from "framer-motion/client";
 import Image from "next/image";
 import Link from "next/link";
+import { SectionEyebrow } from "../content/SectionEyebrow";
 
 const randomLinks = [
   { label: "Dicoding", href: "#" },
@@ -68,7 +69,7 @@ export function Footer() {
       <div className="py-[90px] px-[10vw] max-md:py-[65px] max-md:px-[6vw]">
         <div className="flex justify-between items-start gap-20 max-md:flex-col max-md:gap-[70px]">
           <div className="max-w-[420px] max-md:max-w-none">
-            <p className="text-muted border border-line w-fit px-3 py-1.5 rounded-full text-[10px] tracking-[.18em] mb-6 uppercase">Have a good idea?</p>
+            <SectionEyebrow>Have a good idea?</SectionEyebrow>
             <h2 className="text-[clamp(52px,7vw,92px)] font-medium tracking-[-.065em] leading-[.96] mb-5">Let&apos;s make<br /><em>it real.</em></h2>
             <p className="text-muted text-[14px] leading-[1.7]">Building thoughtful digital products that are clear, useful, and built to last.</p>
           </div>

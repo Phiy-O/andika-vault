@@ -3,20 +3,20 @@
 import { ArrowUpRight, Search } from "lucide-react";
 import Image from "next/image";
 import { useMemo, useState } from "react";
-import { milestones } from "../../data/achievements";
 import {
   homeCertificates,
   type HomeCertificate,
 } from "../../data/home-certificates";
+import { Card } from "../content/Card";
 
-type Category = "all" | "milestone" | "certificate";
+type Category = "all" | "certificate";
 
 type AchievementItem = {
   id: string;
   title: string;
   description: string;
   date: string;
-  category: "milestone" | "certificate";
+  category: "certificate";
   issuer?: string;
   image?: string;
   credentialUrl?: string;
@@ -28,19 +28,6 @@ const dateFormatter = new Intl.DateTimeFormat("en", {
   month: "short",
   year: "numeric",
 });
-
-function mapMilestonesToItems(): AchievementItem[] {
-  return milestones
-    .filter((m) => m.isVisible)
-    .sort((a, b) => a.sortOrder - b.sortOrder)
-    .map((m) => ({
-      id: m.id,
-      title: m.title,
-      description: m.detail,
-      date: m.year,
-      category: "milestone" as const,
-    }));
-}
 
 function mapCertificatesToItems(): AchievementItem[] {
   return homeCertificates
@@ -59,8 +46,7 @@ function mapCertificatesToItems(): AchievementItem[] {
 }
 
 const categories: { value: Category; label: string }[] = [
-  { value: "all", label: "All" },
-  { value: "milestone", label: "Milestones" },
+  { value: "all", label: "All Certificates" },
   { value: "certificate", label: "Certificates" },
 ];
 
@@ -70,7 +56,7 @@ export function AchievementsContent() {
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
 
   const allItems = useMemo(() => {
-    return [...mapMilestonesToItems(), ...mapCertificatesToItems()];
+    return mapCertificatesToItems();
   }, []);
 
   const filteredItems = useMemo(() => {
@@ -179,32 +165,18 @@ function AchievementCard({
   item: AchievementItem;
   index: number;
 }) {
-  const isCertificate = item.category === "certificate";
-
   return (
-    <article
-      className={`bg-[rgba(16,14,23,.48)] border border-line rounded-[18px] flex flex-col overflow-hidden relative transition-all duration-200 hover:border-[rgba(169,139,255,.42)] hover:shadow-[0_22px_50px_rgba(0,0,0,.24)] hover:-translate-y-[5px] ${
-        isCertificate ? "min-h-[360px]" : "min-h-[280px]"
-      }`}
-    >
+    <Card as="article" className="min-h-[360px]">
       {/* Certificate image */}
-      {isCertificate && item.image && (
+      {item.image && (
         <div className="h-[200px] overflow-hidden relative max-md:h-[160px]">
           <Image
             src={item.image}
             alt=""
             fill
+            className="object-cover"
             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
-        </div>
-      )}
-
-      {/* Milestone year badge */}
-      {!isCertificate && (
-        <div className="px-6 pt-6 pb-0">
-          <span className="border border-purple/30 text-purple rounded-md text-[11px] px-2.5 py-1 inline-block">
-            {item.date}
-          </span>
         </div>
       )}
 
@@ -215,12 +187,9 @@ function AchievementCard({
 
       {/* Content */}
       <div className="px-6 pb-4 pt-3 relative z-10 flex-1 flex flex-col">
-        {/* Meta: issuer + date for certificates */}
-        {isCertificate && (
-          <p className="text-muted text-[10px] tracking-[.12em] mb-[14px] uppercase">
-            {item.issuer} / {item.date}
-          </p>
-        )}
+        <p className="text-muted text-[10px] tracking-[.12em] mb-[14px] uppercase">
+          {item.issuer} / {item.date}
+        </p>
 
         <h3 className="text-[clamp(20px,2vw,28px)] font-medium tracking-[-.04em] leading-[1.1] mb-3 line-clamp-2">
           {item.title}
@@ -232,9 +201,9 @@ function AchievementCard({
 
       {/* Footer */}
       <div className="items-center border-t border-line text-muted flex text-xs justify-between mt-auto py-[22px] px-6 relative z-10">
-        <span>{isCertificate ? "View credential" : "View details"}</span>
+        <span>View credential</span>
         <ArrowUpRight className="text-purple" size={18} aria-hidden="true" />
       </div>
-    </article>
+    </Card>
   );
 }

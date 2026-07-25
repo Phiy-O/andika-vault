@@ -5,6 +5,8 @@ import {
   homeCertificates,
   type HomeCertificate,
 } from "../../data/home-certificates";
+import { SectionEyebrow } from "../content/SectionEyebrow";
+import { Card } from "../content/Card";
 
 type HomeCertificatesSectionProps = {
   certificates?: HomeCertificate[];
@@ -34,7 +36,7 @@ export function HomeCertificatesSection({
     >
       <div className="items-end grid gap-[60px] grid-cols-[1.1fr_.9fr] mx-auto mb-[64px] w-full max-md:items-start max-md:gap-[34px] max-md:grid-cols-1 max-md:mb-[44px]">
         <div>
-          <p className="text-muted border border-line w-fit px-3 py-1.5 rounded-full text-[10px] tracking-[.18em] mb-6 uppercase">Certificates</p>
+          <SectionEyebrow>Certificates</SectionEyebrow>
           <h2
             className="text-[clamp(48px,6vw,78px)] mb-0 max-md:text-[clamp(36px,8vw,56px)]"
             id="home-cert-title"
@@ -61,16 +63,13 @@ export function HomeCertificatesSection({
 
       <div className="grid gap-[18px] grid-cols-3 mx-auto w-full max-md:grid-cols-1">
         {visibleCertificates.map((cert, index) => (
-          <Link
-            className="bg-[rgba(16,14,23,.48)] border border-line rounded-[18px] flex flex-col min-h-[360px] overflow-hidden relative transition-all duration-200 hover:border-[rgba(169,139,255,.42)] hover:shadow-[0_22px_50px_rgba(0,0,0,.24)] hover:-translate-y-[5px] max-md:min-h-0"
-            href={cert.credentialUrl || "/achievements"}
-            key={cert.id}
-          >
+          <Card href={cert.credentialUrl || "/achievements"} className="min-h-[360px] max-md:min-h-0" key={cert.id}>
             <div className="rounded-tl-[14px] h-[220px] mb-6 overflow-hidden relative max-md:h-[180px]">
               <Image
                 src={DEFAULT_CERT_IMAGE || cert.image}
                 alt=""
                 fill
+                className="object-cover"
                 sizes="(max-width: 768px) 100vw, 33vw"
               />
             </div>
@@ -91,7 +90,7 @@ export function HomeCertificatesSection({
               <span>View credential</span>
               <ArrowUpRight className="text-purple" size={18} aria-hidden="true" />
             </div>
-          </Link>
+          </Card>
         ))}
       </div>
     </section>
