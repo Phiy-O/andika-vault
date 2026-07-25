@@ -8,6 +8,7 @@ import {
   type HomeCertificate,
 } from "../../data/home-certificates";
 import { Card } from "../content/Card";
+import { CertificateModal } from "../certificates/CertificateModal";
 
 type Category = "all" | "certificate";
 
@@ -20,6 +21,7 @@ type AchievementItem = {
   issuer?: string;
   image?: string;
   credentialUrl?: string;
+  cert: HomeCertificate;
 };
 
 const ITEMS_PER_PAGE = 6;
@@ -42,6 +44,7 @@ function mapCertificatesToItems(): AchievementItem[] {
       issuer: c.issuer,
       image: c.image,
       credentialUrl: c.credentialUrl,
+      cert: c,
     }));
 }
 
@@ -54,6 +57,7 @@ export function AchievementsContent() {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<Category>("all");
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+  const [modalCert, setModalCert] = useState<HomeCertificate | null>(null);
 
   const allItems = useMemo(() => {
     return mapCertificatesToItems();
@@ -137,7 +141,7 @@ export function AchievementsContent() {
         ) : (
           <div className="grid gap-[18px] grid-cols-3 max-md:grid-cols-1 max-lg:grid-cols-2">
             {visibleItems.map((item, index) => (
-              <AchievementCard key={item.id} item={item} index={index} />
+              <AchievementCard key={item.id} item={item} index={index} onSelect={setModalCert} />
             ))}
           </div>
         )}
@@ -154,6 +158,10 @@ export function AchievementsContent() {
           </button>
         </div>
       )}
+
+      {modalCert && (
+        <CertificateModal cert={modalCert} onClose={() => setModalCert(null)} />
+      )}
     </div>
   );
 }
@@ -161,12 +169,15 @@ export function AchievementsContent() {
 function AchievementCard({
   item,
   index,
+  onSelect,
 }: {
   item: AchievementItem;
   index: number;
+  onSelect: (cert: HomeCertificate) => void;
 }) {
   return (
-    <Card as="article" className="min-h-[360px]">
+    <button onClick={() => onSelect(item.cert)} className="text-left block w-full cursor-pointer">
+      <Card as="article" className="min-h-[360px]">
       {/* Certificate image */}
       {item.image && (
         <div className="h-[200px] overflow-hidden relative max-md:h-[160px]">
@@ -205,5 +216,6 @@ function AchievementCard({
         <ArrowUpRight className="text-purple" size={18} aria-hidden="true" />
       </div>
     </Card>
+    </button>
   );
 }

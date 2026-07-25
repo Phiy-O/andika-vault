@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model BlogPost {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  excerpt     String
+  body        String
+  bodyFormat  String   @default("html") // "html" | "markdown"
+  category    String
+  readTime    String
+  publishedAt DateTime @default(now())
+  thumbnail   String?
+  isVisible   Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String
+  body        String
+  bodyFormat  String   @default("html") // "html" | "markdown"
+  thumbnail   String?
+  screenshots String[]
+  techStack   String[]
+  githubUrl   String?
+  liveUrl     String?
+  category    String
+  featured    Boolean  @default(false)
+  isVisible   Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Certificate {
+  id             String   @id @default(cuid())
+  title          String
+  issuer         String
+  issueDate      DateTime
+  credentialUrl  String?
+  image          String?
+  description    String
+  isVisible      Boolean  @default(true)
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}

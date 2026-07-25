@@ -1,12 +1,25 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowUpRight, ChevronLeft, ExternalLink, GitBranch } from "lucide-react";
 import { homeProjects } from "../../../data/home-projects";
 import { PublicShell } from "../../../components/layout/PublicShell";
+import type { Metadata } from "next";
 
-export const metadata = {
-  title: "Projects | Andika",
-};
+export function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  return params.then(({ slug }) => {
+    const project = homeProjects.find((p) => p.slug === slug);
+    if (!project) return { title: "Projects | Andika" };
+    return {
+      title: `${project.title} | Andika`,
+      description: project.description,
+    };
+  });
+}
 
 export function generateStaticParams() {
   return homeProjects
@@ -24,21 +37,38 @@ export default async function ProjectDetailPage({
   if (!project) notFound();
 
   const paragraphs = project.body.split("\n\n");
+  const screenshot = project.screenshots?.[0] || project.thumbnail;
 
   return (
     <PublicShell>
-      <article className="mx-auto w-full px-[10vw] py-[100px] max-md:px-[6vw] max-md:py-[60px]">
+      <article className="mx-auto w-full px-[10vw] max-md:px-[6vw]">
         {/* Back link */}
-        <Link
-          href="/projects"
-          className="inline-flex items-center gap-2 text-muted text-sm hover:text-foreground transition-colors mb-12"
-        >
-          <ChevronLeft size={16} />
-          Back to projects
-        </Link>
+        <div className="mt-16 pt-[60px] pb-4">
+          <Link
+            href="/projects"
+            className="inline-flex items-center gap-2 text-muted text-sm hover:text-foreground transition-colors"
+          >
+            <ChevronLeft size={16} />
+            Back to projects
+          </Link>
+        </div>
+
+        {/* Hero screenshot */}
+        {screenshot && (
+          <div className="relative w-full h-[420px] max-md:h-[240px] rounded-[18px] overflow-hidden border border-line/50 mb-12 mt-2">
+            <Image
+              src={screenshot}
+              alt={`${project.title} screenshot`}
+              fill
+              className="object-cover"
+              priority
+              sizes="(max-width: 768px) 100vw, 80vw"
+            />
+          </div>
+        )}
 
         {/* Header */}
-        <header className="max-w-[720px] mx-auto mb-14">
+        <header className="w-full mx-auto mb-14">
           <div className="flex items-center gap-3 text-muted text-[11px] tracking-[.18em] uppercase mb-6">
             <span className="border border-purple/30 text-purple rounded-md text-[11px] px-2.5 py-1 inline-block">
               {project.category}
@@ -73,18 +103,20 @@ export default async function ProjectDetailPage({
 
           {/* Links */}
           <div className="flex gap-4">
-            {project.liveUrl && (
+            {project.liveUrl && project.liveUrl !== "#" && (
               <Link
                 href={project.liveUrl}
+                target="_blank"
                 className="border border-line rounded-lg text-foreground inline-flex items-center gap-2 text-xs px-5 py-3 transition-all duration-200 hover:shadow-[0_0_2px_var(--foreground)] hover:-translate-y-0.5"
               >
                 <ExternalLink size={14} />
                 Live site
               </Link>
             )}
-            {project.githubUrl && (
+            {project.githubUrl && project.githubUrl !== "#" && (
               <Link
                 href={project.githubUrl}
+                target="_blank"
                 className="border border-line rounded-lg text-foreground inline-flex items-center gap-2 text-xs px-5 py-3 transition-all duration-200 hover:shadow-[0_0_2px_var(--foreground)] hover:-translate-y-0.5"
               >
                 <GitBranch size={14} />
@@ -95,21 +127,28 @@ export default async function ProjectDetailPage({
         </header>
 
         {/* Body */}
-        <div className="max-w-[680px] mx-auto space-y-5 text-[15px] leading-[1.8] text-foreground/90">
-          {paragraphs.map((para, i) => {
-            if (para.startsWith("**")) {
+        <div className="w-full mx-auto space-y-5 text-[15px] leading-[1.8] text-foreground/90 pb-[130px] max-md:pb-[90px]">
+          {project.body.startsWith("<") ? (
+            <div
+              className="prose-content"
+              dangerouslySetInnerHTML={{ __html: project.body }}
+            />
+          ) : (
+            paragraphs.map((para, i) => {
+              if (para.startsWith("**")) {
+                return (
+                  <p key={i} className="font-medium text-foreground">
+                    {para.replace(/\*\*/g, "")}
+                  </p>
+                );
+              }
               return (
-                <p key={i} className="font-medium text-foreground">
-                  {para.replace(/\*\*/g, "")}
+                <p key={i} className="text-muted">
+                  {para}
                 </p>
               );
-            }
-            return (
-              <p key={i} className="text-muted">
-                {para}
-              </p>
-            );
-          })}
+            })
+          )}
         </div>
       </article>
     </PublicShell>

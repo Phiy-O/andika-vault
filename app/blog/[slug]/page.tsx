@@ -1,12 +1,25 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowUpRight, ChevronLeft } from "lucide-react";
 import { homeBlogPosts } from "../../../data/home-blog-posts";
 import { PublicShell } from "../../../components/layout/PublicShell";
+import type { Metadata } from "next";
 
-export const metadata = {
-  title: "Blog | Andika",
-};
+export function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  return params.then(({ slug }) => {
+    const post = homeBlogPosts.find((p) => p.slug === slug);
+    if (!post) return { title: "Blog | Andika" };
+    return {
+      title: `${post.title} | Andika`,
+      description: post.excerpt,
+    };
+  });
+}
 
 export function generateStaticParams() {
   return homeBlogPosts
@@ -43,8 +56,22 @@ export default async function BlogPostPage({
           Back to blog
         </Link>
 
+        {/* Thumbnail */}
+        {post.thumbnail && (
+          <div className="relative w-full h-[360px] max-md:h-[200px] rounded-[18px] overflow-hidden border border-line/50 mb-12">
+            <Image
+              src={post.thumbnail}
+              alt=""
+              fill
+              className="object-cover"
+              priority
+              sizes="(max-width: 768px) 100vw, 80vw"
+            />
+          </div>
+        )}
+
         {/* Header */}
-        <header className="max-w-[720px] mx-auto mb-14">
+        <header className="w-full mx-auto mb-14">
           <div className="flex items-center gap-3 text-muted text-[11px] tracking-[.18em] uppercase mb-6">
             <span>{post.category}</span>
             <span className="w-1 h-1 rounded-full bg-line" />
@@ -62,41 +89,48 @@ export default async function BlogPostPage({
           </p>
         </header>
 
-        {/* Body */}
-        <div className="max-w-[680px] mx-auto space-y-5 text-[15px] leading-[1.8] text-foreground/90">
-          {paragraphs.map((para, i) => {
-            if (para.startsWith("## ")) {
+        {/* Body — handles both plain text and HTML (Tiptap-ready) */}
+        <div className="w-full mx-auto space-y-5 text-[15px] leading-[1.8] text-foreground/90">
+          {post.body.startsWith("<") ? (
+            <div
+              className="prose-content"
+              dangerouslySetInnerHTML={{ __html: post.body }}
+            />
+          ) : (
+            paragraphs.map((para, i) => {
+              if (para.startsWith("## ")) {
+                return (
+                  <h2
+                    key={i}
+                    className="text-[clamp(22px,2.5vw,32px)] font-medium tracking-[-.03em] leading-[1.15] pt-8 -mb-1 text-foreground"
+                  >
+                    {para.replace("## ", "")}
+                  </h2>
+                );
+              }
+              if (para.startsWith("**") && para.endsWith("**")) {
+                return (
+                  <p key={i} className="font-medium text-foreground">
+                    {para.replace(/\*\*/g, "")}
+                  </p>
+                );
+              }
+              if (para.startsWith("- ")) {
+                return (
+                  <ul key={i} className="list-disc pl-5 space-y-1.5 text-muted">
+                    {para.split("\n").map((line, j) => (
+                      <li key={j}>{line.replace("- ", "")}</li>
+                    ))}
+                  </ul>
+                );
+              }
               return (
-                <h2
-                  key={i}
-                  className="text-[clamp(22px,2.5vw,32px)] font-medium tracking-[-.03em] leading-[1.15] pt-8 -mb-1 text-foreground"
-                >
-                  {para.replace("## ", "")}
-                </h2>
-              );
-            }
-            if (para.startsWith("**") && para.endsWith("**")) {
-              return (
-                <p key={i} className="font-medium text-foreground">
-                  {para.replace(/\*\*/g, "")}
+                <p key={i} className="text-muted">
+                  {para}
                 </p>
               );
-            }
-            if (para.startsWith("- ")) {
-              return (
-                <ul key={i} className="list-disc pl-5 space-y-1.5 text-muted">
-                  {para.split("\n").map((line, j) => (
-                    <li key={j}>{line.replace("- ", "")}</li>
-                  ))}
-                </ul>
-              );
-            }
-            return (
-              <p key={i} className="text-muted">
-                {para}
-              </p>
-            );
-          })}
+            })
+          )}
         </div>
       </article>
     </PublicShell>

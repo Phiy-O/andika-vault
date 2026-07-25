@@ -5,7 +5,7 @@ import { PublicShell } from "../../components/layout/PublicShell";
 import { PageHero } from "../../components/content/PageHero";
 import { CTAButton } from "../../components/content/CTAButton";
 import { SectionEyebrow } from "../../components/content/SectionEyebrow";
-import { Sparkles, Target, Layers } from "lucide-react";
+import { Sparkles, Target, Layers, Download } from "lucide-react";
 
 export const metadata = {
   title: "About | Andika",
@@ -75,6 +75,28 @@ export default function AboutPage() {
           The skills, tools and technologies I am really good at.
         </h2>
         <AboutSkills />
+      </section>
+
+      {/* Resume */}
+      <section className="mx-auto w-full px-[10vw] max-md:px-[6vw] border-t border-line pt-[80px] pb-[120px] max-md:pt-[65px] max-md:pb-[85px]">
+        <SectionEyebrow>
+          Resume
+        </SectionEyebrow>
+        <h2 className="text-[clamp(32px,4vw,48px)] font-medium tracking-[-.04em] leading-[1.1] mt-0 mb-6 max-w-[680px]">
+          Want the full picture?
+        </h2>
+        <p className="text-muted text-base leading-[1.75] mb-8 max-w-[480px]">
+          A complete overview of my experience, education, and skills in a single PDF.
+        </p>
+        <Link
+          href="/resume/dummy-resume.pdf"
+          target="_blank"
+          download
+          className="border border-line rounded-lg text-foreground inline-flex items-center gap-2.5 text-xs px-5 py-3 transition-all duration-200 hover:shadow-[0_0_2px_var(--foreground)] hover:-translate-y-0.5"
+        >
+          <Download size={14} />
+          Download resume
+        </Link>
       </section>
 
       {/* How I Work */}
