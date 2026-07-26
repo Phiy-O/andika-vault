@@ -4,6 +4,10 @@ import type { ProjectCreateInput, ProjectUpdateInput } from "@/src/types";
 import slugify from "@/src/lib/slugify";
 
 export const projectService = {
+  async getAll() {
+    return projectRepo.findAll();
+  },
+
   async getVisible() {
     return projectRepo.findVisible();
   },

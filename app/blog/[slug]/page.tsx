@@ -2,29 +2,29 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight, ChevronLeft } from "lucide-react";
-import { homeBlogPosts } from "../../../data/home-blog-posts";
 import { PublicShell } from "../../../components/layout/PublicShell";
+import { blogPostService } from "@/src/services";
 import type { Metadata } from "next";
 
-export function generateMetadata({
+export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  return params.then(({ slug }) => {
-    const post = homeBlogPosts.find((p) => p.slug === slug);
-    if (!post) return { title: "Blog | Andika" };
-    return {
-      title: `${post.title} | Andika`,
-      description: post.excerpt,
-    };
-  });
+  const { slug } = await params;
+  const post = await blogPostService.getBySlug(slug);
+  if (!post) return { title: "Blog | Andika" };
+  return {
+    title: `${post.title} | Andika`,
+    description: post.excerpt,
+  };
 }
 
-export function generateStaticParams() {
-  return homeBlogPosts
+export async function generateStaticParams() {
+  const posts = await blogPostService.getVisible();
+  return posts
     .filter((p) => p.isVisible)
-    .map((post) => ({ slug: post.slug }));
+    .map((post: any) => ({ slug: post.slug }));
 }
 
 const dateFormatter = new Intl.DateTimeFormat("en", {
@@ -39,7 +39,7 @@ export default async function BlogPostPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const post = homeBlogPosts.find((p) => p.slug === slug);
+  const post = await blogPostService.getBySlug(slug);
   if (!post) notFound();
 
   const paragraphs = post.body.split("\n\n");

@@ -1,19 +1,15 @@
 "use client";
 
 import { ArrowUpRight } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import {
-  homeCertificates,
-  type HomeCertificate,
-} from "../../data/home-certificates";
 import { SectionEyebrow } from "../content/SectionEyebrow";
 import { Card } from "../content/Card";
 import { CertificateModal } from "./CertificateModal";
+import type { Certificate } from "@prisma/client";
 
 type HomeCertificatesSectionProps = {
-  certificates?: HomeCertificate[];
+  certificates: Certificate[];
 };
 
 const DEFAULT_CERT_IMAGE = "/images/thumbnails/achievements-default.png";
@@ -25,14 +21,14 @@ const dateFormatter = new Intl.DateTimeFormat("en", {
 });
 
 export function HomeCertificatesSection({
-  certificates = homeCertificates,
+  certificates,
 }: HomeCertificatesSectionProps) {
   const visibleCertificates = certificates
     .filter((cert) => cert.isVisible)
     .sort((a, b) => a.sortOrder - b.sortOrder)
     .slice(0, 3);
 
-  const [modalCert, setModalCert] = useState<HomeCertificate | null>(null);
+  const [modalCert, setModalCert] = useState<Certificate | null>(null);
 
   return (
     <>
@@ -73,12 +69,10 @@ export function HomeCertificatesSection({
           <button onClick={() => setModalCert(cert)} className="text-left block w-full cursor-pointer" key={cert.id}>
             <Card className="min-h-[360px] max-md:min-h-0">
               <div className="rounded-tl-[14px] h-[220px] mb-6 overflow-hidden relative max-md:h-[180px]">
-                <Image
+                <img
                   src={DEFAULT_CERT_IMAGE || cert.image}
                   alt=""
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 33vw"
+                  className="absolute inset-0 w-full h-full object-cover"
                 />
               </div>
               <span className="text-purple text-xs tracking-[.14em] px-6 py-0 relative z-10">

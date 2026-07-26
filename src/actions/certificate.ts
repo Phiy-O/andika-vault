@@ -24,6 +24,17 @@ export async function getCertificates(): Promise<
   }
 }
 
+export async function getAllCertificates(): Promise<
+  ActionResult<Certificate[]>
+> {
+  try {
+    const certs = await certificateService.getAll();
+    return { data: certs as any };
+  } catch (e: any) {
+    return { error: e.message ?? "Failed to fetch certificates" };
+  }
+}
+
 export async function createCertificate(
   input: CertificateCreateInput
 ): Promise<ActionResult<Certificate>> {

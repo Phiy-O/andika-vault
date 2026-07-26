@@ -1,11 +1,10 @@
 "use client";
 
 import { ArrowUpRight, Search } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { homeProjects, type HomeProject } from "../../data/home-projects";
 import { Card } from "../content/Card";
+import type { Project } from "@prisma/client";
 
 type FilterOption = "all" | "featured" | "product" | "tool";
 
@@ -20,16 +19,16 @@ const filters: { value: FilterOption; label: string }[] = [
   { value: "tool", label: "Tools" },
 ];
 
-export function ProjectsContent() {
+export function ProjectsContent({ projects }: { projects: Project[] }) {
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState<FilterOption>("all");
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
 
   const allProjects = useMemo(() => {
-    return homeProjects
+    return projects
       .filter((p) => p.isVisible)
       .sort((a, b) => a.sortOrder - b.sortOrder);
-  }, []);
+  }, [projects]);
 
   const filteredProjects = useMemo(() => {
     return allProjects.filter((project) => {
@@ -141,18 +140,16 @@ function ProjectCard({
   project,
   index,
 }: {
-  project: HomeProject;
+  project: Project;
   index: number;
 }) {
   return (
     <Card href={`/projects/${project.slug}`} className="min-h-[360px] max-md:min-h-0">
       <div className="h-[220px] mb-6 overflow-hidden relative max-md:h-[180px]">
-        <Image
+        <img
           src={project.thumbnail || DEFAULT_PROJECT_THUMBNAIL}
           alt=""
-          fill
-          className="object-cover"
-          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          className="absolute inset-0 w-full h-full object-cover"
         />
       </div>
       <span className="text-purple text-xs tracking-[.14em] px-6 py-0 relative z-10">

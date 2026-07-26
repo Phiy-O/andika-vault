@@ -1,16 +1,12 @@
 "use client";
 
 import { ArrowUpRight, Search } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import {
-  homeBlogPosts,
-  type HomeBlogPost,
-} from "../../data/home-blog-posts";
 import { SectionEyebrow } from "../content/SectionEyebrow";
 import { Card } from "../content/Card";
 import { FilterButton } from "../content/FilterButton";
+import type { BlogPost } from "@prisma/client";
 
 type Category = "all" | "perspective" | "personal" | "process";
 
@@ -31,16 +27,16 @@ const categories: { value: Category; label: string }[] = [
   { value: "process", label: "Process" },
 ];
 
-export function BlogContent() {
+export function BlogContent({ posts }: { posts: BlogPost[] }) {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<Category>("all");
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
 
   const allPosts = useMemo(() => {
-    return homeBlogPosts
+    return posts
       .filter((p) => p.isVisible)
       .sort((a, b) => a.sortOrder - b.sortOrder);
-  }, []);
+  }, [posts]);
 
   const latestPost = allPosts[0];
 
@@ -168,12 +164,10 @@ export function BlogContent() {
                 </SectionEyebrow>
                 <Card href={`/blog/${latestPost.slug}`}>
                   <div className="h-[160px] overflow-hidden relative">
-                    <Image
+                    <img
                       src={latestPost.thumbnail || DEFAULT_BLOG_THUMBNAIL}
                       alt=""
-                      fill
-                      className="object-cover"
-                      sizes="300px"
+                      className="absolute inset-0 w-full h-full object-cover"
                     />
                   </div>
                   <div className="px-5 pt-4 pb-5">
@@ -237,18 +231,16 @@ function BlogCard({
   post,
   index,
 }: {
-  post: HomeBlogPost;
+  post: BlogPost;
   index: number;
 }) {
   return (
     <Card href={`/blog/${post.slug}`} className="min-h-[360px] max-md:min-h-0">
       <div className="h-[200px] mb-5 overflow-hidden relative max-md:h-[180px]">
-        <Image
+        <img
           src={post.thumbnail || DEFAULT_BLOG_THUMBNAIL}
           alt=""
-          fill
-          className="object-cover"
-          sizes="(max-width: 768px) 100vw, 50vw"
+          className="absolute inset-0 w-full h-full object-cover"
         />
       </div>
       <span className="text-purple text-xs tracking-[.14em] px-6 py-0 relative z-10">

@@ -1,12 +1,11 @@
 import { ArrowUpRight } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
-import { homeBlogPosts, type HomeBlogPost } from "../../data/home-blog-posts";
 import { SectionEyebrow } from "../content/SectionEyebrow";
 import { Card } from "../content/Card";
+import type { BlogPost } from "@prisma/client";
 
 type HomeBlogSectionProps = {
-  posts?: HomeBlogPost[];
+  posts: BlogPost[];
 };
 
 const DEFAULT_BLOG_THUMBNAIL = "/images/thumbnails/blog-default.png";
@@ -17,7 +16,7 @@ const dateFormatter = new Intl.DateTimeFormat("en", {
   year: "numeric",
 });
 
-export function HomeBlogSection({ posts = homeBlogPosts }: HomeBlogSectionProps) {
+export function HomeBlogSection({ posts }: HomeBlogSectionProps) {
   const visiblePosts = posts
     .filter((post) => post.isVisible)
     .sort((firstPost, secondPost) => firstPost.sortOrder - secondPost.sortOrder)
@@ -59,12 +58,10 @@ export function HomeBlogSection({ posts = homeBlogPosts }: HomeBlogSectionProps)
         {visiblePosts.map((post, index) => (
           <Card href={`/blog/${post.slug}`} className="min-h-[360px] max-md:min-h-0" key={post.id}>
             <div className="rounded-tl-[14px] h-[240px] mb-6 bg-cover overflow-hidden relative max-md:h-auto">
-              <Image
+              <img
                 src={post.thumbnail || DEFAULT_BLOG_THUMBNAIL}
                 alt=""
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 33vw"
+                className="absolute inset-0 w-full h-full object-cover"
               />
             </div>
             <span className="text-purple text-xs tracking-[.14em] px-6 py-0 relative z-10">

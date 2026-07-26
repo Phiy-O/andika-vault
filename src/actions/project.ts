@@ -16,6 +16,15 @@ export async function getProjects(): Promise<ActionResult<Project[]>> {
   }
 }
 
+export async function getAllProjects(): Promise<ActionResult<Project[]>> {
+  try {
+    const projects = await projectService.getAll();
+    return { data: projects as any };
+  } catch (e: any) {
+    return { error: e.message ?? "Failed to fetch projects" };
+  }
+}
+
 export async function getProject(
   slug: string
 ): Promise<ActionResult<Project | null>> {

@@ -6,10 +6,20 @@ import { HomeBlogSection } from "../components/blog";
 import { HomeCertificatesSection } from "../components/certificates";
 import { HomeProjectsSection } from "../components/projects";
 import { SkillsSection } from "../components/skills";
+import { skillService } from "@/src/services";
+import { blogPostService } from "@/src/services";
+import { projectService } from "@/src/services";
+import { certificateService } from "@/src/services";
 import Image from "next/image";
 import { ArrowUpRight, Download, User } from "lucide-react";
 
-export default function Home() {
+export default async function Home() {
+  const [skills, posts, projects, certificates] = await Promise.all([
+    skillService.getVisible(),
+    blogPostService.getVisible(),
+    projectService.getVisible(),
+    certificateService.getVisible(),
+  ]);
   return (
     <main>
       <Navbar />
@@ -78,10 +88,10 @@ export default function Home() {
         </div>
       </section>
 
-      <SkillsSection />
-      <HomeProjectsSection />
-      <HomeBlogSection />
-      <HomeCertificatesSection />
+      <SkillsSection skills={skills as any} />
+      <HomeProjectsSection projects={projects as any} />
+      <HomeBlogSection posts={posts as any} />
+      <HomeCertificatesSection certificates={certificates as any} />
 
       <Footer />
     </main>

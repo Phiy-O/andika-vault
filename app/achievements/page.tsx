@@ -3,13 +3,16 @@ import { AchievementsContent } from "../../components/achievements/AchievementsC
 import { PublicShell } from "../../components/layout/PublicShell";
 import { PageHero } from "../../components/content/PageHero";
 import { CTAButton } from "../../components/content/CTAButton";
+import { certificateService } from "@/src/services";
 
 export const metadata = {
   title: "Achievements | Andika",
   description: "Achievements, milestones, and certificates from Andika's journey.",
 };
 
-export default function AchievementsPage() {
+export default async function AchievementsPage() {
+  const certificates = await certificateService.getVisible();
+
   return (
     <PublicShell>
       <PageHero
@@ -18,7 +21,7 @@ export default function AchievementsPage() {
         description="A growing record of projects, learning milestones, and work that shaped how I build."
       />
 
-      <AchievementsContent />
+      <AchievementsContent certificates={certificates as any} />
 
       <div className="mx-auto w-full py-0 px-[10vw] pb-[130px] max-md:px-[6vw] max-md:pb-[90px]">
         <CTAButton href="/contact" label="Have a project in mind" />

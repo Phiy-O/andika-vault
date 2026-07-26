@@ -1,14 +1,11 @@
 "use client";
 
 import { ArrowUpRight, Search } from "lucide-react";
-import Image from "next/image";
+
 import { useMemo, useState } from "react";
-import {
-  homeCertificates,
-  type HomeCertificate,
-} from "../../data/home-certificates";
 import { Card } from "../content/Card";
 import { CertificateModal } from "../certificates/CertificateModal";
+import type { Certificate } from "@prisma/client";
 
 type Category = "all" | "certificate";
 
@@ -21,7 +18,7 @@ type AchievementItem = {
   issuer?: string;
   image?: string;
   credentialUrl?: string;
-  cert: HomeCertificate;
+  cert: Certificate;
 };
 
 const ITEMS_PER_PAGE = 6;
@@ -31,8 +28,8 @@ const dateFormatter = new Intl.DateTimeFormat("en", {
   year: "numeric",
 });
 
-function mapCertificatesToItems(): AchievementItem[] {
-  return homeCertificates
+function mapCertificatesToItems(certs: Certificate[]): AchievementItem[] {
+  return certs
     .filter((c) => c.isVisible)
     .sort((a, b) => a.sortOrder - b.sortOrder)
     .map((c) => ({
@@ -42,8 +39,8 @@ function mapCertificatesToItems(): AchievementItem[] {
       date: dateFormatter.format(new Date(c.issueDate)),
       category: "certificate" as const,
       issuer: c.issuer,
-      image: c.image,
-      credentialUrl: c.credentialUrl,
+      image: c.image ?? undefined,
+      credentialUrl: c.credentialUrl ?? undefined,
       cert: c,
     }));
 }
@@ -53,15 +50,15 @@ const categories: { value: Category; label: string }[] = [
   { value: "certificate", label: "Certificates" },
 ];
 
-export function AchievementsContent() {
+export function AchievementsContent({ certificates }: { certificates: Certificate[] }) {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<Category>("all");
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
-  const [modalCert, setModalCert] = useState<HomeCertificate | null>(null);
+  const [modalCert, setModalCert] = useState<Certificate | null>(null);
 
   const allItems = useMemo(() => {
-    return mapCertificatesToItems();
-  }, []);
+    return mapCertificatesToItems(certificates);
+  }, [certificates]);
 
   const filteredItems = useMemo(() => {
     return allItems.filter((item) => {
@@ -173,7 +170,7 @@ function AchievementCard({
 }: {
   item: AchievementItem;
   index: number;
-  onSelect: (cert: HomeCertificate) => void;
+  onSelect: (cert: Certificate) => void;
 }) {
   return (
     <button onClick={() => onSelect(item.cert)} className="text-left block w-full cursor-pointer">
@@ -181,12 +178,10 @@ function AchievementCard({
       {/* Certificate image */}
       {item.image && (
         <div className="h-[200px] overflow-hidden relative max-md:h-[160px]">
-          <Image
+          <img
             src={item.image}
             alt=""
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="absolute inset-0 w-full h-full object-cover"
           />
         </div>
       )}

@@ -1,11 +1,11 @@
-import { homeSkills, type HomeSkill } from "../../data/home-skills";
 import Image from "next/image";
+import type { Skill } from "@prisma/client";
 
 type SkillsSectionProps = {
-  skills?: HomeSkill[];
+  skills: Skill[];
 };
 
-export function SkillsSection({ skills = homeSkills }: SkillsSectionProps) {
+export function SkillsSection({ skills }: SkillsSectionProps) {
   const visibleSkills = skills
     .filter((skill) => skill.isVisible)
     .sort((firstSkill, secondSkill) => firstSkill.sortOrder - secondSkill.sortOrder);

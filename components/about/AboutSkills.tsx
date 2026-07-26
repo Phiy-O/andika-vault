@@ -2,20 +2,17 @@
 
 import Image from "next/image";
 import { useMemo, useState } from "react";
-import {
-  homeSkills,
-  skillCategories,
-  type SkillCategory,
-} from "../../data/home-skills";
+import { skillCategories, type SkillCategory } from "@/src/types";
+import type { Skill } from "@prisma/client";
 
-export function AboutSkills() {
+export function AboutSkills({ skills }: { skills: Skill[] }) {
   const [activeCategory, setActiveCategory] = useState<SkillCategory>("frontend");
 
   const visibleSkills = useMemo(() => {
-    return homeSkills
+    return skills
       .filter((s) => s.isVisible)
       .sort((a, b) => a.sortOrder - b.sortOrder);
-  }, []);
+  }, [skills]);
 
   const filteredSkills = useMemo(() => {
     return visibleSkills.filter((s) => s.category === activeCategory);

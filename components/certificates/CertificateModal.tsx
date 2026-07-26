@@ -4,7 +4,7 @@ import { X, ExternalLink, Calendar, Award } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
-import type { HomeCertificate } from "../../data/home-certificates";
+import type { Certificate } from "@prisma/client";
 
 const dateFormatter = new Intl.DateTimeFormat("en", {
   month: "long",
@@ -13,7 +13,7 @@ const dateFormatter = new Intl.DateTimeFormat("en", {
 });
 
 type CertificateModalProps = {
-  cert: HomeCertificate;
+  cert: Certificate;
   onClose: () => void;
 };
 
@@ -43,7 +43,7 @@ export function CertificateModal({ cert, onClose }: CertificateModalProps) {
     >
       <div className="bg-[var(--surface)] border border-[var(--line)] rounded-[18px] w-full max-h-[90vh] overflow-y-auto shadow-[0_30px_80px_rgba(0,0,0,.5)]">
         {/* Close button */}
-        <div className="flex justify-end pt-4 pr-4">
+        <div className="flex justify-end pt-4 pr-4 my-2">
           <button
             onClick={onClose}
             className="border border-line rounded-lg text-muted hover:text-foreground transition-colors p-2 cursor-pointer"
@@ -56,12 +56,10 @@ export function CertificateModal({ cert, onClose }: CertificateModalProps) {
         {/* Image */}
         {cert.image && (
           <div className="relative h-[240px] max-md:h-[180px] mx-6 rounded-[12px] overflow-hidden border border-line/50">
-            <Image
+            <img
               src={cert.image}
               alt={cert.title}
-              fill
-              className="object-cover"
-              sizes="500px"
+              className="absolute inset-0 w-full h-full object-contain"
             />
           </div>
         )}
@@ -82,12 +80,12 @@ export function CertificateModal({ cert, onClose }: CertificateModalProps) {
           </div>
 
           {/* Title */}
-          <h2 className="text-[clamp(22px,3vw,32px)] font-medium tracking-[-.04em] leading-[1.1] m-0">
+          <h3 className="text-[clamp(28px,4vw,36px)] text-white font-medium tracking-[-.04em] leading-[1.1] mb-2">
             {cert.title}
-          </h2>
+          </h3>
 
           {/* Description */}
-          <p className="text-muted text-sm leading-[1.8] m-0">
+          <p className="text-muted text-sm leading-[1.8]">
             {cert.description}
           </p>
 
@@ -96,7 +94,7 @@ export function CertificateModal({ cert, onClose }: CertificateModalProps) {
             <Link
               href={cert.credentialUrl}
               target="_blank"
-              className="border border-line rounded-lg text-foreground inline-flex items-center gap-2 text-xs px-5 py-3 transition-all duration-200 hover:shadow-[0_0_2px_var(--foreground)] hover:-translate-y-0.5 w-fit"
+              className="border border-line rounded-lg bg-purple text-[#17151c] inline-flex items-center gap-2 text-xs px-5 py-3 mt-2 transition-all duration-200 hover:shadow-[0_0_2px_var(--foreground)] hover:-translate-y-0.5 w-fit"
             >
               <ExternalLink size={14} />
               View credential

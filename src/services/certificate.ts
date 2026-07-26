@@ -3,6 +3,10 @@ import { certificateSchema, certificateUpdateSchema } from "@/src/lib/validation
 import type { CertificateCreateInput, CertificateUpdateInput } from "@/src/types";
 
 export const certificateService = {
+  async getAll() {
+    return certificateRepo.findAll();
+  },
+
   async getVisible() {
     return certificateRepo.findVisible();
   },

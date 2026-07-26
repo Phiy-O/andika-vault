@@ -3,6 +3,7 @@ import Link from "next/link";
 import { AboutSkills } from "../../components/about/AboutSkills";
 import { PublicShell } from "../../components/layout/PublicShell";
 import { PageHero } from "../../components/content/PageHero";
+import { skillService } from "@/src/services";
 import { CTAButton } from "../../components/content/CTAButton";
 import { SectionEyebrow } from "../../components/content/SectionEyebrow";
 import { Sparkles, Target, Layers, Download } from "lucide-react";
@@ -12,7 +13,8 @@ export const metadata = {
   description: "Learn about Andika's approach to building useful digital products.",
 };
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const skills = await skillService.getVisible();
   return (
     <PublicShell>
       <PageHero
@@ -74,7 +76,7 @@ export default function AboutPage() {
         <h2 className="text-[clamp(32px,4vw,48px)] font-medium tracking-[-.04em] leading-[1.1] mt-0 mb-10 max-w-[680px]">
           The skills, tools and technologies I am really good at.
         </h2>
-        <AboutSkills />
+        <AboutSkills skills={skills as any} />
       </section>
 
       {/* Resume */}

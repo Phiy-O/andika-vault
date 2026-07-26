@@ -1,30 +1,29 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { ArrowUpRight, ChevronLeft, ExternalLink, GitBranch } from "lucide-react";
-import { homeProjects } from "../../../data/home-projects";
 import { PublicShell } from "../../../components/layout/PublicShell";
+import { projectService } from "@/src/services";
 import type { Metadata } from "next";
 
-export function generateMetadata({
+export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  return params.then(({ slug }) => {
-    const project = homeProjects.find((p) => p.slug === slug);
-    if (!project) return { title: "Projects | Andika" };
-    return {
-      title: `${project.title} | Andika`,
-      description: project.description,
-    };
-  });
+  const { slug } = await params;
+  const project = await projectService.getBySlug(slug);
+  if (!project) return { title: "Projects | Andika" };
+  return {
+    title: `${project.title} | Andika`,
+    description: project.description,
+  };
 }
 
-export function generateStaticParams() {
-  return homeProjects
+export async function generateStaticParams() {
+  const projects = await projectService.getVisible();
+  return projects
     .filter((p) => p.isVisible)
-    .map((project) => ({ slug: project.slug }));
+    .map((project: any) => ({ slug: project.slug }));
 }
 
 export default async function ProjectDetailPage({
@@ -33,7 +32,7 @@ export default async function ProjectDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const project = homeProjects.find((p) => p.slug === slug);
+  const project = await projectService.getBySlug(slug);
   if (!project) notFound();
 
   const paragraphs = project.body.split("\n\n");
@@ -56,13 +55,10 @@ export default async function ProjectDetailPage({
         {/* Hero screenshot */}
         {screenshot && (
           <div className="relative w-full h-[420px] max-md:h-[240px] rounded-[18px] overflow-hidden border border-line/50 mb-12 mt-2">
-            <Image
+            <img
               src={screenshot}
               alt={`${project.title} screenshot`}
-              fill
-              className="object-cover"
-              priority
-              sizes="(max-width: 768px) 100vw, 80vw"
+              className="absolute inset-0 w-full h-full object-cover"
             />
           </div>
         )}
