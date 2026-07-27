@@ -39,6 +39,7 @@ export const blogPostListSelect = {
   slug: true,
   excerpt: true,
   category: true,
+  tags: true,
   readTime: true,
   publishedAt: true,
   thumbnail: true,

@@ -7,6 +7,15 @@ import type { BlogPost } from "@prisma/client";
 
 type ActionResult<T> = { data?: T; error?: string };
 
+export async function getAllBlogPosts(): Promise<ActionResult<BlogPost[]>> {
+  try {
+    const posts = await blogPostService.getAll();
+    return { data: posts as any };
+  } catch (e: any) {
+    return { error: e.message ?? "Failed to fetch posts" };
+  }
+}
+
 export async function getBlogPosts(): Promise<ActionResult<BlogPost[]>> {
   try {
     const posts = await blogPostService.getVisible();

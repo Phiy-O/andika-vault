@@ -7,6 +7,7 @@ export const blogPostSchema = z.object({
   body: z.string().min(1, "Body is required"),
   bodyFormat: z.enum(["html", "markdown"]).default("html"),
   category: z.string().min(1, "Category is required"),
+  tags: z.array(z.string()).default([]),
   readTime: z.string().min(1, "Read time is required"),
   publishedAt: z.string().datetime().or(z.date()),
   thumbnail: z.string().nullable().optional(),

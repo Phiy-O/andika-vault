@@ -59,13 +59,10 @@ export default async function BlogPostPage({
         {/* Thumbnail */}
         {post.thumbnail && (
           <div className="relative w-full h-[360px] max-md:h-[200px] rounded-[18px] overflow-hidden border border-line/50 mb-12">
-            <Image
+            <img
               src={post.thumbnail}
               alt=""
-              fill
-              className="object-cover"
-              priority
-              sizes="(max-width: 768px) 100vw, 80vw"
+              className="absolute inset-0 w-full h-full object-cover"
             />
           </div>
         )}

@@ -61,6 +61,7 @@ model BlogPost {
   body        String
   bodyFormat  String   @default("html") // "html" | "markdown"
   category    String
+  tags        String[]
   readTime    String
   publishedAt DateTime @default(now())
   thumbnail   String?

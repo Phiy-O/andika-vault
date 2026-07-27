@@ -4,6 +4,10 @@ import type { BlogPostCreateInput, BlogPostUpdateInput } from "@/src/types";
 import slugify from "@/src/lib/slugify";
 
 export const blogPostService = {
+  async getAll() {
+    return blogPostRepo.findAll();
+  },
+
   async getVisible() {
     return blogPostRepo.findVisible();
   },

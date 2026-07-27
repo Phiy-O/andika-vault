@@ -1,4 +1,16 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/* TipTap editor: override typography plugin pointer-events & cursor */
+.tiptap-editor {
+  pointer-events: auto !important;
+  cursor: text !important;
+  outline: none !important;
+  min-height: 300px;
+}
+.tiptap-editor p {
+  margin: 0;
+}
 
 :root {
   --background: #ffffff;
