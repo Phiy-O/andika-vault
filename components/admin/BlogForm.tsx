@@ -6,8 +6,8 @@ import type { BlogPost } from "@prisma/client";
 import slugify from "@/src/lib/slugify";
 import dynamic from "next/dynamic";
 
-const RichEditor = dynamic(
-  () => import("./RichEditor").then((m) => m.RichEditor),
+const LexKitEditor = dynamic(
+  () => import("./LexKitEditor").then((m) => m.LexKitEditor),
   { ssr: false }
 );
 
@@ -255,7 +255,7 @@ export function BlogForm({ post }: Props) {
 
       {/* Body with Rich Editor */}
       <Field label="Body" required>
-        <RichEditor content={body} onChange={setBody} />
+        <LexKitEditor key={post?.id ?? "new"} content={body} onChange={setBody} />
       </Field>
 
       {/* Toggles */}
