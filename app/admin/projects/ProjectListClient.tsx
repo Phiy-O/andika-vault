@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Edit3, Trash2, ExternalLink, Eye, EyeOff } from "lucide-react";
+import { Modal } from "@/components/ui/Modal";
 import type { ProjectListItem } from "@/src/types";
 
 export function ProjectListClient({
@@ -11,12 +13,22 @@ export function ProjectListClient({
   projects: ProjectListItem[];
 }) {
   const router = useRouter();
+  const [deleting, setDeleting] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
 
-  async function handleDelete(id: string, title: string) {
-    if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
-    const res = await fetch(`/api/admin/projects/${id}`, { method: "DELETE" });
+  function handleDelete(id: string, title: string) {
+    setDeleting({ id, title });
+  }
+
+  async function confirmDelete() {
+    if (!deleting) return;
+    const res = await fetch(`/api/admin/projects/${deleting.id}`, {
+      method: "DELETE",
+    });
+    setDeleting(null);
     if (res.ok) router.refresh();
-    else alert("Failed to delete project.");
   }
 
   if (projects.length === 0) {
@@ -123,6 +135,22 @@ export function ProjectListClient({
           ))}
         </tbody>
       </table>
-    </div>
+      {/* Delete confirmation */}
+      <Modal
+        open={!!deleting}
+        onClose={() => setDeleting(null)}
+        title="Delete project"
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onConfirm={confirmDelete}
+      >
+        <p className="m-0 text-sm leading-[1.7] text-muted">
+          Are you sure you want to delete{" "}
+          <span className="font-medium text-foreground">
+            {deleting?.title}
+          </span>
+          ? This cannot be undone.
+        </p>
+      </Modal>    </div>
   );
 }

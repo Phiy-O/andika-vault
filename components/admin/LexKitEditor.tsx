@@ -47,6 +47,7 @@ import {
     CodeXml,
     ChevronDown,
 } from "lucide-react";
+import { Modal } from "@/components/ui/Modal";
 
 const extensions = [
     richTextExtension.configure({
@@ -93,10 +94,15 @@ export function LexKitEditor({ content, onChange }: Props) {
 }
 
 function EditorShell({ content, onChange }: Props) {
-    const { commands, editor, activeStates } = useEditor();
+    const { editor, commands, activeStates } = useEditor();
     const initialized = useRef(false);
     const onChangeRef = useRef(onChange);
     onChangeRef.current = onChange;
+    const [currentBlock, setCurrentBlock] = useState<BlockFormat>("p");
+    const [prompt, setPrompt] = useState<null | {
+        mode: "link" | "image";
+        value: string;
+    }>(null);
 
     // Inject initial HTML content once on mount
     useEffect(() => {
@@ -109,28 +115,33 @@ function EditorShell({ content, onChange }: Props) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [editor]);
 
-    // Emit HTML changes to parent – use a ref to avoid stale closure
+    // Emit HTML changes to parent + keep block type in sync with selection.
+    // Without this, currentBlock is stale (computed once at render), so the
+    // dropdown label is wrong and toggleHeading silently toggles back.
     useEffect(() => {
         if (!editor) return;
         return editor.registerUpdateListener(() => {
             const html = commands.exportToHTML();
             onChangeRef.current(html);
+            setCurrentBlock(commands.getCurrentBlockType());
         });
     }, [editor, commands]);
 
-    const addLink = useCallback(() => {
-        const url = window.prompt("Link URL");
-        if (url) commands.insertLink(url);
-    }, [commands]);
-
     const addImage = useCallback(() => {
-        const url = window.prompt("Image URL");
-        if (url) commands.insertImage({ src: url, alt: "" });
-    }, [commands]);
+        setPrompt({ mode: "image", value: "" });
+    }, []);
+
+    function submitPrompt() {
+        if (!prompt) return;
+        if (prompt.value) {
+            if (prompt.mode === "link") commands.insertLink(prompt.value);
+            else commands.insertImage({ src: prompt.value, alt: "" });
+        }
+        setPrompt(null);
+    }
 
     // ── helpers ────────────────────────────────────────
     const a = activeStates as Record<string, boolean>;
-    const currentBlock = commands.getCurrentBlockType();
 
     const blockOptions: { label: string; value: BlockFormat; icon?: React.ReactNode }[] = [
         { label: "Paragraph", value: "p", icon: <Pilcrow size={14} /> },
@@ -144,7 +155,7 @@ function EditorShell({ content, onChange }: Props) {
     ];
 
     return (
-        <div className="overflow-hidden rounded-lg border border-line">
+        <div className="overflow-visible rounded-lg border border-line">
             {/* Toolbar */}
             <div className="flex flex-wrap items-center gap-0.5 border-b border-line bg-surface/50 px-2 py-1.5">
                 {/* Undo / Redo */}
@@ -199,6 +210,37 @@ function EditorShell({ content, onChange }: Props) {
                     <TbBtn label="HTML Embed" icon={<CodeXml size={14} />} action={() => commands.insertHTMLEmbed()} />
                 </ToolbarGroup>
             </div>
+
+            {/* Link / Image URL prompt */}
+            <Modal
+                open={!!prompt}
+                onClose={() => setPrompt(null)}
+                title={prompt?.mode === "link" ? "Insert link" : "Insert image"}
+                confirmLabel="Insert"
+                onConfirm={submitPrompt}
+            >
+                <label className="block space-y-1.5">
+                    <span className="text-xs font-medium tracking-wider text-muted uppercase">
+                        {prompt?.mode === "link" ? "Link URL" : "Image URL"}
+                    </span>
+                    <input
+                        type="url"
+                        autoFocus
+                        value={prompt?.value ?? ""}
+                        onChange={(e) =>
+                            setPrompt((p) => (p ? { ...p, value: e.target.value } : p))
+                        }
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                                e.preventDefault();
+                                submitPrompt();
+                            }
+                        }}
+                        placeholder="https://..."
+                        className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-purple"
+                    />
+                </label>
+            </Modal>
         </div>
     );
 }

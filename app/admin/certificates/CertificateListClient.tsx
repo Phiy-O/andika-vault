@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Edit3, Trash2, Eye, EyeOff, ExternalLink } from "lucide-react";
+import { Modal } from "@/components/ui/Modal";
 import type { CertificateListItem } from "@/src/types";
 
 export function CertificateListClient({
@@ -11,14 +13,22 @@ export function CertificateListClient({
   certificates: CertificateListItem[];
 }) {
   const router = useRouter();
+  const [deleting, setDeleting] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
 
-  async function handleDelete(id: string, title: string) {
-    if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
-    const res = await fetch(`/api/admin/certificates/${id}`, {
+  function handleDelete(id: string, title: string) {
+    setDeleting({ id, title });
+  }
+
+  async function confirmDelete() {
+    if (!deleting) return;
+    const res = await fetch(`/api/admin/certificates/${deleting.id}`, {
       method: "DELETE",
     });
+    setDeleting(null);
     if (res.ok) router.refresh();
-    else alert("Failed to delete certificate.");
   }
 
   if (certificates.length === 0) {
@@ -126,6 +136,22 @@ export function CertificateListClient({
           ))}
         </tbody>
       </table>
-    </div>
+      {/* Delete confirmation */}
+      <Modal
+        open={!!deleting}
+        onClose={() => setDeleting(null)}
+        title="Delete certificate"
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onConfirm={confirmDelete}
+      >
+        <p className="m-0 text-sm leading-[1.7] text-muted">
+          Are you sure you want to delete{" "}
+          <span className="font-medium text-foreground">
+            {deleting?.title}
+          </span>
+          ? This cannot be undone.
+        </p>
+      </Modal>    </div>
   );
 }

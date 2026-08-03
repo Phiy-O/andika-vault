@@ -64,8 +64,24 @@ h1 {
 }
 
 h2 {
-  font-size: clamp(43px, 6vw, 77px);
-  margin-bottom: 28px;
+  font-size: clamp(32px, 4vw, 48px);
+  margin-bottom: 24px;
+}
+
+h3 {
+  font-size: clamp(22px, 2.5vw, 32px);
+  margin-bottom: 20px;
+}
+
+h4 {
+  font-size: clamp(18px, 1.8vw, 24px);
+  margin-bottom: 16px;
+}
+
+h5,
+h6 {
+  font-size: clamp(16px, 1.5vw, 20px);
+  margin-bottom: 14px;
 }
 
 em {
@@ -75,6 +91,91 @@ em {
   letter-spacing: -.04em;
   font-style: normal;
   text-decoration: underline;
+}
+
+/* Blog body (`.prose-content`) element styling — scoped so it doesn't leak
+   to other pages that keep the global `em` design accent. */
+.prose-content em {
+  font-family: inherit;
+  font-style: italic;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  text-decoration: none;
+}
+
+.prose-content ul,
+.prose-content ol {
+  margin: 0 0 1.25rem;
+  padding-left: 1.5rem;
+}
+
+.prose-content ul {
+  list-style: disc;
+}
+
+.prose-content ol {
+  list-style: decimal;
+}
+
+.prose-content li {
+  margin-bottom: .4rem;
+}
+
+.prose-content li::marker {
+  color: var(--muted);
+}
+
+.prose-content table {
+  border-collapse: collapse;
+  margin: 1.25rem 0;
+  width: 100%;
+  font-size: .95em;
+}
+
+.prose-content th,
+.prose-content td {
+  /* border follows theme: white on dark, black on light (both via --foreground) */
+  border: 1px solid var(--foreground);
+  padding: 10px 14px;
+  text-align: left;
+  vertical-align: top;
+  color: var(--foreground);
+}
+
+.prose-content th {
+  background: var(--surface);
+  font-weight: 600;
+}
+
+.prose-content pre {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin: 1.25rem 0;
+  overflow-x: auto;
+  padding: 16px;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: .9em;
+  line-height: 1.7;
+}
+
+.prose-content code {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 2px 6px;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: .9em;
+  color: var(--amber);
+}
+
+.prose-content pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
 }
 
 .loading-screen {
