@@ -54,7 +54,7 @@ const extensions = [
         placeholder: "Start writing...",
         classNames: {
             contentEditable:
-                "prose prose-invert max-w-none focus:outline-none px-4 py-3 min-h-[280px] text-sm text-foreground",
+                "prose prose-invert max-w-none focus:outline-none px-4 py-3 min-h-[280px] text-sm text-foreground bg-surface/30 cursor-text",
             placeholder: "text-muted text-sm px-4 py-3",
         },
         styles: {
@@ -95,6 +95,7 @@ export function LexKitEditor({ content, onChange }: Props) {
 
 function EditorShell({ content, onChange }: Props) {
     const { editor, commands, activeStates } = useEditor();
+    const wrapperRef = useRef<HTMLDivElement>(null);
     const initialized = useRef(false);
     const onChangeRef = useRef(onChange);
     onChangeRef.current = onChange;
@@ -103,6 +104,9 @@ function EditorShell({ content, onChange }: Props) {
         mode: "link" | "image";
         value: string;
     }>(null);
+    // The Provider renders the contentEditable in a sibling container, so
+    // focus-within on the wrapper never fires — track focus manually.
+    const [focused, setFocused] = useState(false);
 
     // Inject initial HTML content once on mount
     useEffect(() => {
@@ -126,6 +130,86 @@ function EditorShell({ content, onChange }: Props) {
             setCurrentBlock(commands.getCurrentBlockType());
         });
     }, [editor, commands]);
+
+    // Guard against the browser's native "scroll focused element into view"
+    // when clicking the contentEditable: the click's focus processing can make
+    // the browser land focus on the nearest focusable element above (the
+    // toolbar) and scroll the page up to it. Restore the scroll position when
+    // an unexpected jump happens right after a mousedown on the editor.
+    // Note: the Provider renders the contentEditable in a sibling container,
+    // so listen on document and match by target.
+    const scrollGuard = useRef<{ y: number; t: number } | null>(null);
+    useEffect(() => {
+        const onMouseDown = (e: MouseEvent) => {
+            const t = e.target as HTMLElement | null;
+            if (
+                t &&
+                t.closest &&
+                (t.closest('[contenteditable="true"]') ||
+                    (wrapperRef.current && wrapperRef.current.contains(t)))
+            ) {
+                scrollGuard.current = { y: window.scrollY, t: Date.now() };
+            }
+        };
+        const onScroll = () => {
+            const g = scrollGuard.current;
+            if (!g || Date.now() - g.t > 800) return;
+            const delta = window.scrollY - g.y;
+            if (Math.abs(delta) > 50) {
+                window.scrollTo({ top: g.y, behavior: "instant" });
+            }
+            scrollGuard.current = null;
+        };
+
+        document.addEventListener("mousedown", onMouseDown, true);
+        document.addEventListener("scroll", onScroll, true);
+
+        // Clicking an unfocused contentEditable makes the browser natively
+        // drop focus from it mid-click and fall back to the nearest focusable
+        // element above (the toolbar's Undo button). That steals the selection
+        // so the caret disappears/blinks until the user clicks again. preventDefault
+        // on the click keeps the native fallback from running while Lexical's
+        // own onClick handler still processes the click, so the caret lands
+        // exactly where the user clicked on the first try.
+        const onClick = (e: MouseEvent) => {
+            const t = e.target as HTMLElement | null;
+            if (t && t.closest && t.closest('[contenteditable="true"]')) {
+                e.preventDefault();
+            }
+        };
+        document.addEventListener("click", onClick, true);
+
+        // Track focus on the contentEditable (sibling container) so the
+        // wrapper border lights up when the body area is active.
+        const onFocusIn = (e: FocusEvent) => {
+            const t = e.target as HTMLElement | null;
+            if (t && t.closest && t.closest('[contenteditable="true"]')) {
+                setFocused(true);
+            }
+        };
+        const onFocusOut = (e: FocusEvent) => {
+            const t = e.target as HTMLElement | null;
+            const next = e.relatedTarget as HTMLElement | null;
+            if (
+                t &&
+                t.closest &&
+                t.closest('[contenteditable="true"]') &&
+                !(next && next.closest && next.closest('[contenteditable="true"]'))
+            ) {
+                setFocused(false);
+            }
+        };
+        document.addEventListener("focusin", onFocusIn, true);
+        document.addEventListener("focusout", onFocusOut, true);
+
+        return () => {
+            document.removeEventListener("mousedown", onMouseDown, true);
+            document.removeEventListener("scroll", onScroll, true);
+            document.removeEventListener("click", onClick, true);
+            document.removeEventListener("focusin", onFocusIn, true);
+            document.removeEventListener("focusout", onFocusOut, true);
+        };
+    }, []);
 
     const addImage = useCallback(() => {
         setPrompt({ mode: "image", value: "" });
@@ -155,7 +239,13 @@ function EditorShell({ content, onChange }: Props) {
     ];
 
     return (
-        <div className="overflow-visible rounded-lg border border-line">
+        <div
+            ref={wrapperRef}
+            className={`overflow-visible rounded-lg border transition-colors ${focused
+                    ? "border-purple ring-2 ring-purple/30"
+                    : "border-line"
+                }`}
+        >
             {/* Toolbar */}
             <div className="flex flex-wrap items-center gap-0.5 border-b border-line bg-surface/50 px-2 py-1.5">
                 {/* Undo / Redo */}
