@@ -4,6 +4,7 @@ import { AboutSkills } from "../../components/about/AboutSkills";
 import { PublicShell } from "../../components/layout/PublicShell";
 import { PageHero } from "../../components/content/PageHero";
 import { skillService } from "@/src/services";
+import { getSiteSettings } from "@/src/actions/site-setting";
 import { CTAButton } from "../../components/content/CTAButton";
 import { SectionEyebrow } from "../../components/content/SectionEyebrow";
 import { Sparkles, Target, Layers, Download } from "lucide-react";
@@ -14,7 +15,10 @@ export const metadata = {
 };
 
 export default async function AboutPage() {
-  const skills = await skillService.getVisible();
+  const [skills, settings] = await Promise.all([
+    skillService.getVisible(),
+    getSiteSettings(),
+  ]);
   return (
     <PublicShell>
       <PageHero
@@ -91,7 +95,7 @@ export default async function AboutPage() {
           A complete overview of my experience, education, and skills in a single PDF.
         </p>
         <Link
-          href="/resume/dummy-resume.pdf"
+          href={settings?.data?.resumeUrl ?? "/resume/dummy-resume.pdf"}
           target="_blank"
           download
           className="border border-line rounded-lg text-foreground inline-flex items-center gap-2.5 text-xs px-5 py-3 transition-all duration-200 hover:shadow-[0_0_2px_var(--foreground)] hover:-translate-y-0.5"

@@ -4,19 +4,22 @@ import { PublicShell } from "../../components/layout/PublicShell";
 import { PageHero } from "../../components/content/PageHero";
 import { CTAButton } from "../../components/content/CTAButton";
 import { Mail, MapPin, Clock, ArrowUpRight, Send } from "lucide-react";
+import { getSiteSettings } from "@/src/actions/site-setting";
 
 export const metadata = {
   title: "Contact | Andika",
   description: "Get in touch with Andika about a thoughtful digital project.",
 };
 
-const socialLinks = [
-  { label: "LinkedIn", href: "https://linkedin.com", icon: "/icons/linkedin-svgrepo-com.svg" },
-  { label: "GitHub", href: "https://github.com", icon: "/icons/github-svgrepo-com.svg" },
-  { label: "Instagram", href: "https://instagram.com", icon: "/icons/instagram-svgrepo-com.svg" },
-];
+export default async function ContactPage() {
+  const { data: settings } = await getSiteSettings();
+  const email = settings?.email ?? "andikapiyo12@gmail.com";
+  const socialLinks = [
+    { label: "LinkedIn", href: settings?.linkedinUrl ?? "#", icon: "/icons/linkedin-svgrepo-com.svg" },
+    { label: "GitHub", href: settings?.githubUrl ?? "#", icon: "/icons/github-svgrepo-com.svg" },
+    { label: "Instagram", href: settings?.instagramUrl ?? "#", icon: "/icons/instagram-svgrepo-com.svg" },
+  ];
 
-export default function ContactPage() {
   return (
     <PublicShell>
       <PageHero
@@ -42,7 +45,7 @@ export default function ContactPage() {
 
             <form
               className="mt-10 flex flex-col gap-5"
-              action="mailto:andikapiyo12@gmail.com"
+              action={`mailto:${email}`}
               method="post"
               encType="text/plain"
             >
@@ -109,9 +112,9 @@ export default function ContactPage() {
               </p>
               <a
                 className="text-foreground text-lg font-medium block mb-3 transition-colors duration-200 hover:text-purple"
-                href="mailto:andikapiyo12@gmail.com"
+                href={`mailto:${email}`}
               >
-                andikapiyo12@gmail.com
+                {email}
               </a>
               <p className="text-muted text-[14px] leading-[1.7] m-0">
                 The best way to reach me. Share what you&apos;re building and

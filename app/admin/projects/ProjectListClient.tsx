@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Edit3, Trash2, ExternalLink, Eye, EyeOff } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
+import { useToast } from "@/components/ui/Toast";
 import type { ProjectListItem } from "@/src/types";
 
 export function ProjectListClient({
@@ -13,6 +14,7 @@ export function ProjectListClient({
   projects: ProjectListItem[];
 }) {
   const router = useRouter();
+  const showToast = useToast();
   const [deleting, setDeleting] = useState<{
     id: string;
     title: string;
@@ -28,7 +30,10 @@ export function ProjectListClient({
       method: "DELETE",
     });
     setDeleting(null);
-    if (res.ok) router.refresh();
+    if (res.ok) {
+      showToast("Project berhasil dihapus");
+      router.refresh();
+    }
   }
 
   if (projects.length === 0) {

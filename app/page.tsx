@@ -10,15 +10,17 @@ import { skillService } from "@/src/services";
 import { blogPostService } from "@/src/services";
 import { projectService } from "@/src/services";
 import { certificateService } from "@/src/services";
+import { getSiteSettings } from "@/src/actions/site-setting";
 import Image from "next/image";
 import { ArrowUpRight, Download, User } from "lucide-react";
 
 export default async function Home() {
-  const [skills, posts, projects, certificates] = await Promise.all([
+  const [skills, posts, projects, certificates, settings] = await Promise.all([
     skillService.getVisible(),
     blogPostService.getVisible(),
     projectService.getVisible(),
     certificateService.getVisible(),
+    getSiteSettings(),
   ]);
   return (
     <main>
@@ -37,7 +39,7 @@ export default async function Home() {
           <p className="text-muted text-xl leading-[1.7] max-w-[640px] max-md:text-base max-md:leading-[1.7]">I&apos;m passionate about creating thoughtful digital products that are clear, useful, and built to last.</p>
           <div className="flex items-center gap-[27px] mt-[38px]">
             <a className="inline-flex rounded-lg text-base gap-5 py-4 px-7 transition-all duration-200 hover:-translate-y-0.5 bg-gradient-to-br from-[#a98bff] to-[#7391ff] text-[#f0f0f0] hover:brightness-[1.05] hover:shadow-[0_0_16px_rgba(255,255,255,.25)] max-md:py-3 max-md:px-5 max-md:text-xs max-md:flex max-md:items-center" href="#projects">View my work <span className="flex items-center" aria-hidden="true"><ArrowUpRight size={20} aria-hidden="true" /></span></a>
-            <a className="inline-flex rounded-lg text-base gap-5 py-4 px-7 transition-all duration-200 hover:-translate-y-0.5 border border-muted text-foreground hover:border-purple max-md:py-3 max-md:px-5 max-md:text-xs max-md:flex max-md:items-center" href="/resume.pdf">Download CV <span className="flex items-center" aria-hidden="true"><Download size={20} aria-hidden="true" /></span></a>
+            <a className="inline-flex rounded-lg text-base gap-5 py-4 px-7 transition-all duration-200 hover:-translate-y-0.5 border border-muted text-foreground hover:border-purple max-md:py-3 max-md:px-5 max-md:text-xs max-md:flex max-md:items-center" href={settings?.data?.resumeUrl ?? "/resume/dummy-resume.pdf"} download>Download CV <span className="flex items-center" aria-hidden="true"><Download size={20} aria-hidden="true" /></span></a>
           </div>
           <div className="mt-[55px]" aria-label="Technologies I work with">
             <p className="text-muted text-[10px] tracking-[.12em] mb-[18px] uppercase">Technologies I work with</p>

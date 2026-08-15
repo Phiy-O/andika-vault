@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Edit3, Trash2, ExternalLink, Eye, EyeOff } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
+import { useToast } from "@/components/ui/Toast";
 import type { BlogPostListItem } from "@/src/types";
 
 export function BlogListClient({
@@ -13,6 +14,7 @@ export function BlogListClient({
   posts: BlogPostListItem[];
 }) {
   const router = useRouter();
+  const showToast = useToast();
   const [deleting, setDeleting] = useState<{
     id: string;
     title: string;
@@ -28,7 +30,10 @@ export function BlogListClient({
       method: "DELETE",
     });
     setDeleting(null);
-    if (res.ok) router.refresh();
+    if (res.ok) {
+      showToast("Blog berhasil dihapus");
+      router.refresh();
+    }
   }
 
   if (posts.length === 0) {

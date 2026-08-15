@@ -3,6 +3,7 @@
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/Toast";
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
@@ -10,6 +11,7 @@ export default function LoginPage() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState<string | null>(null);
     const router = useRouter();
+    const showToast = useToast();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -26,6 +28,7 @@ export default function LoginPage() {
         if (result?.error) {
             setError("Invalid credentials");
         } else {
+            showToast("Login berhasil, selamat datang kembali!");
             router.push("/admin");
         }
     };

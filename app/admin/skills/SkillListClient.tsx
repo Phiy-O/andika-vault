@@ -3,48 +3,49 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Edit3, Trash2, Eye, EyeOff, ExternalLink } from "lucide-react";
+import Image from "next/image";
+import { Edit3, Trash2, Eye, EyeOff } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { useToast } from "@/components/ui/Toast";
-import type { CertificateListItem } from "@/src/types";
+import type { SkillListItem } from "@/src/types";
 
-export function CertificateListClient({
-  certificates,
+export function SkillListClient({
+  skills,
 }: {
-  certificates: CertificateListItem[];
+  skills: SkillListItem[];
 }) {
   const router = useRouter();
   const showToast = useToast();
   const [deleting, setDeleting] = useState<{
     id: string;
-    title: string;
+    name: string;
   } | null>(null);
 
-  function handleDelete(id: string, title: string) {
-    setDeleting({ id, title });
+  function handleDelete(id: string, name: string) {
+    setDeleting({ id, name });
   }
 
   async function confirmDelete() {
     if (!deleting) return;
-    const res = await fetch(`/api/admin/certificates/${deleting.id}`, {
+    const res = await fetch(`/api/admin/skills/${deleting.id}`, {
       method: "DELETE",
     });
     setDeleting(null);
     if (res.ok) {
-      showToast("Sertifikat berhasil dihapus");
+      showToast("Skill berhasil dihapus");
       router.refresh();
     }
   }
 
-  if (certificates.length === 0) {
+  if (skills.length === 0) {
     return (
       <div className="rounded-lg border border-line bg-surface/30 px-8 py-16 text-center">
-        <p className="text-muted">No certificates yet.</p>
+        <p className="text-muted">No skills yet.</p>
         <Link
-          href="/admin/certificates/new"
+          href="/admin/skills/new"
           className="mt-3 inline-block text-sm text-purple hover:underline"
         >
-          Add your first certificate →
+          Add your first skill →
         </Link>
       </div>
     );
@@ -55,61 +56,36 @@ export function CertificateListClient({
       <table className="w-full text-left text-sm">
         <thead className="border-b border-line bg-surface/50 text-xs uppercase tracking-wider text-muted">
           <tr>
-            <th className="px-4 py-3 font-medium">Certificate</th>
-            <th className="px-4 py-3 font-medium">Issuer</th>
-            <th className="px-4 py-3 font-medium">Issued</th>
+            <th className="px-4 py-3 font-medium">Skill</th>
+            <th className="px-4 py-3 font-medium">Category</th>
             <th className="px-4 py-3 font-medium">Order</th>
             <th className="px-4 py-3 font-medium">Status</th>
             <th className="px-4 py-3 font-medium text-right">Actions</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-line">
-          {certificates.map((c) => (
-            <tr key={c.id} className="transition-colors hover:bg-surface/20">
+          {skills.map((s) => (
+            <tr key={s.id} className="transition-colors hover:bg-surface/20">
               <td className="px-4 py-3.5">
                 <div className="flex items-center gap-3">
-                  {c.image ? (
-                    <img
-                      src={c.image}
-                      alt=""
-                      className="h-9 w-14 flex-shrink-0 rounded border border-line object-cover"
-                    />
-                  ) : (
-                    <div className="h-9 w-14 flex-shrink-0 rounded border border-line bg-surface" />
-                  )}
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <span className="truncate font-medium text-foreground">
-                        {c.title}
-                      </span>
-                      {c.credentialUrl && (
-                        <a
-                          href={c.credentialUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex-shrink-0 text-muted hover:text-foreground"
-                        >
-                          <ExternalLink size={12} />
-                        </a>
-                      )}
-                    </div>
-                    <p className="mt-0.5 line-clamp-1 text-xs text-muted">
-                      {c.description}
-                    </p>
-                  </div>
+                  <Image
+                    src={s.iconSrc}
+                    alt=""
+                    width={22}
+                    height={22}
+                    className="h-5.5 w-5.5 shrink-0"
+                  />
+                  <span className="font-medium text-foreground">{s.name}</span>
                 </div>
               </td>
-              <td className="px-4 py-3.5 text-muted">{c.issuer}</td>
-              <td className="px-4 py-3.5 text-muted">
-                {new Date(c.issueDate).toLocaleDateString("en", {
-                  month: "short",
-                  day: "2-digit",
-                  year: "numeric",
-                })}
-              </td>
-              <td className="px-4 py-3.5 text-muted">{c.sortOrder}</td>
               <td className="px-4 py-3.5">
-                {c.isVisible ? (
+                <span className="rounded border border-line bg-surface/30 px-2 py-0.5 text-xs capitalize text-muted">
+                  {s.category}
+                </span>
+              </td>
+              <td className="px-4 py-3.5 text-muted">{s.sortOrder}</td>
+              <td className="px-4 py-3.5">
+                {s.isVisible ? (
                   <span className="inline-flex items-center gap-1 text-xs text-green-400">
                     <Eye size={12} /> Visible
                   </span>
@@ -122,14 +98,14 @@ export function CertificateListClient({
               <td className="px-4 py-3.5 text-right">
                 <div className="flex items-center justify-end gap-1">
                   <Link
-                    href={`/admin/certificates/${c.id}/edit`}
+                    href={`/admin/skills/${s.id}/edit`}
                     className="rounded p-1.5 text-muted transition-colors hover:bg-surface hover:text-foreground"
                     title="Edit"
                   >
                     <Edit3 size={15} />
                   </Link>
                   <button
-                    onClick={() => handleDelete(c.id, c.title)}
+                    onClick={() => handleDelete(s.id, s.name)}
                     className="rounded p-1.5 text-muted transition-colors hover:bg-red-500/10 hover:text-red-400"
                     title="Delete"
                   >
@@ -145,18 +121,17 @@ export function CertificateListClient({
       <Modal
         open={!!deleting}
         onClose={() => setDeleting(null)}
-        title="Delete certificate"
+        title="Delete skill"
         confirmLabel="Delete"
         cancelLabel="Cancel"
         onConfirm={confirmDelete}
       >
         <p className="m-0 text-sm leading-[1.7] text-muted">
           Are you sure you want to delete{" "}
-          <span className="font-medium text-foreground">
-            {deleting?.title}
-          </span>
+          <span className="font-medium text-foreground">{deleting?.name}</span>
           ? This cannot be undone.
         </p>
-      </Modal>    </div>
+      </Modal>
+    </div>
   );
 }

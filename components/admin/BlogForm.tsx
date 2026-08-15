@@ -5,6 +5,7 @@ import { useState, useMemo } from "react";
 import type { BlogPost } from "@prisma/client";
 import slugify from "@/src/lib/slugify";
 import dynamic from "next/dynamic";
+import { useToast } from "@/components/ui/Toast";
 
 const LexKitEditor = dynamic(
   () => import("./LexKitEditor").then((m) => m.LexKitEditor),
@@ -26,6 +27,7 @@ interface Props {
 export function BlogForm({ post }: Props) {
   const router = useRouter();
   const isEdit = !!post;
+  const showToast = useToast();
 
   const [title, setTitle] = useState(post?.title ?? "");
   const [slug, setSlug] = useState(post?.slug ?? "");
@@ -104,6 +106,7 @@ export function BlogForm({ post }: Props) {
         const err = await res.json();
         throw new Error(err.error ?? "Failed to save post");
       }
+      showToast(isEdit ? "Blog berhasil diupdate" : "Blog berhasil dibuat");
       router.push("/admin/blog");
       router.refresh();
     } catch (e: any) {

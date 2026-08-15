@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { Project } from "@prisma/client";
 import slugify from "@/src/lib/slugify";
+import { useToast } from "@/components/ui/Toast";
 
 interface Props {
   project?: Project | null;
@@ -12,6 +13,7 @@ interface Props {
 export function ProjectForm({ project }: Props) {
   const router = useRouter();
   const isEdit = !!project;
+  const showToast = useToast();
 
   const [title, setTitle] = useState(project?.title ?? "");
   const [slug, setSlug] = useState(project?.slug ?? "");
@@ -87,6 +89,7 @@ export function ProjectForm({ project }: Props) {
         const err = await res.json();
         throw new Error(err.error ?? "Failed to save project");
       }
+      showToast(isEdit ? "Project berhasil diupdate" : "Project berhasil dibuat");
       router.push("/admin/projects");
       router.refresh();
     } catch (e: any) {

@@ -2,36 +2,52 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import type { Certificate } from "@prisma/client";
+import Image from "next/image";
+import type { Skill } from "@prisma/client";
 import { useToast } from "@/components/ui/Toast";
+import { skillCategories } from "@/src/types";
 
 interface Props {
-  certificate?: Certificate | null;
+  skill?: Skill | null;
 }
 
-export function CertificateForm({ certificate }: Props) {
+const ICON_OPTIONS = [
+  "javascript",
+  "typescript",
+  "react",
+  "nextjs",
+  "tailwindcss",
+  "sass",
+  "nodejs",
+  "express",
+  "postgresql",
+  "mongodb",
+  "figma",
+  "cypress",
+  "storybook",
+  "git",
+];
+
+export function SkillForm({ skill }: Props) {
   const router = useRouter();
-  const isEdit = !!certificate;
+  const isEdit = !!skill;
   const showToast = useToast();
 
-  const [title, setTitle] = useState(certificate?.title ?? "");
-  const [issuer, setIssuer] = useState(certificate?.issuer ?? "");
-  const [issueDate, setIssueDate] = useState(
-    certificate
-      ? new Date(certificate.issueDate).toISOString().slice(0, 10)
-      : ""
+  const [name, setName] = useState(skill?.name ?? "");
+  const [iconKey, setIconKey] = useState(
+    skill?.iconSrc?.replace("/icons/skills/", "").replace(".svg", "") ?? ""
   );
-  const [credentialUrl, setCredentialUrl] = useState(
-    certificate?.credentialUrl ?? ""
-  );
-  const [image, setImage] = useState(certificate?.image ?? "");
-  const [description, setDescription] = useState(
-    certificate?.description ?? ""
-  );
-  const [isVisible, setIsVisible] = useState(certificate?.isVisible ?? true);
-  const [sortOrder, setSortOrder] = useState(certificate?.sortOrder ?? 0);
+  const [iconSrc, setIconSrc] = useState(skill?.iconSrc ?? "");
+  const [category, setCategory] = useState(skill?.category ?? "frontend");
+  const [sortOrder, setSortOrder] = useState(skill?.sortOrder ?? 0);
+  const [isVisible, setIsVisible] = useState(skill?.isVisible ?? true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+
+  function selectIcon(key: string) {
+    setIconKey(key);
+    setIconSrc(`/icons/skills/${key}.svg`);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -39,20 +55,17 @@ export function CertificateForm({ certificate }: Props) {
     setError("");
 
     const body = {
-      title,
-      issuer,
-      issueDate: new Date(issueDate).toISOString(),
-      credentialUrl: credentialUrl || null,
-      image: image || null,
-      description,
-      isVisible,
+      name,
+      iconSrc,
+      category,
       sortOrder,
+      isVisible,
     };
 
     try {
       const url = isEdit
-        ? `/api/admin/certificates/${certificate!.id}`
-        : "/api/admin/certificates";
+        ? `/api/admin/skills/${skill!.id}`
+        : "/api/admin/skills";
       const method = isEdit ? "PATCH" : "POST";
       const res = await fetch(url, {
         method,
@@ -61,10 +74,10 @@ export function CertificateForm({ certificate }: Props) {
       });
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.error ?? "Failed to save certificate");
+        throw new Error(err.error ?? "Failed to save skill");
       }
-      showToast(isEdit ? "Sertifikat berhasil diupdate" : "Sertifikat berhasil dibuat");
-      router.push("/admin/certificates");
+      showToast(isEdit ? "Skill berhasil diupdate" : "Skill berhasil dibuat");
+      router.push("/admin/skills");
       router.refresh();
     } catch (e: any) {
       setError(e.message);
@@ -82,34 +95,69 @@ export function CertificateForm({ certificate }: Props) {
       )}
 
       <div className="grid gap-6 md:grid-cols-2">
-        <Field label="Title" required>
+        <Field label="Name" required>
           <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="e.g. JavaScript"
             className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-purple"
             required
           />
         </Field>
-        <Field label="Issuer" required>
-          <input
-            value={issuer}
-            onChange={(e) => setIssuer(e.target.value)}
+        <Field label="Category" required>
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
             className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-purple"
-            required
-          />
+          >
+            {skillCategories.map((c) => (
+              <option key={c.value} value={c.value} className="bg-[#1a1821]">
+                {c.label}
+              </option>
+            ))}
+          </select>
         </Field>
       </div>
 
+      <Field label="Icon" required>
+        <div className="grid grid-cols-4 gap-2 sm:grid-cols-7">
+          {ICON_OPTIONS.map((key) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => selectIcon(key)}
+              className={`flex h-14 items-center justify-center rounded-lg border transition-all duration-200 ${
+                iconKey === key
+                  ? "border-purple bg-purple/10"
+                  : "border-line hover:border-foreground hover:bg-surface"
+              }`}
+              title={key}
+            >
+              <Image
+                src={`/icons/skills/${key}.svg`}
+                alt=""
+                width={26}
+                height={26}
+                className="h-6.5 w-6.5"
+              />
+            </button>
+          ))}
+        </div>
+        {iconSrc && (
+          <div className="mt-3 flex items-center gap-2 text-xs text-muted">
+            <Image
+              src={iconSrc}
+              alt=""
+              width={18}
+              height={18}
+              className="h-4.5 w-4.5"
+            />
+            <code className="text-muted">{iconSrc}</code>
+          </div>
+        )}
+      </Field>
+
       <div className="grid gap-6 md:grid-cols-2">
-        <Field label="Issue Date" required>
-          <input
-            type="date"
-            value={issueDate}
-            onChange={(e) => setIssueDate(e.target.value)}
-            className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-purple"
-            required
-          />
-        </Field>
         <Field label="Sort Order">
           <input
             type="number"
@@ -119,43 +167,6 @@ export function CertificateForm({ certificate }: Props) {
           />
         </Field>
       </div>
-
-      <Field label="Image URL">
-        <div className="flex gap-3">
-          <input
-            value={image}
-            onChange={(e) => setImage(e.target.value)}
-            placeholder="https://..."
-            className="flex-1 rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-purple"
-          />
-          {image && (
-            <img
-              src={image}
-              alt="preview"
-              className="h-10 w-16 flex-shrink-0 rounded border border-line object-cover"
-            />
-          )}
-        </div>
-      </Field>
-
-      <Field label="Credential URL">
-        <input
-          value={credentialUrl}
-          onChange={(e) => setCredentialUrl(e.target.value)}
-          placeholder="https://..."
-          className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-purple"
-        />
-      </Field>
-
-      <Field label="Description" required>
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          rows={4}
-          className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-purple resize-none"
-          required
-        />
-      </Field>
 
       <div className="flex flex-wrap gap-8">
         <Toggle label="Visible" checked={isVisible} onChange={setIsVisible} />
@@ -167,7 +178,7 @@ export function CertificateForm({ certificate }: Props) {
           disabled={saving}
           className="rounded-lg bg-purple px-6 py-2.5 text-sm font-medium text-[#17151c] transition-opacity hover:opacity-90 disabled:opacity-50"
         >
-          {saving ? "Saving…" : isEdit ? "Update Certificate" : "Create Certificate"}
+          {saving ? "Saving…" : isEdit ? "Update Skill" : "Create Skill"}
         </button>
         <button
           type="button"
