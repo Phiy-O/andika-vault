@@ -2,9 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import Image from "next/image";
+import { X } from "lucide-react";
 import type { Project } from "@prisma/client";
 import slugify from "@/src/lib/slugify";
 import { useToast } from "@/components/ui/Toast";
+import { ImageUploader } from "./ImageUploader";
 
 interface Props {
   project?: Project | null;
@@ -26,7 +29,6 @@ export function ProjectForm({ project }: Props) {
   const [screenshots, setScreenshots] = useState<string[]>(
     project?.screenshots ?? []
   );
-  const [screenshotInput, setScreenshotInput] = useState("");
   const [techStack, setTechStack] = useState<string[]>(
     project?.techStack ?? []
   );
@@ -163,22 +165,8 @@ export function ProjectForm({ project }: Props) {
       </div>
 
       {/* Thumbnail */}
-      <Field label="Thumbnail URL">
-        <div className="flex gap-3">
-          <input
-            value={thumbnail}
-            onChange={(e) => setThumbnail(e.target.value)}
-            placeholder="https://..."
-            className="flex-1 rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-purple"
-          />
-          {thumbnail && (
-            <img
-              src={thumbnail}
-              alt="preview"
-              className="h-10 w-16 rounded border border-line object-cover"
-            />
-          )}
-        </div>
+      <Field label="Thumbnail">
+        <ImageUploader value={thumbnail} onChange={setThumbnail} />
       </Field>
 
       {/* Body */}
@@ -203,17 +191,37 @@ export function ProjectForm({ project }: Props) {
       />
 
       {/* Screenshots */}
-      <TagField
-        label="Screenshots (URLs)"
-        items={screenshots}
-        input={screenshotInput}
-        onInputChange={setScreenshotInput}
-        onAdd={() =>
-          addTag(screenshots, setScreenshots, screenshotInput, setScreenshotInput)
-        }
-        onRemove={(i) => removeTag(screenshots, setScreenshots, i)}
-        url
-      />
+      <Field label="Screenshots">
+        <div className="space-y-3">
+          {screenshots.map((url, i) => (
+            <div key={i} className="flex items-center gap-3">
+              <div className="relative h-16 w-24 overflow-hidden rounded-lg border border-line">
+                <Image
+                  src={url}
+                  alt={`screenshot ${i + 1}`}
+                  fill
+                  sizes="96px"
+                  unoptimized
+                  className="object-cover"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => removeTag(screenshots, setScreenshots, i)}
+                className="rounded p-1.5 text-muted transition-colors hover:bg-surface hover:text-red-400"
+                title="Remove screenshot"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          ))}
+          <ImageUploader
+            value=""
+            onChange={(url) => setScreenshots([...screenshots, url])}
+            label="Add screenshot"
+          />
+        </div>
+      </Field>
 
       {/* GitHub & Live URLs */}
       <div className="grid gap-6 md:grid-cols-2">

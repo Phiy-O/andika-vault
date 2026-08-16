@@ -6,6 +6,7 @@ import type { BlogPost } from "@prisma/client";
 import slugify from "@/src/lib/slugify";
 import dynamic from "next/dynamic";
 import { useToast } from "@/components/ui/Toast";
+import { ImageUploader } from "./ImageUploader";
 
 const LexKitEditor = dynamic(
   () => import("./LexKitEditor").then((m) => m.LexKitEditor),
@@ -238,22 +239,8 @@ export function BlogForm({ post }: Props) {
       </Field>
 
       {/* Thumbnail */}
-      <Field label="Thumbnail URL">
-        <div className="flex gap-3">
-          <input
-            value={thumbnail}
-            onChange={(e) => setThumbnail(e.target.value)}
-            placeholder="https://..."
-            className="flex-1 rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-purple"
-          />
-          {thumbnail && (
-            <img
-              src={thumbnail}
-              alt="preview"
-              className="h-10 w-16 flex-shrink-0 rounded border border-line object-cover"
-            />
-          )}
-        </div>
+      <Field label="Thumbnail">
+        <ImageUploader value={thumbnail} onChange={setThumbnail} />
       </Field>
 
       {/* Body with Rich Editor */}

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { ArrowUpRight, ChevronLeft, ExternalLink, GitBranch } from "lucide-react";
 import { PublicShell } from "../../../components/layout/PublicShell";
 import { projectService } from "@/src/services";
+import { optimizeCloudinaryUrl } from "@/src/lib/cloudinary-url";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/src/lib/auth";
 import type { Metadata } from "next";
@@ -67,10 +68,11 @@ export default async function ProjectDetailPage({
         {screenshot && (
           <div className="relative w-full h-[420px] max-md:h-[240px] rounded-[18px] overflow-hidden border border-line/50 mb-12 mt-2">
             <Image
-              src={screenshot}
+              src={optimizeCloudinaryUrl(screenshot, 1600)}
               alt={`${project.title} screenshot`}
               fill
               sizes="(max-width: 768px) 100vw, 80vw"
+              unoptimized
               className="object-cover"
             />
           </div>

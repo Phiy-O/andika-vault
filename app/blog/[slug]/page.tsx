@@ -4,6 +4,7 @@ import Image from "next/image";
 import { ArrowUpRight, ChevronLeft } from "lucide-react";
 import { PublicShell } from "../../../components/layout/PublicShell";
 import { blogPostService } from "@/src/services";
+import { optimizeCloudinaryUrl } from "@/src/lib/cloudinary-url";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/src/lib/auth";
 import type { Metadata } from "next";
@@ -70,10 +71,11 @@ export default async function BlogPostPage({
         {post.thumbnail && (
           <div className="relative w-full h-[360px] max-md:h-[200px] rounded-[18px] overflow-hidden border border-line/50 mb-12">
             <Image
-              src={post.thumbnail}
+              src={optimizeCloudinaryUrl(post.thumbnail, 1600)}
               alt=""
               fill
               sizes="(max-width: 768px) 100vw, 80vw"
+              unoptimized
               className="object-cover"
             />
           </div>

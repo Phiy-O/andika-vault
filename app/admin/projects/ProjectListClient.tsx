@@ -119,6 +119,7 @@ export function ProjectListClient({
                       alt=""
                       width={56}
                       height={36}
+                      unoptimized
                       className="h-9 w-14 shrink-0 rounded border border-line object-cover"
                     />
                   ) : (
