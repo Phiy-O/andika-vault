@@ -21,6 +21,17 @@ import {
     htmlEmbedExtension,
 } from "@lexkit/editor";
 import {
+    $getSelection,
+    $isElementNode,
+    $isRangeSelection,
+    FORMAT_ELEMENT_COMMAND,
+    type ElementFormatType,
+} from "lexical";
+import {
+    AlignCenter,
+    AlignJustify,
+    AlignLeft,
+    AlignRight,
     Bold,
     Italic,
     Underline,
@@ -100,6 +111,7 @@ function EditorShell({ content, onChange }: Props) {
     const onChangeRef = useRef(onChange);
     onChangeRef.current = onChange;
     const [currentBlock, setCurrentBlock] = useState<BlockFormat>("p");
+    const [currentAlign, setCurrentAlign] = useState<ElementFormatType>("left");
     const [prompt, setPrompt] = useState<null | {
         mode: "link" | "image";
         value: string;
@@ -124,10 +136,18 @@ function EditorShell({ content, onChange }: Props) {
     // dropdown label is wrong and toggleHeading silently toggles back.
     useEffect(() => {
         if (!editor) return;
-        return editor.registerUpdateListener(() => {
+        return editor.registerUpdateListener(({ editorState }) => {
             const html = commands.exportToHTML();
             onChangeRef.current(html);
             setCurrentBlock(commands.getCurrentBlockType());
+            editorState.read(() => {
+                const selection = $getSelection();
+                if ($isRangeSelection(selection)) {
+                    const node = selection.anchor.getNode();
+                    const element = $isElementNode(node) ? node : node.getParent();
+                    setCurrentAlign(element?.getFormatType() ?? "left");
+                }
+            });
         });
     }, [editor, commands]);
 
@@ -291,6 +311,17 @@ function EditorShell({ content, onChange }: Props) {
 
                 <Divider />
 
+                {/* Alignment */}
+                <AlignDropdown
+                    value={currentAlign}
+                    onChange={(val) => {
+                        editor?.focus();
+                        editor?.dispatchCommand(FORMAT_ELEMENT_COMMAND, val);
+                    }}
+                />
+
+                <Divider />
+
                 {/* Insert items */}
                 <ToolbarGroup>
                     <TbBtn label="Insert Table" icon={<Table size={14} />} action={() => commands.insertTable({ rows: 3, columns: 3 })} />
@@ -377,6 +408,64 @@ function BlockDropdown({
             >
                 {active?.icon}
                 <span>{active?.label ?? "Paragraph"}</span>
+                <ChevronDown size={12} />
+            </button>
+            {open && (
+                <div className="absolute left-0 top-full z-50 mt-1 w-40 rounded-lg border border-line bg-[#17151c] p-1 shadow-xl">
+                    {options.map((opt) => (
+                        <button
+                            key={opt.value}
+                            type="button"
+                            onMouseDown={(e) => { e.preventDefault(); onChange(opt.value); setOpen(false); }}
+                            className={`flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-xs transition-colors ${opt.value === value
+                                    ? "bg-purple/20 text-purple"
+                                    : "text-muted hover:bg-surface hover:text-foreground"
+                                }`}
+                        >
+                            {opt.icon}
+                            {opt.label}
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
+function AlignDropdown({
+    value,
+    onChange,
+}: {
+    value: ElementFormatType;
+    onChange: (val: ElementFormatType) => void;
+}) {
+    const [open, setOpen] = useState(false);
+    const ref = useRef<HTMLDivElement>(null);
+    const options: { label: string; value: ElementFormatType; icon: React.ReactNode }[] = [
+        { label: "Align Left", value: "left", icon: <AlignLeft size={14} /> },
+        { label: "Align Center", value: "center", icon: <AlignCenter size={14} /> },
+        { label: "Align Right", value: "right", icon: <AlignRight size={14} /> },
+        { label: "Justify", value: "justify", icon: <AlignJustify size={14} /> },
+    ];
+    const active = options.find((o) => o.value === value) ?? options[0];
+
+    useEffect(() => {
+        function handleClickOutside(e: MouseEvent) {
+            if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+        }
+        if (open) document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [open]);
+
+    return (
+        <div className="relative" ref={ref}>
+            <button
+                type="button"
+                onClick={() => setOpen((v) => !v)}
+                className="flex items-center gap-1.5 rounded px-2 py-1.5 text-xs font-medium text-muted hover:bg-surface hover:text-foreground transition-colors"
+            >
+                {active.icon}
+                <span>{active.label}</span>
                 <ChevronDown size={12} />
             </button>
             {open && (

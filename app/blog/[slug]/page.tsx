@@ -4,7 +4,11 @@ import Image from "next/image";
 import { ArrowUpRight, ChevronLeft } from "lucide-react";
 import { PublicShell } from "../../../components/layout/PublicShell";
 import { blogPostService } from "@/src/services";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/src/lib/auth";
 import type { Metadata } from "next";
+
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -12,7 +16,10 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const post = await blogPostService.getBySlug(slug);
+  const session = await getServerSession(authOptions);
+  const post = session
+    ? await blogPostService.getBySlug(slug)
+    : await blogPostService.getVisibleBySlug(slug);
   if (!post) return { title: "Blog | Andika" };
   return {
     title: `${post.title} | Andika`,
@@ -39,7 +46,10 @@ export default async function BlogPostPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const post = await blogPostService.getBySlug(slug);
+  const session = await getServerSession(authOptions);
+  const post = session
+    ? await blogPostService.getBySlug(slug)
+    : await blogPostService.getVisibleBySlug(slug);
   if (!post) notFound();
 
   const paragraphs = post.body.split("\n\n");

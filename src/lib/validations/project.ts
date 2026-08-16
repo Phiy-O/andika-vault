@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { safeUrl, safeUrlString } from "./url";
 
 export const projectSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -6,11 +7,11 @@ export const projectSchema = z.object({
   description: z.string().min(1, "Description is required"),
   body: z.string().min(1, "Body is required"),
   bodyFormat: z.enum(["html", "markdown"]).default("html"),
-  thumbnail: z.string().nullable().optional(),
-  screenshots: z.array(z.string()).default([]),
+  thumbnail: safeUrl,
+  screenshots: z.array(safeUrlString).default([]),
   techStack: z.array(z.string()).default([]),
-  githubUrl: z.string().url().nullable().optional().or(z.literal("")),
-  liveUrl: z.string().url().nullable().optional().or(z.literal("")),
+  githubUrl: safeUrl,
+  liveUrl: safeUrl,
   category: z.enum(["product", "tool"]),
   featured: z.boolean().default(false),
   isVisible: z.boolean().default(true),

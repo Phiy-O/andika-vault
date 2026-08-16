@@ -16,6 +16,10 @@ export const projectService = {
     return projectRepo.findBySlug(slug);
   },
 
+  async getVisibleBySlug(slug: string) {
+    return projectRepo.findVisibleBySlug(slug);
+  },
+
   async getById(id: string) {
     return projectRepo.findById(id);
   },

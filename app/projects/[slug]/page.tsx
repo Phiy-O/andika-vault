@@ -3,7 +3,11 @@ import Link from "next/link";
 import { ArrowUpRight, ChevronLeft, ExternalLink, GitBranch } from "lucide-react";
 import { PublicShell } from "../../../components/layout/PublicShell";
 import { projectService } from "@/src/services";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/src/lib/auth";
 import type { Metadata } from "next";
+
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -11,7 +15,10 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const project = await projectService.getBySlug(slug);
+  const session = await getServerSession(authOptions);
+  const project = session
+    ? await projectService.getBySlug(slug)
+    : await projectService.getVisibleBySlug(slug);
   if (!project) return { title: "Projects | Andika" };
   return {
     title: `${project.title} | Andika`,
@@ -32,7 +39,10 @@ export default async function ProjectDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const project = await projectService.getBySlug(slug);
+  const session = await getServerSession(authOptions);
+  const project = session
+    ? await projectService.getBySlug(slug)
+    : await projectService.getVisibleBySlug(slug);
   if (!project) notFound();
 
   const paragraphs = project.body.split("\n\n");

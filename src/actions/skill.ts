@@ -4,6 +4,7 @@ import { skillService } from "@/src/services/skill";
 import { skillSchema, skillUpdateSchema } from "@/src/lib/validations/skill";
 import type { SkillCreateInput, SkillUpdateInput } from "@/src/types";
 import type { Skill } from "@prisma/client";
+import { requireAdmin } from "@/src/lib/auth";
 
 type ActionResult<T> = { data?: T; error?: string };
 
@@ -37,6 +38,7 @@ export async function getSkill(id: string): Promise<ActionResult<Skill | null>> 
 export async function createSkill(
   input: SkillCreateInput
 ): Promise<ActionResult<Skill>> {
+  if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
     const parsed = skillSchema.parse(input);
     const skill = await skillService.create(parsed as any);
@@ -51,6 +53,7 @@ export async function updateSkill(
   id: string,
   input: SkillUpdateInput
 ): Promise<ActionResult<Skill>> {
+  if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
     const parsed = skillUpdateSchema.parse(input);
     const skill = await skillService.update(id, parsed as any);
@@ -62,6 +65,7 @@ export async function updateSkill(
 }
 
 export async function deleteSkill(id: string): Promise<ActionResult<void>> {
+  if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
     await skillService.delete(id);
     return {};

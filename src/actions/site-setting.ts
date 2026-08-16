@@ -3,6 +3,7 @@
 import { siteSettingService } from "@/src/services";
 import { siteSettingsSchema } from "@/src/lib/validations/site-settings";
 import type { SiteSettings } from "@/src/lib/validations/site-settings";
+import { requireAdmin } from "@/src/lib/auth";
 
 type ActionResult<T> = { data?: T; error?: string };
 
@@ -18,6 +19,7 @@ export async function getSiteSettings(): Promise<ActionResult<SiteSettings>> {
 export async function updateSiteSettings(
   input: SiteSettings
 ): Promise<ActionResult<SiteSettings>> {
+  if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
     const parsed = siteSettingsSchema.parse(input);
     const settings = await siteSettingService.update(parsed);

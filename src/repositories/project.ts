@@ -23,6 +23,12 @@ export const projectRepo = {
     return prisma.project.findUnique({ where: { slug } });
   },
 
+  async findVisibleBySlug(slug: string) {
+    return prisma.project.findFirst({
+      where: { slug, isVisible: true },
+    });
+  },
+
   async findById(id: string) {
     return prisma.project.findUnique({ where: { id } });
   },

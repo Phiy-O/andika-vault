@@ -121,3 +121,14 @@ model SiteSetting {
   value     String
   updatedAt DateTime @updatedAt
 }
+
+model Message {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([isRead])
+}

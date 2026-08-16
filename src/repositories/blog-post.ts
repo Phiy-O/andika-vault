@@ -23,6 +23,12 @@ export const blogPostRepo = {
     return prisma.blogPost.findUnique({ where: { slug } });
   },
 
+  async findVisibleBySlug(slug: string) {
+    return prisma.blogPost.findFirst({
+      where: { slug, isVisible: true },
+    });
+  },
+
   async findById(id: string) {
     return prisma.blogPost.findUnique({ where: { id } });
   },

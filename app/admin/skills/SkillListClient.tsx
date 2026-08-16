@@ -7,6 +7,7 @@ import Image from "next/image";
 import { Edit3, Trash2, Eye, EyeOff } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { useToast } from "@/components/ui/Toast";
+import { ListToolbar, type StatusFilter } from "@/components/admin/ListToolbar";
 import type { SkillListItem } from "@/src/types";
 
 export function SkillListClient({
@@ -16,10 +17,24 @@ export function SkillListClient({
 }) {
   const router = useRouter();
   const showToast = useToast();
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState<StatusFilter>("all");
+  const [category, setCategory] = useState("all");
   const [deleting, setDeleting] = useState<{
     id: string;
     name: string;
   } | null>(null);
+
+  const categories = Array.from(new Set(skills.map((s) => s.category))).sort();
+
+  const filtered = skills.filter((s) => {
+    if (status === "published" && !s.isVisible) return false;
+    if (status === "draft" && s.isVisible) return false;
+    if (category !== "all" && s.category !== category) return false;
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return s.name.toLowerCase().includes(q);
+  });
 
   function handleDelete(id: string, name: string) {
     setDeleting({ id, name });
@@ -52,7 +67,18 @@ export function SkillListClient({
   }
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-line">
+    <>
+      <ListToolbar
+        search={search}
+        onSearch={setSearch}
+        status={status}
+        onStatus={setStatus}
+        categories={categories}
+        category={category}
+        onCategory={setCategory}
+        placeholder="Search skills..."
+      />
+      <div className="overflow-x-auto rounded-lg border border-line">
       <table className="w-full text-left text-sm">
         <thead className="border-b border-line bg-surface/50 text-xs uppercase tracking-wider text-muted">
           <tr>
@@ -64,7 +90,7 @@ export function SkillListClient({
           </tr>
         </thead>
         <tbody className="divide-y divide-line">
-          {skills.map((s) => (
+          {filtered.map((s) => (
             <tr key={s.id} className="transition-colors hover:bg-surface/20">
               <td className="px-4 py-3.5">
                 <div className="flex items-center gap-3">
@@ -133,5 +159,6 @@ export function SkillListClient({
         </p>
       </Modal>
     </div>
+    </>
   );
 }

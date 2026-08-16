@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Edit3, Trash2, ExternalLink, Eye, EyeOff } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { useToast } from "@/components/ui/Toast";
+import { ListToolbar, type StatusFilter } from "@/components/admin/ListToolbar";
 import type { BlogPostListItem } from "@/src/types";
 
 export function BlogListClient({
@@ -15,10 +16,29 @@ export function BlogListClient({
 }) {
   const router = useRouter();
   const showToast = useToast();
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState<StatusFilter>("all");
+  const [category, setCategory] = useState("all");
   const [deleting, setDeleting] = useState<{
     id: string;
     title: string;
   } | null>(null);
+
+  const categories = Array.from(new Set(posts.map((p) => p.category))).sort();
+
+  const filtered = posts.filter((p) => {
+    if (status === "published" && !p.isVisible) return false;
+    if (status === "draft" && p.isVisible) return false;
+    if (category !== "all" && p.category !== category) return false;
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      p.title.toLowerCase().includes(q) ||
+      p.excerpt.toLowerCase().includes(q) ||
+      p.category.toLowerCase().includes(q) ||
+      p.tags?.some((t) => t.toLowerCase().includes(q))
+    );
+  });
 
   async function handleDelete(id: string, title: string) {
     setDeleting({ id, title });
@@ -51,7 +71,18 @@ export function BlogListClient({
   }
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-line">
+    <>
+      <ListToolbar
+        search={search}
+        onSearch={setSearch}
+        status={status}
+        onStatus={setStatus}
+        categories={categories}
+        category={category}
+        onCategory={setCategory}
+        placeholder="Search posts..."
+      />
+      <div className="overflow-x-auto rounded-lg border border-line">
       <table className="w-full text-left text-sm">
         <thead className="border-b border-line bg-surface/50 text-xs uppercase tracking-wider text-muted">
           <tr>
@@ -64,7 +95,7 @@ export function BlogListClient({
           </tr>
         </thead>
         <tbody className="divide-y divide-line">
-          {posts.map((p) => (
+          {filtered.map((p) => (
             <tr key={p.id} className="transition-colors hover:bg-surface/20">
               <td className="px-4 py-3.5">
                 <div className="flex items-center gap-3">
@@ -72,10 +103,10 @@ export function BlogListClient({
                     <img
                       src={p.thumbnail}
                       alt=""
-                      className="h-9 w-14 flex-shrink-0 rounded border border-line object-cover"
+                      className="h-9 w-14 shrink-0 rounded border border-line object-cover"
                     />
                   ) : (
-                    <div className="h-9 w-14 flex-shrink-0 rounded border border-line bg-surface" />
+                    <div className="h-9 w-14 shrink-0 rounded border border-line bg-surface" />
                   )}
                   <div>
                     <div className="flex items-center gap-1.5">
@@ -162,5 +193,6 @@ export function BlogListClient({
         </p>
       </Modal>
     </div>
+    </>
   );
 }
