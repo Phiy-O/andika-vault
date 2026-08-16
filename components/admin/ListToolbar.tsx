@@ -14,6 +14,7 @@ export function ListToolbar({
   onCategory,
   placeholder = "Search...",
   statusLabels,
+  onResetPage,
 }: {
   search: string;
   onSearch: (v: string) => void;
@@ -24,7 +25,20 @@ export function ListToolbar({
   onCategory?: (v: string) => void;
   placeholder?: string;
   statusLabels?: { published: string; draft: string };
+  onResetPage?: () => void;
 }) {
+  function handleSearch(v: string) {
+    onSearch(v);
+    onResetPage?.();
+  }
+  function handleStatus(v: StatusFilter) {
+    onStatus(v);
+    onResetPage?.();
+  }
+  function handleCategory(v: string) {
+    onCategory?.(v);
+    onResetPage?.();
+  }
   return (
     <div className="mb-4 flex flex-wrap items-center gap-3">
       <div className="relative">
@@ -34,7 +48,7 @@ export function ListToolbar({
         />
         <input
           value={search}
-          onChange={(e) => onSearch(e.target.value)}
+          onChange={(e) => handleSearch(e.target.value)}
           placeholder={placeholder}
           className="w-56 rounded-lg border border-line bg-transparent py-2 pl-8 pr-3 text-sm text-foreground outline-none transition-colors focus:border-purple"
         />
@@ -43,7 +57,7 @@ export function ListToolbar({
       {categories && category !== undefined && onCategory && (
         <select
           value={category}
-          onChange={(e) => onCategory(e.target.value)}
+          onChange={(e) => handleCategory(e.target.value)}
           className="rounded-lg border border-line bg-[#17151c] px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-purple"
         >
           <option value="all">All Categories</option>
@@ -69,7 +83,7 @@ export function ListToolbar({
           <button
             key={opt.value}
             type="button"
-            onClick={() => onStatus(opt.value)}
+            onClick={() => handleStatus(opt.value)}
             className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
               status === opt.value
                 ? "bg-purple/20 text-purple"

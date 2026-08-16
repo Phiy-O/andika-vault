@@ -7,6 +7,8 @@ import { ContactForm } from "../../components/contact/ContactForm";
 import { Mail, MapPin, Clock, ArrowUpRight } from "lucide-react";
 import { getSiteSettings } from "@/src/actions/site-setting";
 
+export const revalidate = 3600;
+
 export const metadata = {
   title: "Contact | Andika",
   description: "Get in touch with Andika about a thoughtful digital project.",

@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowUpRight, ChevronLeft, ExternalLink, GitBranch } from "lucide-react";
 import { PublicShell } from "../../../components/layout/PublicShell";
 import { projectService } from "@/src/services";
@@ -65,10 +66,12 @@ export default async function ProjectDetailPage({
         {/* Hero screenshot */}
         {screenshot && (
           <div className="relative w-full h-[420px] max-md:h-[240px] rounded-[18px] overflow-hidden border border-line/50 mb-12 mt-2">
-            <img
+            <Image
               src={screenshot}
               alt={`${project.title} screenshot`}
-              className="absolute inset-0 w-full h-full object-cover"
+              fill
+              sizes="(max-width: 768px) 100vw, 80vw"
+              className="object-cover"
             />
           </div>
         )}

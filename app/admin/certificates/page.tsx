@@ -1,5 +1,9 @@
 import { getAllCertificates } from "@/src/actions/certificate";
-import { CertificateListClient } from "./CertificateListClient";
+import dynamic from "next/dynamic";
+
+const CertificateListClient = dynamic(
+  () => import("./CertificateListClient").then((m) => m.CertificateListClient)
+);
 
 export default async function AdminCertificatesPage() {
   const { data: certs, error } = await getAllCertificates();

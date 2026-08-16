@@ -1,5 +1,9 @@
 import { getAllBlogPosts } from "@/src/actions/blog-post";
-import { BlogListClient } from "./BlogListClient";
+import dynamic from "next/dynamic";
+
+const BlogListClient = dynamic(
+  () => import("./BlogListClient").then((m) => m.BlogListClient)
+);
 
 export default async function AdminBlogPage() {
   const { data: posts, error } = await getAllBlogPosts();

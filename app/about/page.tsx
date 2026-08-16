@@ -9,6 +9,8 @@ import { CTAButton } from "../../components/content/CTAButton";
 import { SectionEyebrow } from "../../components/content/SectionEyebrow";
 import { Sparkles, Target, Layers, Download } from "lucide-react";
 
+export const revalidate = 3600;
+
 export const metadata = {
   title: "About | Andika",
   description: "Learn about Andika's approach to building useful digital products.",

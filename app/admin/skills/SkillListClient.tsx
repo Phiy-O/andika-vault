@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
-import { Edit3, Trash2, Eye, EyeOff } from "lucide-react";
+import { Edit3, Trash2, Eye, EyeOff, ChevronLeft, ChevronRight } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { useToast } from "@/components/ui/Toast";
 import { ListToolbar, type StatusFilter } from "@/components/admin/ListToolbar";
@@ -24,6 +24,8 @@ export function SkillListClient({
     id: string;
     name: string;
   } | null>(null);
+  const [page, setPage] = useState(0);
+  const PAGE_SIZE = 10;
 
   const categories = Array.from(new Set(skills.map((s) => s.category))).sort();
 
@@ -35,6 +37,16 @@ export function SkillListClient({
     if (!q) return true;
     return s.name.toLowerCase().includes(q);
   });
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const current = Math.min(page, pageCount - 1);
+  const pageItems = filtered.slice(
+    current * PAGE_SIZE,
+    (current + 1) * PAGE_SIZE
+  );
+
+  function resetPage() {
+    setPage(0);
+  }
 
   function handleDelete(id: string, name: string) {
     setDeleting({ id, name });
@@ -77,6 +89,7 @@ export function SkillListClient({
         category={category}
         onCategory={setCategory}
         placeholder="Search skills..."
+        onResetPage={resetPage}
       />
       <div className="overflow-x-auto rounded-lg border border-line">
       <table className="w-full text-left text-sm">
@@ -90,7 +103,7 @@ export function SkillListClient({
           </tr>
         </thead>
         <tbody className="divide-y divide-line">
-          {filtered.map((s) => (
+          {pageItems.map((s) => (
             <tr key={s.id} className="transition-colors hover:bg-surface/20">
               <td className="px-4 py-3.5">
                 <div className="flex items-center gap-3">
@@ -143,6 +156,40 @@ export function SkillListClient({
           ))}
         </tbody>
       </table>
+
+      {/* Pagination */}
+      <div className="flex items-center justify-between border-t border-line px-4 py-3 text-sm text-muted">
+        <span>
+          {filtered.length === 0
+            ? "0 items"
+            : `${current * PAGE_SIZE + 1}–${Math.min(
+                (current + 1) * PAGE_SIZE,
+                filtered.length
+              )} of ${filtered.length}`}
+        </span>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setPage(current - 1)}
+            disabled={current === 0}
+            className="rounded p-1.5 transition-colors hover:bg-surface hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
+            title="Previous page"
+          >
+            <ChevronLeft size={16} />
+          </button>
+          <span className="px-2">
+            {current + 1} / {pageCount}
+          </span>
+          <button
+            onClick={() => setPage(current + 1)}
+            disabled={current >= pageCount - 1}
+            className="rounded p-1.5 transition-colors hover:bg-surface hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
+            title="Next page"
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      </div>
+
       {/* Delete confirmation */}
       <Modal
         open={!!deleting}

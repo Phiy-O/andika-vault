@@ -1,5 +1,9 @@
 import { getAllMessages } from "@/src/actions/message";
-import { MessageListClient } from "./MessageListClient";
+import dynamic from "next/dynamic";
+
+const MessageListClient = dynamic(
+  () => import("./MessageListClient").then((m) => m.MessageListClient)
+);
 
 export default async function AdminMessagesPage() {
   const { data: messages, error } = await getAllMessages();

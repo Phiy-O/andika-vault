@@ -14,6 +14,8 @@ import { getSiteSettings } from "@/src/actions/site-setting";
 import Image from "next/image";
 import { ArrowUpRight, Download, User } from "lucide-react";
 
+export const revalidate = 3600;
+
 export default async function Home() {
   const [skills, posts, projects, certificates, settings] = await Promise.all([
     skillService.getVisible(),

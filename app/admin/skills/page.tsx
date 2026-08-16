@@ -1,5 +1,9 @@
 import { getAllSkills } from "@/src/actions/skill";
-import { SkillListClient } from "./SkillListClient";
+import dynamic from "next/dynamic";
+
+const SkillListClient = dynamic(
+  () => import("./SkillListClient").then((m) => m.SkillListClient)
+);
 
 export default async function AdminSkillsPage() {
   const { data: skills, error } = await getAllSkills();
