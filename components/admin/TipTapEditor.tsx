@@ -109,7 +109,7 @@ export function TipTapEditor({ content, onChange }: Props) {
           >
             <ChevronDown size={14} />
           </button>
-          <div className="absolute right-0 top-full z-50 mt-1 hidden min-w-[180px] rounded-lg border border-line bg-[#17151c] p-1 shadow-xl group-hover:block">
+          <div className="absolute right-0 top-full z-50 mt-1 hidden min-w-45 rounded-lg border border-line bg-[#17151c] p-1 shadow-xl group-hover:block">
             {more.map((btn) => (
               <button
                 key={btn.label}

@@ -6,8 +6,8 @@ import type { BlogPost } from "@prisma/client";
 import slugify from "@/src/lib/slugify";
 import dynamic from "next/dynamic";
 
-const RichEditor = dynamic(
-  () => import("./RichEditor").then((m) => m.RichEditor),
+const TipTapEditor = dynamic(
+  () => import("./TipTapEditor").then((m) => m.TipTapEditor),
   { ssr: false }
 );
 
@@ -247,7 +247,7 @@ export function BlogForm({ post }: Props) {
             <img
               src={thumbnail}
               alt="preview"
-              className="h-10 w-16 flex-shrink-0 rounded border border-line object-cover"
+              className="h-10 w-16 shrink-0 rounded border border-line object-cover"
             />
           )}
         </div>
@@ -255,7 +255,7 @@ export function BlogForm({ post }: Props) {
 
       {/* Body with Rich Editor */}
       <Field label="Body" required>
-        <RichEditor content={body} onChange={setBody} />
+        <TipTapEditor content={body} onChange={setBody} />
       </Field>
 
       {/* Toggles */}
