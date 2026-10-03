@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
-import { X } from "lucide-react";
+import { GripVertical, X } from "lucide-react";
 import type { Project } from "@prisma/client";
 import slugify from "@/src/lib/slugify";
 import { useToast } from "@/components/ui/Toast";
@@ -39,6 +39,7 @@ export function ProjectForm({ project }: Props) {
   const [featured, setFeatured] = useState(project?.featured ?? false);
   const [isVisible, setIsVisible] = useState(project?.isVisible ?? true);
   const [sortOrder, setSortOrder] = useState(project?.sortOrder ?? 0);
+  const [draggedScreenshotIndex, setDraggedScreenshotIndex] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -59,10 +60,29 @@ export function ProjectForm({ project }: Props) {
     setter(list.filter((_, i) => i !== index));
   }
 
+  function moveScreenshot(from: number, to: number) {
+    if (to < 0 || to >= screenshots.length) return;
+    const next = [...screenshots];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    setScreenshots(next);
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setSaving(true);
     setError("");
+
+    if (!thumbnail) {
+      setError("Thumbnail wajib diisi untuk cover project");
+      return;
+    }
+
+    if (screenshots.length > 10) {
+      setError("Maksimal 10 screenshot yang diperbolehkan");
+      return;
+    }
+
+    setSaving(true);
 
     const bodyData = {
       title,
@@ -165,7 +185,7 @@ export function ProjectForm({ project }: Props) {
       </div>
 
       {/* Thumbnail */}
-      <Field label="Thumbnail">
+      <Field label="Thumbnail" required>
         <ImageUploader value={thumbnail} onChange={setThumbnail} />
       </Field>
 
@@ -191,10 +211,27 @@ export function ProjectForm({ project }: Props) {
       />
 
       {/* Screenshots */}
-      <Field label="Screenshots">
+      <Field label={`Screenshots (${screenshots.length}/10)`}>
         <div className="space-y-3">
           {screenshots.map((url, i) => (
-            <div key={i} className="flex items-center gap-3">
+            <div
+              key={`${url}-${i}`}
+              draggable
+              onDragStart={() => setDraggedScreenshotIndex(i)}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={() => {
+                if (draggedScreenshotIndex !== null && draggedScreenshotIndex !== i) {
+                  moveScreenshot(draggedScreenshotIndex, i);
+                }
+                setDraggedScreenshotIndex(null);
+              }}
+              onDragEnd={() => setDraggedScreenshotIndex(null)}
+              className="flex items-center gap-3 rounded-lg border border-transparent p-1 transition-colors hover:border-line"
+            >
+              <span className="flex w-8 shrink-0 items-center justify-center gap-1 text-xs font-medium text-muted">
+                <GripVertical size={14} className="cursor-grab" aria-hidden="true" />
+                {i + 1}
+              </span>
               <div className="relative h-16 w-24 overflow-hidden rounded-lg border border-line">
                 <Image
                   src={url}
@@ -207,7 +244,11 @@ export function ProjectForm({ project }: Props) {
               </div>
               <button
                 type="button"
-                onClick={() => removeTag(screenshots, setScreenshots, i)}
+                onClick={() => {
+                  if (window.confirm(`Hapus screenshot ${i + 1}?`)) {
+                    removeTag(screenshots, setScreenshots, i);
+                  }
+                }}
                 className="rounded p-1.5 text-muted transition-colors hover:bg-surface hover:text-red-400"
                 title="Remove screenshot"
               >
@@ -215,11 +256,14 @@ export function ProjectForm({ project }: Props) {
               </button>
             </div>
           ))}
-          <ImageUploader
-            value=""
-            onChange={(url) => setScreenshots([...screenshots, url])}
-            label="Add screenshot"
-          />
+          {screenshots.length < 10 && (
+            <ImageUploader
+              value=""
+              onChange={(url) => setScreenshots([...screenshots, url])}
+              label="Add screenshot"
+            />
+          )}
+          <p className="text-xs text-muted">Maksimal 10 screenshot, URL maksimal 2048 karakter.</p>
         </div>
       </Field>
 

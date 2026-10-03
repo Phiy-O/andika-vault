@@ -1,5 +1,59 @@
 import { prisma } from "@/lib/prisma";
-import { deleteCloudinaryAsset, publicIdFromUrl } from "./cloudinary";
+import {
+  deleteCloudinaryAsset,
+  default as cloudinary,
+  publicIdFromUrl,
+} from "./cloudinary";
+
+// Delete old Cloudinary uploads that are no longer referenced by ANY entity.
+export async function cleanupOrphanCloudinaryImages(minAgeHours = 24) {
+  const [posts, projects, certificates] = await Promise.all([
+    prisma.blogPost.findMany({ select: { thumbnail: true, body: true } }),
+    prisma.project.findMany({
+      select: { thumbnail: true, screenshots: true, body: true },
+    }),
+    prisma.certificate.findMany({ select: { image: true, description: true } }),
+  ]);
+
+  const referenced = new Set<string>();
+  const addUrl = (url: string | null) => {
+    const publicId = url && publicIdFromUrl(url);
+    if (publicId) referenced.add(publicId);
+  };
+  const bodies: string[] = [];
+  for (const post of posts) {
+    addUrl(post.thumbnail);
+    bodies.push(post.body);
+  }
+  for (const project of projects) {
+    addUrl(project.thumbnail);
+    project.screenshots.forEach(addUrl);
+    bodies.push(project.body);
+  }
+  for (const certificate of certificates) {
+    addUrl(certificate.image);
+    bodies.push(certificate.description);
+  }
+
+  const resources = await cloudinary.api.resources({
+    type: "upload",
+    resource_type: "image",
+    prefix: "andika-vault/",
+    max_results: 500,
+  });
+  const cutoff = Date.now() - minAgeHours * 60 * 60 * 1000;
+  let deleted = 0;
+
+  for (const resource of resources.resources) {
+    const publicId = resource.public_id as string;
+    const createdAt = Date.parse(resource.created_at as string);
+    if (referenced.has(publicId) || bodies.some((body) => body.includes(publicId))) continue;
+    if (Number.isFinite(createdAt) && createdAt > cutoff) continue;
+    if (await deleteCloudinaryAsset(publicId)) deleted++;
+  }
+
+  return { scanned: resources.resources.length, deleted };
+}
 
 // Delete Cloudinary assets that are no longer referenced by ANY entity.
 // Call AFTER a successful save: URLs still in use (including inside body

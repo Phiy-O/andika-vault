@@ -5,6 +5,7 @@ import { ArrowUpRight, ChevronLeft, ExternalLink, GitBranch } from "lucide-react
 import { PublicShell } from "../../../components/layout/PublicShell";
 import { projectService } from "@/src/services";
 import { optimizeCloudinaryUrl } from "@/src/lib/cloudinary-url";
+import { ScreenshotSlider } from "@/components/projects/ScreenshotSlider";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/src/lib/auth";
 import type { Metadata } from "next";
@@ -22,9 +23,18 @@ export async function generateMetadata({
     ? await projectService.getBySlug(slug)
     : await projectService.getVisibleBySlug(slug);
   if (!project) return { title: "Projects | Andika" };
+  const siteUrl = process.env.NEXTAUTH_URL || "https://andika.dev";
+  const image = project.thumbnail || project.screenshots?.[0] || `${siteUrl}/images/andika-profile.png`;
   return {
     title: `${project.title} | Andika`,
     description: project.description,
+    openGraph: {
+      title: `${project.title} | Andika`,
+      description: project.description,
+      type: "article",
+      images: [{ url: image, alt: `${project.title} cover` }],
+    },
+    twitter: { card: "summary_large_image", images: [image] },
   };
 }
 
@@ -48,7 +58,7 @@ export default async function ProjectDetailPage({
   if (!project) notFound();
 
   const paragraphs = project.body.split("\n\n");
-  const screenshot = project.screenshots?.[0] || project.thumbnail;
+  const heroImage = project.thumbnail || project.screenshots?.[0];
 
   return (
     <PublicShell>
@@ -64,12 +74,12 @@ export default async function ProjectDetailPage({
           </Link>
         </div>
 
-        {/* Hero screenshot */}
-        {screenshot && (
+        {/* Hero image */}
+        {heroImage && (
           <div className="relative w-full h-[420px] max-md:h-[240px] rounded-[18px] overflow-hidden border border-line/50 mb-12 mt-2">
             <Image
-              src={optimizeCloudinaryUrl(screenshot, 1600)}
-              alt={`${project.title} screenshot`}
+              src={optimizeCloudinaryUrl(heroImage, 1600)}
+              alt={`${project.title} cover`}
               fill
               sizes="(max-width: 768px) 100vw, 80vw"
               unoptimized
@@ -136,6 +146,9 @@ export default async function ProjectDetailPage({
             )}
           </div>
         </header>
+
+        {/* Project screenshots slider */}
+        <ScreenshotSlider images={project.screenshots} title={project.title} />
 
         {/* Body */}
         <div className="w-full mx-auto space-y-5 text-[15px] leading-[1.8] text-foreground/90 pb-[130px] max-md:pb-[90px]">

@@ -8,7 +8,10 @@ export const projectSchema = z.object({
   body: z.string().min(1, "Body is required"),
   bodyFormat: z.enum(["html", "markdown"]).default("html"),
   thumbnail: safeUrl,
-  screenshots: z.array(safeUrlString).default([]),
+  screenshots: z
+    .array(safeUrlString)
+    .max(10, "Maksimal 10 screenshot")
+    .default([]),
   techStack: z.array(z.string()).default([]),
   githubUrl: safeUrl,
   liveUrl: safeUrl,

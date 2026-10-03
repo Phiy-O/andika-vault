@@ -22,9 +22,18 @@ export async function generateMetadata({
     ? await blogPostService.getBySlug(slug)
     : await blogPostService.getVisibleBySlug(slug);
   if (!post) return { title: "Blog | Andika" };
+  const siteUrl = process.env.NEXTAUTH_URL || "https://andika.dev";
+  const image = post.thumbnail || `${siteUrl}/images/andika-profile.png`;
   return {
     title: `${post.title} | Andika`,
     description: post.excerpt,
+    openGraph: {
+      title: `${post.title} | Andika`,
+      description: post.excerpt,
+      type: "article",
+      images: [{ url: image, alt: post.title }],
+    },
+    twitter: { card: "summary_large_image", images: [image] },
   };
 }
 

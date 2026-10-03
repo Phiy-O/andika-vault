@@ -50,6 +50,13 @@ export function ContactForm() {
 
   return (
     <form className="mt-10 flex flex-col gap-5" onSubmit={handleSubmit}>
+      <div
+        aria-hidden="true"
+        className="absolute -left-[9999px] h-px w-px overflow-hidden"
+      >
+        <label htmlFor="website">Website</label>
+        <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" />
+      </div>
       <div className="flex flex-col gap-1.5">
         <label htmlFor="name" className="text-foreground text-[13px] tracking-[.06em] uppercase">
           Name
