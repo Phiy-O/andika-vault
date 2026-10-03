@@ -1,7 +1,7 @@
-import { label } from "framer-motion/client";
 import Image from "next/image";
 import Link from "next/link";
 import { SectionEyebrow } from "../content/SectionEyebrow";
+import { getSiteSettings } from "@/src/actions/site-setting";
 
 const randomLinks = [
   { label: "Dicoding", href: "#" },
@@ -36,12 +36,6 @@ const quickLinks = [
   { label: "GitHub", href: "https://github.com", external: true },
 ];
 
-const socialIcons = [
-  { label: "LinkedIn", href: "https://linkedin.com", icon: "/icons/linkedin-svgrepo-com.svg" },
-  { label: "GitHub", href: "https://github.com", icon: "/icons/github-svgrepo-com.svg" },
-  { label: "Instagram", href: "https://instagram.com", icon: "/icons/instagram-svgrepo-com.svg" },
-];
-
 function FooterColumn({ title, links }: { title: string; links: { label: string; href: string; external?: boolean }[] }) {
   return (
     <div className="flex flex-col gap-3.5">
@@ -63,7 +57,14 @@ function FooterColumn({ title, links }: { title: string; links: { label: string;
   );
 }
 
-export function Footer() {
+export async function Footer() {
+  const { data: settings } = await getSiteSettings();
+  const socialIcons = [
+    { label: "LinkedIn", href: settings?.linkedinUrl ?? "#", icon: "/icons/linkedin-svgrepo-com.svg" },
+    { label: "GitHub", href: settings?.githubUrl ?? "#", icon: "/icons/github-svgrepo-com.svg" },
+    { label: "Instagram", href: settings?.instagramUrl ?? "#", icon: "/icons/instagram-svgrepo-com.svg" },
+  ];
+
   return (
     <footer className="bg-surface" id="contact">
       <div className="py-[90px] px-[10vw] max-md:py-[65px] max-md:px-[6vw]">

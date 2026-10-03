@@ -1,5 +1,9 @@
 import { getAllProjects } from "@/src/actions/project";
-import { ProjectListClient } from "./ProjectListClient";
+import dynamic from "next/dynamic";
+
+const ProjectListClient = dynamic(
+  () => import("./ProjectListClient").then((m) => m.ProjectListClient)
+);
 
 export default async function AdminProjectsPage() {
   const { data: projects, error } = await getAllProjects();

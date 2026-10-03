@@ -7,6 +7,7 @@ import {
   FileText,
   FolderKanban,
   Award,
+  Wrench,
   MessageSquare,
   Settings,
   LogOut,
@@ -18,6 +19,7 @@ const sidebarLinks = [
   { label: "Blog Posts", href: "/admin/blog", icon: FileText },
   { label: "Projects", href: "/admin/projects", icon: FolderKanban },
   { label: "Certificates", href: "/admin/certificates", icon: Award },
+  { label: "Skills", href: "/admin/skills", icon: Wrench },
   { label: "Messages", href: "/admin/messages", icon: MessageSquare },
   { label: "Settings", href: "/admin/settings", icon: Settings },
 ];

@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { Certificate } from "@prisma/client";
+import { useToast } from "@/components/ui/Toast";
+import { ImageUploader } from "./ImageUploader";
 
 interface Props {
   certificate?: Certificate | null;
@@ -11,6 +13,7 @@ interface Props {
 export function CertificateForm({ certificate }: Props) {
   const router = useRouter();
   const isEdit = !!certificate;
+  const showToast = useToast();
 
   const [title, setTitle] = useState(certificate?.title ?? "");
   const [issuer, setIssuer] = useState(certificate?.issuer ?? "");
@@ -61,6 +64,7 @@ export function CertificateForm({ certificate }: Props) {
         const err = await res.json();
         throw new Error(err.error ?? "Failed to save certificate");
       }
+      showToast(isEdit ? "Sertifikat berhasil diupdate" : "Sertifikat berhasil dibuat");
       router.push("/admin/certificates");
       router.refresh();
     } catch (e: any) {
@@ -117,22 +121,8 @@ export function CertificateForm({ certificate }: Props) {
         </Field>
       </div>
 
-      <Field label="Image URL">
-        <div className="flex gap-3">
-          <input
-            value={image}
-            onChange={(e) => setImage(e.target.value)}
-            placeholder="https://..."
-            className="flex-1 rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-purple"
-          />
-          {image && (
-            <img
-              src={image}
-              alt="preview"
-              className="h-10 w-16 flex-shrink-0 rounded border border-line object-cover"
-            />
-          )}
-        </div>
+      <Field label="Image">
+        <ImageUploader value={image} onChange={setImage} />
       </Field>
 
       <Field label="Credential URL">

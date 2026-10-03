@@ -5,6 +5,8 @@ import { PageHero } from "../../components/content/PageHero";
 import { CTAButton } from "../../components/content/CTAButton";
 import { projectService } from "@/src/services";
 
+export const revalidate = 3600;
+
 export const metadata = {
   title: "Projects | Andika",
   description: "Selected projects by Andika, from product concepts to full-stack builds.",

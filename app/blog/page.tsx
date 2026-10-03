@@ -5,6 +5,8 @@ import { PageHero } from "../../components/content/PageHero";
 import { CTAButton } from "../../components/content/CTAButton";
 import { blogPostService } from "@/src/services";
 
+export const revalidate = 3600;
+
 export const metadata = {
   title: "Blog | Andika",
   description: "Notes on product thinking, engineering, and a life in progress.",

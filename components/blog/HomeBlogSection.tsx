@@ -2,6 +2,7 @@ import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { SectionEyebrow } from "../content/SectionEyebrow";
 import { Card } from "../content/Card";
+import { optimizeCloudinaryUrl } from "@/src/lib/cloudinary-url";
 import type { BlogPost } from "@prisma/client";
 
 type HomeBlogSectionProps = {
@@ -59,7 +60,7 @@ export function HomeBlogSection({ posts }: HomeBlogSectionProps) {
           <Card href={`/blog/${post.slug}`} className="min-h-[360px] max-md:min-h-0" key={post.id}>
             <div className="rounded-tl-[14px] h-[240px] mb-6 bg-cover overflow-hidden relative max-md:h-auto">
               <img
-                src={post.thumbnail || DEFAULT_BLOG_THUMBNAIL}
+                src={optimizeCloudinaryUrl(post.thumbnail || DEFAULT_BLOG_THUMBNAIL, 800)}
                 alt=""
                 className="absolute inset-0 w-full h-full object-cover"
               />

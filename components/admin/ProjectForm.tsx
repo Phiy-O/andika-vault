@@ -2,8 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import Image from "next/image";
+import { GripVertical, X } from "lucide-react";
 import type { Project } from "@prisma/client";
 import slugify from "@/src/lib/slugify";
+import { useToast } from "@/components/ui/Toast";
+import { ImageUploader } from "./ImageUploader";
 
 interface Props {
   project?: Project | null;
@@ -12,6 +16,7 @@ interface Props {
 export function ProjectForm({ project }: Props) {
   const router = useRouter();
   const isEdit = !!project;
+  const showToast = useToast();
 
   const [title, setTitle] = useState(project?.title ?? "");
   const [slug, setSlug] = useState(project?.slug ?? "");
@@ -24,7 +29,6 @@ export function ProjectForm({ project }: Props) {
   const [screenshots, setScreenshots] = useState<string[]>(
     project?.screenshots ?? []
   );
-  const [screenshotInput, setScreenshotInput] = useState("");
   const [techStack, setTechStack] = useState<string[]>(
     project?.techStack ?? []
   );
@@ -35,6 +39,7 @@ export function ProjectForm({ project }: Props) {
   const [featured, setFeatured] = useState(project?.featured ?? false);
   const [isVisible, setIsVisible] = useState(project?.isVisible ?? true);
   const [sortOrder, setSortOrder] = useState(project?.sortOrder ?? 0);
+  const [draggedScreenshotIndex, setDraggedScreenshotIndex] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -55,10 +60,29 @@ export function ProjectForm({ project }: Props) {
     setter(list.filter((_, i) => i !== index));
   }
 
+  function moveScreenshot(from: number, to: number) {
+    if (to < 0 || to >= screenshots.length) return;
+    const next = [...screenshots];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    setScreenshots(next);
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setSaving(true);
     setError("");
+
+    if (!thumbnail) {
+      setError("Thumbnail wajib diisi untuk cover project");
+      return;
+    }
+
+    if (screenshots.length > 10) {
+      setError("Maksimal 10 screenshot yang diperbolehkan");
+      return;
+    }
+
+    setSaving(true);
 
     const bodyData = {
       title,
@@ -87,6 +111,7 @@ export function ProjectForm({ project }: Props) {
         const err = await res.json();
         throw new Error(err.error ?? "Failed to save project");
       }
+      showToast(isEdit ? "Project berhasil diupdate" : "Project berhasil dibuat");
       router.push("/admin/projects");
       router.refresh();
     } catch (e: any) {
@@ -160,22 +185,8 @@ export function ProjectForm({ project }: Props) {
       </div>
 
       {/* Thumbnail */}
-      <Field label="Thumbnail URL">
-        <div className="flex gap-3">
-          <input
-            value={thumbnail}
-            onChange={(e) => setThumbnail(e.target.value)}
-            placeholder="https://..."
-            className="flex-1 rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-purple"
-          />
-          {thumbnail && (
-            <img
-              src={thumbnail}
-              alt="preview"
-              className="h-10 w-16 rounded border border-line object-cover"
-            />
-          )}
-        </div>
+      <Field label="Thumbnail" required>
+        <ImageUploader value={thumbnail} onChange={setThumbnail} />
       </Field>
 
       {/* Body */}
@@ -200,17 +211,61 @@ export function ProjectForm({ project }: Props) {
       />
 
       {/* Screenshots */}
-      <TagField
-        label="Screenshots (URLs)"
-        items={screenshots}
-        input={screenshotInput}
-        onInputChange={setScreenshotInput}
-        onAdd={() =>
-          addTag(screenshots, setScreenshots, screenshotInput, setScreenshotInput)
-        }
-        onRemove={(i) => removeTag(screenshots, setScreenshots, i)}
-        url
-      />
+      <Field label={`Screenshots (${screenshots.length}/10)`}>
+        <div className="space-y-3">
+          {screenshots.map((url, i) => (
+            <div
+              key={`${url}-${i}`}
+              draggable
+              onDragStart={() => setDraggedScreenshotIndex(i)}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={() => {
+                if (draggedScreenshotIndex !== null && draggedScreenshotIndex !== i) {
+                  moveScreenshot(draggedScreenshotIndex, i);
+                }
+                setDraggedScreenshotIndex(null);
+              }}
+              onDragEnd={() => setDraggedScreenshotIndex(null)}
+              className="flex items-center gap-3 rounded-lg border border-transparent p-1 transition-colors hover:border-line"
+            >
+              <span className="flex w-8 shrink-0 items-center justify-center gap-1 text-xs font-medium text-muted">
+                <GripVertical size={14} className="cursor-grab" aria-hidden="true" />
+                {i + 1}
+              </span>
+              <div className="relative h-16 w-24 overflow-hidden rounded-lg border border-line">
+                <Image
+                  src={url}
+                  alt={`screenshot ${i + 1}`}
+                  fill
+                  sizes="96px"
+                  unoptimized
+                  className="object-cover"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  if (window.confirm(`Hapus screenshot ${i + 1}?`)) {
+                    removeTag(screenshots, setScreenshots, i);
+                  }
+                }}
+                className="rounded p-1.5 text-muted transition-colors hover:bg-surface hover:text-red-400"
+                title="Remove screenshot"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          ))}
+          {screenshots.length < 10 && (
+            <ImageUploader
+              value=""
+              onChange={(url) => setScreenshots([...screenshots, url])}
+              label="Add screenshot"
+            />
+          )}
+          <p className="text-xs text-muted">Maksimal 10 screenshot, URL maksimal 2048 karakter.</p>
+        </div>
+      </Field>
 
       {/* GitHub & Live URLs */}
       <div className="grid gap-6 md:grid-cols-2">

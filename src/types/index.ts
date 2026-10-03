@@ -1,7 +1,7 @@
 import type { Prisma } from "@prisma/client";
 
 // ── Re-export Prisma-generated types ──
-export type { BlogPost, Project, Certificate, Skill } from "@prisma/client";
+export type { BlogPost, Project, Certificate, Skill, Message } from "@prisma/client";
 
 // ── Create / Update input types (omit auto-managed fields) ──
 export type BlogPostCreateInput = Omit<
@@ -31,6 +31,13 @@ export type SkillCreateInput = Omit<
 >;
 
 export type SkillUpdateInput = Partial<SkillCreateInput>;
+
+export type MessageCreateInput = Omit<
+  Prisma.MessageCreateInput,
+  "id" | "createdAt" | "isRead"
+>;
+
+export type MessageUpdateInput = Partial<MessageCreateInput>;
 
 // ── Lean select return types (for list views — no body) ──
 export const blogPostListSelect = {

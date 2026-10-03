@@ -5,6 +5,8 @@ import { PageHero } from "../../components/content/PageHero";
 import { CTAButton } from "../../components/content/CTAButton";
 import { certificateService } from "@/src/services";
 
+export const revalidate = 3600;
+
 export const metadata = {
   title: "Achievements | Andika",
   description: "Achievements, milestones, and certificates from Andika's journey.",

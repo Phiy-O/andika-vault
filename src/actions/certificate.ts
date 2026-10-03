@@ -10,6 +10,7 @@ import type {
   CertificateUpdateInput,
 } from "@/src/types";
 import type { Certificate } from "@prisma/client";
+import { requireAdmin } from "@/src/lib/auth";
 
 type ActionResult<T> = { data?: T; error?: string };
 
@@ -38,6 +39,7 @@ export async function getAllCertificates(): Promise<
 export async function createCertificate(
   input: CertificateCreateInput
 ): Promise<ActionResult<Certificate>> {
+  if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
     const parsed = certificateSchema.parse(input);
     const cert = await certificateService.create(parsed as any);
@@ -53,6 +55,7 @@ export async function updateCertificate(
   id: string,
   input: CertificateUpdateInput
 ): Promise<ActionResult<Certificate>> {
+  if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
     const parsed = certificateUpdateSchema.parse(input);
     const cert = await certificateService.update(id, parsed as any);
@@ -67,6 +70,7 @@ export async function updateCertificate(
 export async function deleteCertificate(
   id: string
 ): Promise<ActionResult<void>> {
+  if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
     await certificateService.delete(id);
     return {};

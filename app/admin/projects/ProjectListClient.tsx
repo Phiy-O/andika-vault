@@ -1,8 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Edit3, Trash2, ExternalLink, Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
+import { Edit3, Trash2, ExternalLink, Eye, EyeOff, ChevronLeft, ChevronRight } from "lucide-react";
+import { Modal } from "@/components/ui/Modal";
+import { useToast } from "@/components/ui/Toast";
+import { ListToolbar, type StatusFilter } from "@/components/admin/ListToolbar";
 import type { ProjectListItem } from "@/src/types";
 
 export function ProjectListClient({
@@ -11,12 +16,57 @@ export function ProjectListClient({
   projects: ProjectListItem[];
 }) {
   const router = useRouter();
+  const showToast = useToast();
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState<StatusFilter>("all");
+  const [category, setCategory] = useState("all");
+  const [deleting, setDeleting] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
+  const [page, setPage] = useState(0);
+  const PAGE_SIZE = 10;
 
-  async function handleDelete(id: string, title: string) {
-    if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
-    const res = await fetch(`/api/admin/projects/${id}`, { method: "DELETE" });
-    if (res.ok) router.refresh();
-    else alert("Failed to delete project.");
+  const categories = Array.from(new Set(projects.map((p) => p.category))).sort();
+
+  const filtered = projects.filter((p) => {
+    if (status === "published" && !p.isVisible) return false;
+    if (status === "draft" && p.isVisible) return false;
+    if (category !== "all" && p.category !== category) return false;
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      p.title.toLowerCase().includes(q) ||
+      p.description.toLowerCase().includes(q) ||
+      p.category.toLowerCase().includes(q) ||
+      p.techStack?.some((t) => t.toLowerCase().includes(q))
+    );
+  });
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const current = Math.min(page, pageCount - 1);
+  const pageItems = filtered.slice(
+    current * PAGE_SIZE,
+    (current + 1) * PAGE_SIZE
+  );
+
+  function resetPage() {
+    setPage(0);
+  }
+
+  function handleDelete(id: string, title: string) {
+    setDeleting({ id, title });
+  }
+
+  async function confirmDelete() {
+    if (!deleting) return;
+    const res = await fetch(`/api/admin/projects/${deleting.id}`, {
+      method: "DELETE",
+    });
+    setDeleting(null);
+    if (res.ok) {
+      showToast("Project berhasil dihapus");
+      router.refresh();
+    }
   }
 
   if (projects.length === 0) {
@@ -34,7 +84,19 @@ export function ProjectListClient({
   }
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-line">
+    <>
+      <ListToolbar
+        search={search}
+        onSearch={setSearch}
+        status={status}
+        onStatus={setStatus}
+        categories={categories}
+        category={category}
+        onCategory={setCategory}
+        placeholder="Search projects..."
+        onResetPage={resetPage}
+      />
+      <div className="overflow-x-auto rounded-lg border border-line">
       <table className="w-full text-left text-sm">
         <thead className="border-b border-line bg-surface/50 text-xs uppercase tracking-wider text-muted">
           <tr>
@@ -47,18 +109,21 @@ export function ProjectListClient({
           </tr>
         </thead>
         <tbody className="divide-y divide-line">
-          {projects.map((p) => (
+          {pageItems.map((p) => (
             <tr key={p.id} className="transition-colors hover:bg-surface/20">
               <td className="px-4 py-3.5">
                 <div className="flex items-center gap-3">
                   {p.thumbnail ? (
-                    <img
+                    <Image
                       src={p.thumbnail}
                       alt=""
-                      className="h-9 w-14 flex-shrink-0 rounded border border-line object-cover"
+                      width={56}
+                      height={36}
+                      unoptimized
+                      className="h-9 w-14 shrink-0 rounded border border-line object-cover"
                     />
                   ) : (
-                    <div className="h-9 w-14 flex-shrink-0 rounded border border-line bg-surface" />
+                    <div className="h-9 w-14 shrink-0 rounded border border-line bg-surface" />
                   )}
                   <div>
                     <div className="flex items-center gap-1.5">
@@ -123,6 +188,57 @@ export function ProjectListClient({
           ))}
         </tbody>
       </table>
-    </div>
+
+      {/* Pagination */}
+      <div className="flex items-center justify-between border-t border-line px-4 py-3 text-sm text-muted">
+        <span>
+          {filtered.length === 0
+            ? "0 items"
+            : `${current * PAGE_SIZE + 1}–${Math.min(
+                (current + 1) * PAGE_SIZE,
+                filtered.length
+              )} of ${filtered.length}`}
+        </span>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setPage(current - 1)}
+            disabled={current === 0}
+            className="rounded p-1.5 transition-colors hover:bg-surface hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
+            title="Previous page"
+          >
+            <ChevronLeft size={16} />
+          </button>
+          <span className="px-2">
+            {current + 1} / {pageCount}
+          </span>
+          <button
+            onClick={() => setPage(current + 1)}
+            disabled={current >= pageCount - 1}
+            className="rounded p-1.5 transition-colors hover:bg-surface hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
+            title="Next page"
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      </div>
+
+      {/* Delete confirmation */}
+      <Modal
+        open={!!deleting}
+        onClose={() => setDeleting(null)}
+        title="Delete project"
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onConfirm={confirmDelete}
+      >
+        <p className="m-0 text-sm leading-[1.7] text-muted">
+          Are you sure you want to delete{" "}
+          <span className="font-medium text-foreground">
+            {deleting?.title}
+          </span>
+          ? This cannot be undone.
+        </p>
+      </Modal>    </div>
+    </>
   );
 }

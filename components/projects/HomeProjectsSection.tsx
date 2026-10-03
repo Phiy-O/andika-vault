@@ -2,6 +2,7 @@ import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { SectionEyebrow } from "../content/SectionEyebrow";
 import { Card } from "../content/Card";
+import { optimizeCloudinaryUrl } from "@/src/lib/cloudinary-url";
 import type { Project } from "@prisma/client";
 
 type HomeProjectsSectionProps = {
@@ -54,7 +55,7 @@ export function HomeProjectsSection({ projects }: HomeProjectsSectionProps) {
           <Card href={`/projects/${project.slug}`} className="min-h-[360px] max-md:min-h-0" key={project.id}>
             <div className="rounded-tl-[14px] h-[220px] mb-6 overflow-hidden relative max-md:h-[180px]">
               <img
-                src={project.thumbnail || DEFAULT_PROJECT_THUMBNAIL}
+                src={optimizeCloudinaryUrl(project.thumbnail || DEFAULT_PROJECT_THUMBNAIL, 800)}
                 alt=""
                 className="absolute inset-0 w-full h-full object-cover"
               />

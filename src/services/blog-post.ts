@@ -16,6 +16,10 @@ export const blogPostService = {
     return blogPostRepo.findBySlug(slug);
   },
 
+  async getVisibleBySlug(slug: string) {
+    return blogPostRepo.findVisibleBySlug(slug);
+  },
+
   async getById(id: string) {
     return blogPostRepo.findById(id);
   },

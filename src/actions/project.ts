@@ -4,6 +4,7 @@ import { projectService } from "@/src/services";
 import { projectSchema, projectUpdateSchema } from "@/src/lib/validations";
 import type { ProjectCreateInput, ProjectUpdateInput } from "@/src/types";
 import type { Project } from "@prisma/client";
+import { requireAdmin } from "@/src/lib/auth";
 
 type ActionResult<T> = { data?: T; error?: string };
 
@@ -39,6 +40,7 @@ export async function getProject(
 export async function createProject(
   input: ProjectCreateInput
 ): Promise<ActionResult<Project>> {
+  if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
     const parsed = projectSchema.parse(input);
     const project = await projectService.create(parsed as any);
@@ -53,6 +55,7 @@ export async function updateProject(
   id: string,
   input: ProjectUpdateInput
 ): Promise<ActionResult<Project>> {
+  if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
     const parsed = projectUpdateSchema.parse(input);
     const project = await projectService.update(id, parsed as any);
@@ -66,6 +69,7 @@ export async function updateProject(
 export async function deleteProject(
   id: string
 ): Promise<ActionResult<void>> {
+  if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
     await projectService.delete(id);
     return {};

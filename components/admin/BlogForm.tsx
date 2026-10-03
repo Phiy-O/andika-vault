@@ -5,9 +5,11 @@ import { useState, useMemo } from "react";
 import type { BlogPost } from "@prisma/client";
 import slugify from "@/src/lib/slugify";
 import dynamic from "next/dynamic";
+import { useToast } from "@/components/ui/Toast";
+import { ImageUploader } from "./ImageUploader";
 
-const TipTapEditor = dynamic(
-  () => import("./TipTapEditor").then((m) => m.TipTapEditor),
+const LexKitEditor = dynamic(
+  () => import("./LexKitEditor").then((m) => m.LexKitEditor),
   { ssr: false }
 );
 
@@ -26,6 +28,7 @@ interface Props {
 export function BlogForm({ post }: Props) {
   const router = useRouter();
   const isEdit = !!post;
+  const showToast = useToast();
 
   const [title, setTitle] = useState(post?.title ?? "");
   const [slug, setSlug] = useState(post?.slug ?? "");
@@ -104,6 +107,7 @@ export function BlogForm({ post }: Props) {
         const err = await res.json();
         throw new Error(err.error ?? "Failed to save post");
       }
+      showToast(isEdit ? "Blog berhasil diupdate" : "Blog berhasil dibuat");
       router.push("/admin/blog");
       router.refresh();
     } catch (e: any) {
@@ -235,27 +239,13 @@ export function BlogForm({ post }: Props) {
       </Field>
 
       {/* Thumbnail */}
-      <Field label="Thumbnail URL">
-        <div className="flex gap-3">
-          <input
-            value={thumbnail}
-            onChange={(e) => setThumbnail(e.target.value)}
-            placeholder="https://..."
-            className="flex-1 rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-purple"
-          />
-          {thumbnail && (
-            <img
-              src={thumbnail}
-              alt="preview"
-              className="h-10 w-16 shrink-0 rounded border border-line object-cover"
-            />
-          )}
-        </div>
+      <Field label="Thumbnail">
+        <ImageUploader value={thumbnail} onChange={setThumbnail} />
       </Field>
 
       {/* Body with Rich Editor */}
       <Field label="Body" required>
-        <TipTapEditor content={body} onChange={setBody} />
+        <LexKitEditor key={post?.id ?? "new"} content={body} onChange={setBody} />
       </Field>
 
       {/* Toggles */}

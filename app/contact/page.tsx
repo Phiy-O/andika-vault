@@ -3,20 +3,26 @@ import Link from "next/link";
 import { PublicShell } from "../../components/layout/PublicShell";
 import { PageHero } from "../../components/content/PageHero";
 import { CTAButton } from "../../components/content/CTAButton";
-import { Mail, MapPin, Clock, ArrowUpRight, Send } from "lucide-react";
+import { ContactForm } from "../../components/contact/ContactForm";
+import { Mail, MapPin, Clock, ArrowUpRight } from "lucide-react";
+import { getSiteSettings } from "@/src/actions/site-setting";
+
+export const revalidate = 3600;
 
 export const metadata = {
   title: "Contact | Andika",
   description: "Get in touch with Andika about a thoughtful digital project.",
 };
 
-const socialLinks = [
-  { label: "LinkedIn", href: "https://linkedin.com", icon: "/icons/linkedin-svgrepo-com.svg" },
-  { label: "GitHub", href: "https://github.com", icon: "/icons/github-svgrepo-com.svg" },
-  { label: "Instagram", href: "https://instagram.com", icon: "/icons/instagram-svgrepo-com.svg" },
-];
+export default async function ContactPage() {
+  const { data: settings } = await getSiteSettings();
+  const email = settings?.email ?? "andikapiyo12@gmail.com";
+  const socialLinks = [
+    { label: "LinkedIn", href: settings?.linkedinUrl ?? "#", icon: "/icons/linkedin-svgrepo-com.svg" },
+    { label: "GitHub", href: settings?.githubUrl ?? "#", icon: "/icons/github-svgrepo-com.svg" },
+    { label: "Instagram", href: settings?.instagramUrl ?? "#", icon: "/icons/instagram-svgrepo-com.svg" },
+  ];
 
-export default function ContactPage() {
   return (
     <PublicShell>
       <PageHero
@@ -40,63 +46,7 @@ export default function ContactPage() {
               can.
             </p>
 
-            <form
-              className="mt-10 flex flex-col gap-5"
-              action="mailto:andikapiyo12@gmail.com"
-              method="post"
-              encType="text/plain"
-            >
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="name" className="text-foreground text-[13px] tracking-[.06em] uppercase">
-                  Name
-                </label>
-                <input
-                  id="name"
-                  name="name"
-                  type="text"
-                  required
-                  placeholder="Your name"
-                  className="bg-transparent border border-line rounded-lg px-5 py-4 text-foreground text-[15px] outline-none transition-all duration-200 placeholder:text-muted/50 focus:border-purple focus:shadow-[0_0_8px_rgba(169,139,255,.15)]"
-                />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="email" className="text-foreground text-[13px] tracking-[.06em] uppercase">
-                  Email
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required
-                  placeholder="you@example.com"
-                  className="bg-transparent border border-line rounded-lg px-5 py-4 text-foreground text-[15px] outline-none transition-all duration-200 placeholder:text-muted/50 focus:border-purple focus:shadow-[0_0_8px_rgba(169,139,255,.15)]"
-                />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="message" className="text-foreground text-[13px] tracking-[.06em] uppercase">
-                  Message
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  required
-                  rows={5}
-                  placeholder="Tell me about your project…"
-                  className="bg-transparent border border-line rounded-lg px-5 py-4 text-foreground text-[15px] outline-none transition-all duration-200 placeholder:text-muted/50 focus:border-purple focus:shadow-[0_0_8px_rgba(169,139,255,.15)] resize-y min-h-[120px]"
-                />
-              </div>
-              <button
-                type="submit"
-                className="inline-flex items-center justify-center gap-3 rounded-lg text-base py-4 px-7 transition-all duration-200 hover:-translate-y-0.5 bg-gradient-to-br from-[#a98bff] to-[#7391ff] text-[#f0f0f0] hover:brightness-[1.05] hover:shadow-[0_0_16px_rgba(255,255,255,.25)] w-fit max-md:w-full max-md:py-3 max-md:px-5 max-md:text-xs"
-              >
-                Send message
-                <Send size={16} aria-hidden="true" />
-              </button>
-              <p className="text-muted/60 text-[11px] mt-0">
-                Your email will be shared via your default mail client. No data
-                is stored on this server.
-              </p>
-            </form>
+            <ContactForm />
           </div>
 
           {/* ── Email + Social ── */}
@@ -109,9 +59,9 @@ export default function ContactPage() {
               </p>
               <a
                 className="text-foreground text-lg font-medium block mb-3 transition-colors duration-200 hover:text-purple"
-                href="mailto:andikapiyo12@gmail.com"
+                href={`mailto:${email}`}
               >
-                andikapiyo12@gmail.com
+                {email}
               </a>
               <p className="text-muted text-[14px] leading-[1.7] m-0">
                 The best way to reach me. Share what you&apos;re building and

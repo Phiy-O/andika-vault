@@ -4,7 +4,12 @@ import Image from "next/image";
 import { ArrowUpRight, ChevronLeft } from "lucide-react";
 import { PublicShell } from "../../../components/layout/PublicShell";
 import { blogPostService } from "@/src/services";
+import { optimizeCloudinaryUrl } from "@/src/lib/cloudinary-url";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/src/lib/auth";
 import type { Metadata } from "next";
+
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -12,11 +17,23 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const post = await blogPostService.getBySlug(slug);
+  const session = await getServerSession(authOptions);
+  const post = session
+    ? await blogPostService.getBySlug(slug)
+    : await blogPostService.getVisibleBySlug(slug);
   if (!post) return { title: "Blog | Andika" };
+  const siteUrl = process.env.NEXTAUTH_URL || "https://andika.dev";
+  const image = post.thumbnail || `${siteUrl}/images/andika-profile.png`;
   return {
     title: `${post.title} | Andika`,
     description: post.excerpt,
+    openGraph: {
+      title: `${post.title} | Andika`,
+      description: post.excerpt,
+      type: "article",
+      images: [{ url: image, alt: post.title }],
+    },
+    twitter: { card: "summary_large_image", images: [image] },
   };
 }
 
@@ -39,7 +56,10 @@ export default async function BlogPostPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const post = await blogPostService.getBySlug(slug);
+  const session = await getServerSession(authOptions);
+  const post = session
+    ? await blogPostService.getBySlug(slug)
+    : await blogPostService.getVisibleBySlug(slug);
   if (!post) notFound();
 
   const paragraphs = post.body.split("\n\n");
@@ -59,10 +79,13 @@ export default async function BlogPostPage({
         {/* Thumbnail */}
         {post.thumbnail && (
           <div className="relative w-full h-[360px] max-md:h-[200px] rounded-[18px] overflow-hidden border border-line/50 mb-12">
-            <img
-              src={post.thumbnail}
+            <Image
+              src={optimizeCloudinaryUrl(post.thumbnail, 1600)}
               alt=""
-              className="absolute inset-0 w-full h-full object-cover"
+              fill
+              sizes="(max-width: 768px) 100vw, 80vw"
+              unoptimized
+              className="object-cover"
             />
           </div>
         )}

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { safeUrl } from "./url";
 
 export const blogPostSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -10,7 +11,7 @@ export const blogPostSchema = z.object({
   tags: z.array(z.string()).default([]),
   readTime: z.string().min(1, "Read time is required"),
   publishedAt: z.string().datetime().or(z.date()),
-  thumbnail: z.string().nullable().optional(),
+  thumbnail: safeUrl,
   isVisible: z.boolean().default(true),
   sortOrder: z.number().int().default(0),
 });

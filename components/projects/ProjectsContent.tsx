@@ -4,6 +4,7 @@ import { ArrowUpRight, Search } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Card } from "../content/Card";
+import { optimizeCloudinaryUrl } from "@/src/lib/cloudinary-url";
 import type { Project } from "@prisma/client";
 
 type FilterOption = "all" | "featured" | "product" | "tool";
@@ -147,7 +148,7 @@ function ProjectCard({
     <Card href={`/projects/${project.slug}`} className="min-h-[360px] max-md:min-h-0">
       <div className="h-[220px] mb-6 overflow-hidden relative max-md:h-[180px]">
         <img
-          src={project.thumbnail || DEFAULT_PROJECT_THUMBNAIL}
+          src={optimizeCloudinaryUrl(project.thumbnail || DEFAULT_PROJECT_THUMBNAIL, 800)}
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
         />

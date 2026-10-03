@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Cormorant_Garamond, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import AuthProvider from "@/components/SessionProvider";
+import { ToastProvider } from "@/components/ui/Toast";
+import { getSiteSettings } from "@/src/actions/site-setting";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -20,12 +22,37 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Andika | Portofolio",
-  description: "The portfolio and journal of Andika, a software engineer creating thoughtful digital products.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { data: settings } = await getSiteSettings();
+  const title = settings?.siteTitle ?? "Andika | Portofolio";
+  const description =
+    settings?.metaDescription ??
+    "The portfolio and journal of Andika, a software engineer creating thoughtful digital products.";
+  const siteUrl = process.env.NEXTAUTH_URL || "https://andika.dev";
+  const image = `${siteUrl}/images/andika-profile.png`;
 
-export default function RootLayout({
+  return {
+    metadataBase: new URL(siteUrl),
+    title,
+    description,
+    openGraph: {
+      type: "website",
+      url: siteUrl,
+      title,
+      description,
+      siteName: title,
+      images: [{ url: image, alt: title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [image],
+    },
+  };
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -37,7 +64,9 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
     >
       <body className="min-h-full flex flex-col">
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <ToastProvider>{children}</ToastProvider>
+        </AuthProvider>
       </body>
     </html>
   );

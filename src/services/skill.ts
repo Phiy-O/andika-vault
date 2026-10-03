@@ -10,6 +10,10 @@ export const skillService = {
     return skillRepo.findAll();
   },
 
+  async getById(id: string) {
+    return skillRepo.findById(id);
+  },
+
   async create(input: { name: string; iconSrc: string; category: string; sortOrder?: number; isVisible?: boolean }) {
     const parsed = skillSchema.parse(input);
     return skillRepo.create(parsed);

@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { SectionEyebrow } from "../content/SectionEyebrow";
 import { Card } from "../content/Card";
 import { FilterButton } from "../content/FilterButton";
+import { optimizeCloudinaryUrl } from "@/src/lib/cloudinary-url";
 import type { BlogPost } from "@prisma/client";
 
 type Category = "all" | "perspective" | "personal" | "process";
@@ -165,7 +166,7 @@ export function BlogContent({ posts }: { posts: BlogPost[] }) {
                 <Card href={`/blog/${latestPost.slug}`}>
                   <div className="h-[160px] overflow-hidden relative">
                     <img
-                      src={latestPost.thumbnail || DEFAULT_BLOG_THUMBNAIL}
+                      src={optimizeCloudinaryUrl(latestPost.thumbnail || DEFAULT_BLOG_THUMBNAIL, 1200)}
                       alt=""
                       className="absolute inset-0 w-full h-full object-cover"
                     />
@@ -238,7 +239,7 @@ function BlogCard({
     <Card href={`/blog/${post.slug}`} className="min-h-[360px] max-md:min-h-0">
       <div className="h-[200px] mb-5 overflow-hidden relative max-md:h-[180px]">
         <img
-          src={post.thumbnail || DEFAULT_BLOG_THUMBNAIL}
+          src={optimizeCloudinaryUrl(post.thumbnail || DEFAULT_BLOG_THUMBNAIL, 800)}
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
         />
