@@ -80,4 +80,7 @@ export const milestones: Milestone[] = [
     sortOrder: 8,
     isVisible: true,
   },
+  { id: "dummy-distributed-systems", year: "2026", title: "Completed distributed systems field study", detail: "Built small experiments around queues, state synchronization, and service failure modes.", sortOrder: 20, isVisible: true },
+  { id: "dummy-edge-prototype", year: "2026", title: "Shipped first edge runtime prototype", detail: "Designed and tested a lightweight runtime monitor for constrained deployment environments.", sortOrder: 21, isVisible: true },
+  { id: "dummy-technical-notes", year: "2026", title: "Published technical field notes", detail: "Started documenting practical engineering lessons from frontend, backend, and systems work.", sortOrder: 22, isVisible: true },
 ];

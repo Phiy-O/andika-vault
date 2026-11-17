@@ -10,7 +10,7 @@ export default async function AdminMessagesPage() {
 
   return (
     <section>
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-8 flex items-end justify-between gap-4 border-b-2 border-foreground pb-6">
         <div>
           <h1 className="text-3xl font-medium tracking-[-.06em] text-foreground">
             Messages

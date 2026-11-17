@@ -40,9 +40,16 @@ export async function deleteCloudinaryAsset(publicId: string) {
 // Extract public_id from a Cloudinary URL (https://res.cloudinary.com/.../image/upload/v123/andika-vault/abc.png)
 // Cloudinary public_ids never include the file extension.
 export function publicIdFromUrl(url: string): string | null {
-  const match = url.match(/\/image\/upload\/[^/]+\/(.+)$/);
-  if (!match) return null;
-  return match[1].replace(/\.[a-z0-9]+$/i, "");
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname !== `res.cloudinary.com`) return null;
+    if (parsed.pathname.split("/")[1] !== process.env.CLOUDINARY_CLOUD_NAME) return null;
+    const match = parsed.pathname.match(/\/image\/upload\/(?:v\d+\/)?(.+)$/);
+    if (!match || !match[1].startsWith(`${CLOUDINARY_FOLDER}/`)) return null;
+    return match[1].replace(/\.[a-z0-9]+$/i, "");
+  } catch {
+    return null;
+  }
 }
 
 export default cloudinary;

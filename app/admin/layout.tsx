@@ -1,19 +1,25 @@
-import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { AdminMain } from "@/components/admin/AdminMain";
 import { AdminNavbar } from "@/components/admin/AdminNavbar";
+import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { getSiteSettings } from "@/src/actions/site-setting";
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { data: settings } = await getSiteSettings();
+  const profile = {
+    name: settings?.aboutName?.trim() || "Studio Admin",
+    role: settings?.aboutRole?.trim() || "Content Manager",
+  };
+
   return (
-    <div className="flex min-h-screen bg-[#17151c]">
-      <AdminSidebar />
-      <div className="flex flex-1 flex-col">
-        <AdminNavbar />
-        <main className="flex-1 px-[10vw] py-10 max-md:px-[6vw]">
-          {children}
-        </main>
+    <div className="admin-shell flex min-h-screen bg-background text-foreground">
+      <AdminSidebar profile={profile} />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <AdminNavbar profile={profile} />
+        <AdminMain>{children}</AdminMain>
       </div>
     </div>
   );

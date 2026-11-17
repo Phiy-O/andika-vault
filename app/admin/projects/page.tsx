@@ -1,39 +1,24 @@
 import { getAllProjects } from "@/src/actions/project";
-import dynamic from "next/dynamic";
+import { ProjectsWorkspace } from "./_components/ProjectsWorkspace";
 
-const ProjectListClient = dynamic(
-  () => import("./ProjectListClient").then((m) => m.ProjectListClient)
-);
-
-export default async function AdminProjectsPage() {
+export default async function AdminProjectsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string | string[] }>;
+}) {
+  const params = await searchParams;
+  const rawQuery = params.q;
+  const initialSearch = Array.isArray(rawQuery)
+    ? (rawQuery[0] ?? "")
+    : (rawQuery ?? "");
   const { data: projects, error } = await getAllProjects();
 
   return (
-    <section>
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-medium tracking-[-.06em] text-foreground">
-            Projects
-          </h1>
-          <p className="mt-1 text-sm text-muted">
-            Manage your portfolio projects.
-          </p>
-        </div>
-        <a
-          href="/admin/projects/new"
-          className="rounded-lg bg-purple px-4 py-2 text-sm font-medium text-[#17151c] transition-opacity hover:opacity-90"
-        >
-          + New Project
-        </a>
-      </div>
-
-      {error && (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
-          {error}
-        </div>
-      )}
-
-      <ProjectListClient projects={projects ?? []} />
-    </section>
+    <ProjectsWorkspace
+      key={initialSearch || "projects"}
+      projects={projects ?? []}
+      initialSearch={initialSearch}
+      loadError={error}
+    />
   );
 }

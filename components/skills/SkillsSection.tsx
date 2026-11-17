@@ -12,7 +12,7 @@ export function SkillsSection({ skills }: SkillsSectionProps) {
 
   return (
     <section
-      className="border-b border-line mx-auto overflow-hidden py-[120px] px-[10vw] pb-[130px] relative max-md:py-[90px] max-md:px-[6vw] before:content-[''] before:absolute before:left-1/2 before:-translate-x-1/2 before:top-[18%] before:h-[420px] before:w-[min(760px,90vw)] before:rounded-full before:bg-[radial-gradient(circle,rgba(169,139,255,.16),transparent_62%)] before:pointer-events-none"
+      className="border-b border-line mx-auto overflow-hidden py-24 px-[5.5vw] pb-28 relative max-md:py-[90px] max-md:px-[6vw] before:content-[''] before:absolute before:left-1/2 before:-translate-x-1/2 before:top-[18%] before:h-[420px] before:w-[min(760px,90vw)] before:rounded-full before:bg-[radial-gradient(circle,rgba(231,111,81,.16),transparent_62%)] before:pointer-events-none"
       id="skills"
       aria-labelledby="skills-title"
     >
@@ -32,7 +32,7 @@ export function SkillsSection({ skills }: SkillsSectionProps) {
         {visibleSkills.map((skill) => (
           <li className="flex flex-col items-center text-muted text-xs font-semibold gap-3 tracking-[-.01em] min-w-0 text-center transition-all duration-200 hover:text-foreground hover:-translate-y-1 group" key={skill.id}>
             <Image
-              className="block drop-shadow-[0_12px_24px_rgba(0,0,0,.28)] h-[46px] object-contain transition-all duration-200 w-[46px] max-md:h-[42px] max-md:w-[42px] group-hover:drop-shadow-[0_16px_28px_rgba(169,139,255,.24)] group-hover:scale-[1.06]"
+              className="block drop-shadow-[0_12px_24px_rgba(0,0,0,.28)] h-[46px] object-contain transition-all duration-200 w-[46px] max-md:h-[42px] max-md:w-[42px] group-hover:drop-shadow-[0_16px_28px_rgba(231,111,81,.24)] group-hover:scale-[1.06]"
               src={skill.iconSrc}
               alt=""
               width={48}

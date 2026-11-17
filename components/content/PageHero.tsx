@@ -9,11 +9,11 @@ type PageHeroProps = {
 
 export function PageHero({ eyebrow, title, description }: PageHeroProps) {
   return (
-    <header className="relative mx-auto w-full py-[150px] px-[10vw] pb-[110px] max-md:py-[100px] max-md:px-[6vw] max-md:pb-[75px] overflow-hidden">
+    <header className="relative mx-auto w-full py-[150px] px-[3vw] pb-[80px] max-md:py-[72px] max-md:px-4 max-md:pb-[75px] overflow-hidden">
       {/* decorative glow */}
       <div
-        className="absolute left-[-8%] top-[-20%] h-[520px] w-[520px] rounded-full opacity-[.08] blur-[120px] pointer-events-none"
-        style={{ background: "radial-gradient(circle, #a98bff, transparent 70%)" }}
+        className="absolute left-[-8%] top-[-20%] h-[520px] w-[520px] rounded-none opacity-[.08] blur-[120px] pointer-events-none"
+        style={{ background: "radial-gradient(circle, #e76f51, transparent 70%)" }}
         aria-hidden="true"
       />
       {/* decorative dots */}

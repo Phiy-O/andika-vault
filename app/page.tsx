@@ -18,7 +18,7 @@ export default async function Home() {
   ]);
 
   return (
-    <main>
+    <main className="min-h-screen bg-[#f4ebdc] text-[#1d1d1b]">
       <Navbar />
       <HomeHero resumeUrl={settings?.data?.resumeUrl} />
       <HomeApproach />

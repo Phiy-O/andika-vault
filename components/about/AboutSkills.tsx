@@ -26,9 +26,9 @@ export function AboutSkills({ skills }: { skills: Skill[] }) {
           <button
             key={cat.value}
             onClick={() => setActiveCategory(cat.value)}
-            className={`border rounded-lg text-xs px-4 py-2 transition-all duration-200 cursor-pointer ${
+            className={`border rounded-none text-xs px-4 py-2 transition-all duration-200 cursor-pointer ${
               activeCategory === cat.value
-                ? "border-purple text-purple bg-[rgba(169,139,255,.08)]"
+                ? "border-purple text-purple bg-[rgba(231,111,81,.08)]"
                 : "border-line text-muted hover:border-foreground hover:text-foreground"
             }`}
           >

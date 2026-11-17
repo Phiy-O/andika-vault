@@ -25,7 +25,7 @@ export function HomeBlogSection({ posts }: HomeBlogSectionProps) {
 
   return (
     <section
-      className="border-b border-line mx-auto py-[100px] px-[10vw] relative max-md:py-[90px] max-md:px-[6vw]"
+      className="border-b border-line mx-auto py-24 px-[5.5vw] relative max-md:py-[90px] max-md:px-[6vw]"
       id="blog"
       aria-labelledby="home-blog-title"
     >
@@ -44,7 +44,7 @@ export function HomeBlogSection({ posts }: HomeBlogSectionProps) {
             Thoughts on product, engineering, design, and the lessons hiding inside the work.
           </p>
           <Link
-            className="border border-line rounded-lg text-foreground inline-flex items-center w-fit text-xs px-5 py-3 transition-all duration-200 hover:shadow-[0_0_2px_var(--foreground)] hover:-translate-y-0.5"
+            className="border border-line rounded-none text-foreground inline-flex items-center w-fit text-xs px-5 py-3 transition-all duration-200 hover:shadow-[0_0_2px_var(--foreground)] hover:-translate-y-0.5"
             href="/blog"
           >
             View all posts{" "}
@@ -58,14 +58,14 @@ export function HomeBlogSection({ posts }: HomeBlogSectionProps) {
       <div className="grid gap-8 grid-cols-3 mx-auto w-full max-md:grid-cols-1">
         {visiblePosts.map((post, index) => (
           <Card href={`/blog/${post.slug}`} className="min-h-[360px] max-md:min-h-0" key={post.id}>
-            <div className="rounded-tl-[14px] h-[240px] mb-6 bg-cover overflow-hidden relative max-md:h-auto">
+            <div className="border-b border-foreground h-[240px] mb-6 bg-cover overflow-hidden relative max-md:h-auto">
               <img
                 src={optimizeCloudinaryUrl(post.thumbnail || DEFAULT_BLOG_THUMBNAIL, 800)}
                 alt=""
                 className="absolute inset-0 w-full h-full object-cover"
               />
             </div>
-            <span className="text-purple text-xs tracking-[.14em] px-6 py-0 relative z-10">
+            <span className="text-amber text-xs tracking-[.14em] px-6 py-0 relative z-10">
               {String(index + 1).padStart(2, "0")}
             </span>
             <div className="mt-0 pt-3 pb-4 px-6 relative z-10">
@@ -79,7 +79,7 @@ export function HomeBlogSection({ posts }: HomeBlogSectionProps) {
             </div>
             <div className="items-center border-t border-line text-muted flex text-xs justify-between mt-auto py-4 px-5 relative z-10">
               <span>{post.readTime}</span>
-              <ArrowUpRight className="text-purple" size={18} aria-hidden="true" />
+              <ArrowUpRight className="text-amber" size={18} aria-hidden="true" />
             </div>
           </Card>
         ))}

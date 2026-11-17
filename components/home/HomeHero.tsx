@@ -2,26 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, Download } from "lucide-react";
 
+const mono = "font-mono text-[10px] font-bold uppercase tracking-[.1em]";
 export function HomeHero({ resumeUrl }: { resumeUrl?: string | null }) {
-  return (
-    <section className="mx-auto grid max-w-7xl gap-12 border-b border-line px-[5.5vw] pb-14 pt-28 lg:grid-cols-[1.08fr_.92fr] lg:items-center lg:gap-20 lg:pb-20" id="top" aria-labelledby="hero-title">
-      <div>
-        <p className="mb-5 font-mono text-[10px] uppercase tracking-[.16em] text-muted">Hello / I&apos;m Andika</p>
-        <h1 id="hero-title" className="mb-7 max-w-[680px] text-[clamp(48px,7vw,92px)] font-semibold uppercase leading-[.87] tracking-[-.075em]">I build things that <em>make sense.</em></h1>
-        <p className="max-w-[560px] text-base leading-[1.7] text-muted lg:text-lg">I&apos;m a software developer who enjoys turning ideas into useful applications, reliable systems, and practical technical experiments.</p>
-        <div className="mt-8 flex flex-wrap gap-3">
-          <Link className="inline-flex items-center gap-2 border border-foreground bg-[#e76f51] px-5 py-3 text-xs font-semibold uppercase shadow-[3px_3px_0_var(--foreground)] transition-transform hover:-translate-y-0.5" href="#projects">Explore my work <ArrowUpRight size={15} aria-hidden="true" /></Link>
-          <Link className="inline-flex items-center gap-2 border border-foreground bg-background px-5 py-3 text-xs font-semibold uppercase transition-colors hover:bg-surface" href="/about">More about me <ArrowUpRight size={15} aria-hidden="true" /></Link>
-          <a className="inline-flex items-center gap-2 border border-foreground bg-background px-5 py-3 text-xs font-semibold uppercase transition-colors hover:bg-surface" href={resumeUrl ?? "/resume/dummy-resume.pdf"} download>CV <Download size={15} aria-hidden="true" /></a>
-        </div>
-        <p className="mt-8 border-t border-line pt-3 font-mono text-[9px] uppercase tracking-[.12em] text-muted">Web development / backend / engineering</p>
-      </div>
-      <div className="relative mx-auto w-full max-w-[520px] border-2 border-foreground bg-surface p-2 shadow-[7px_7px_0_var(--foreground)]">
-        <div className="relative aspect-[4/3] overflow-hidden border border-foreground bg-background">
-          <Image src="/images/andika-profile.png" alt="Andika working at a laptop" fill className="object-contain object-bottom" priority sizes="(max-width: 1024px) 90vw, 520px" />
-        </div>
-        <div className="flex justify-between pt-2 font-mono text-[8px] uppercase tracking-[.1em] text-muted"><span>Selected visual / 01</span><span>Available / 2026</span></div>
-      </div>
-    </section>
-  );
+  return <section id="top" aria-labelledby="hero-title" className="mx-auto grid w-full gap-10 border-b-2 border-[#1d1d1b] px-[5.5vw] pb-12 pt-24 lg:grid-cols-[7fr_5fr] lg:items-center lg:gap-8 lg:pb-16 lg:pt-32"><div><div className="mb-5 flex flex-wrap gap-2"><span className={`${mono} bg-[#1d1d1b] px-2 py-1 text-[#faf6ee]`}>00 // SOFTWARE ENGINEER</span><span className={`${mono} border border-[#1d1d1b] bg-[#fffdf7] px-2 py-1`}>AVAILABLE FOR GOOD WORK</span></div><h1 id="hero-title" className="max-w-[680px] font-serif text-5xl font-black uppercase leading-[.9] tracking-[-.06em] sm:text-7xl">I BUILD THINGS<br />THAT <span className="inline-block border-2 border-[#1d1d1b] bg-[#f46d66] px-2 py-1 shadow-[4px_4px_0_#1d1d1b]">MAKE SENSE.</span></h1><p className="mt-6 max-w-xl text-base leading-7 text-[#595652] sm:text-lg">I&apos;m a software developer who enjoys turning ideas into useful applications, reliable systems, and practical technical experiments.</p><div className="mt-7 flex flex-wrap gap-3"><Link className={`${mono} inline-flex items-center gap-2 border-2 border-[#1d1d1b] bg-[#f46d66] px-5 py-3 shadow-[4px_4px_0_#1d1d1b] transition-transform hover:-translate-y-0.5`} href="#projects">EXPLORE MY WORK <ArrowUpRight size={14} /></Link><Link className={`${mono} inline-flex items-center gap-2 border-2 border-[#1d1d1b] bg-[#fffdf7] px-5 py-3 shadow-[3px_3px_0_#1d1d1b]`} href="/about">MORE ABOUT ME <ArrowUpRight size={14} /></Link>{resumeUrl && <a className={`${mono} inline-flex items-center gap-2 border-2 border-[#1d1d1b] bg-[#fffdf7] px-4 py-3`} href={resumeUrl} download>CV <Download size={14} /></a>}</div><div className="mt-8 border-t-2 border-[#1d1d1b]/20 pt-3"><span className={`${mono} text-[#595652]`}><b className="mr-2 text-[#f46d66]">#</b>WEB DEVELOPMENT / BACKEND / ENGINEERING</span></div></div><div className="border-2 border-[#1d1d1b] bg-[#fffdf7] p-3 shadow-[4px_4px_0_#1d1d1b]"><div className="relative aspect-[4/3] overflow-hidden border-2 border-[#1d1d1b] bg-[#faf6ee]"><Image src="/images/andika-profile.png" alt="Andika working at a laptop" fill className="object-contain object-bottom" priority sizes="(max-width: 1024px) 90vw, 520px" /></div><div className={`${mono} flex justify-between px-1 pt-2 text-[#595652]`}><span>FIG. 01 // DEV WORKSPACE SPEC</span><span className="bg-[#1d1d1b] px-1 text-[#faf6ee]">SPEC · 2026</span></div></div></section>;
 }

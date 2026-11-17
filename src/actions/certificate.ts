@@ -7,32 +7,35 @@ import {
 } from "@/src/lib/validations";
 import type {
   CertificateCreateInput,
+  CertificateListItem,
   CertificateUpdateInput,
 } from "@/src/types";
 import type { Certificate } from "@prisma/client";
 import { requireAdmin } from "@/src/lib/auth";
+import { actionError } from "./action-error";
 
 type ActionResult<T> = { data?: T; error?: string };
 
 export async function getCertificates(): Promise<
-  ActionResult<Certificate[]>
+  ActionResult<CertificateListItem[]>
 > {
   try {
     const certs = await certificateService.getVisible();
-    return { data: certs as any };
-  } catch (e: any) {
-    return { error: e.message ?? "Failed to fetch certificates" };
+    return { data: certs };
+  } catch (e) {
+    return { error: actionError(e, "Failed to fetch certificates") };
   }
 }
 
 export async function getAllCertificates(): Promise<
-  ActionResult<Certificate[]>
+  ActionResult<CertificateListItem[]>
 > {
+  if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
     const certs = await certificateService.getAll();
-    return { data: certs as any };
-  } catch (e: any) {
-    return { error: e.message ?? "Failed to fetch certificates" };
+    return { data: certs };
+  } catch (e) {
+    return { error: actionError(e, "Failed to fetch certificates") };
   }
 }
 
@@ -42,12 +45,10 @@ export async function createCertificate(
   if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
     const parsed = certificateSchema.parse(input);
-    const cert = await certificateService.create(parsed as any);
-    return { data: cert as any };
-  } catch (e: any) {
-    if (e.issues)
-      return { error: e.issues.map((i: any) => i.message).join(", ") };
-    return { error: e.message ?? "Failed to create certificate" };
+    const cert = await certificateService.create(parsed);
+    return { data: cert };
+  } catch (e) {
+    return { error: actionError(e, "Failed to create certificate") };
   }
 }
 
@@ -58,12 +59,10 @@ export async function updateCertificate(
   if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
     const parsed = certificateUpdateSchema.parse(input);
-    const cert = await certificateService.update(id, parsed as any);
-    return { data: cert as any };
-  } catch (e: any) {
-    if (e.issues)
-      return { error: e.issues.map((i: any) => i.message).join(", ") };
-    return { error: e.message ?? "Failed to update certificate" };
+    const cert = await certificateService.update(id, parsed);
+    return { data: cert };
+  } catch (e) {
+    return { error: actionError(e, "Failed to update certificate") };
   }
 }
 
@@ -74,7 +73,7 @@ export async function deleteCertificate(
   try {
     await certificateService.delete(id);
     return {};
-  } catch (e: any) {
-    return { error: e.message ?? "Failed to delete certificate" };
+  } catch (e) {
+    return { error: actionError(e, "Failed to delete certificate") };
   }
 }

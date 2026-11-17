@@ -45,6 +45,7 @@ export const blogPostListSelect = {
   title: true,
   slug: true,
   excerpt: true,
+  bodyFormat: true,
   category: true,
   tags: true,
   readTime: true,
@@ -52,6 +53,8 @@ export const blogPostListSelect = {
   thumbnail: true,
   sortOrder: true,
   isVisible: true,
+  createdAt: true,
+  updatedAt: true,
 } satisfies Prisma.BlogPostSelect;
 
 export type BlogPostListItem = Prisma.BlogPostGetPayload<{
@@ -63,7 +66,9 @@ export const projectListSelect = {
   title: true,
   slug: true,
   description: true,
+  bodyFormat: true,
   thumbnail: true,
+  screenshots: true,
   techStack: true,
   githubUrl: true,
   liveUrl: true,
@@ -71,6 +76,8 @@ export const projectListSelect = {
   featured: true,
   sortOrder: true,
   isVisible: true,
+  createdAt: true,
+  updatedAt: true,
 } satisfies Prisma.ProjectSelect;
 
 export type ProjectListItem = Prisma.ProjectGetPayload<{
@@ -87,6 +94,8 @@ export const certificateListSelect = {
   description: true,
   sortOrder: true,
   isVisible: true,
+  createdAt: true,
+  updatedAt: true,
 } satisfies Prisma.CertificateSelect;
 
 export type CertificateListItem = Prisma.CertificateGetPayload<{

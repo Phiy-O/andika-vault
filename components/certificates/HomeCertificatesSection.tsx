@@ -33,7 +33,7 @@ export function HomeCertificatesSection({
   return (
     <>
       <section
-      className="border-b border-line mx-auto py-[130px] px-[10vw] relative max-md:py-[90px] max-md:px-[6vw]"
+      className="border-b border-line mx-auto py-24 px-[5.5vw] relative max-md:py-[90px] max-md:px-[6vw]"
       id="certificates"
       aria-labelledby="home-cert-title"
     >
@@ -53,7 +53,7 @@ export function HomeCertificatesSection({
             craft.
           </p>
           <Link
-            className="border border-line rounded-lg text-foreground inline-flex items-center w-fit text-xs px-5 py-3 transition-all duration-200 hover:shadow-[0_0_2px_var(--foreground)] hover:-translate-y-0.5"
+            className="border border-line rounded-none text-foreground inline-flex items-center w-fit text-xs px-5 py-3 transition-all duration-200 hover:shadow-[0_0_2px_var(--foreground)] hover:-translate-y-0.5"
             href="/achievements"
           >
             View all achievements{" "}
@@ -68,14 +68,14 @@ export function HomeCertificatesSection({
         {visibleCertificates.map((cert, index) => (
           <button onClick={() => setModalCert(cert)} className="text-left block w-full cursor-pointer" key={cert.id}>
             <Card className="min-h-[360px] max-md:min-h-0">
-              <div className="rounded-tl-[14px] h-[220px] mb-6 overflow-hidden relative max-md:h-[180px]">
+              <div className="border-b border-foreground h-[220px] mb-6 overflow-hidden relative max-md:h-[180px]">
                 <img
                   src={DEFAULT_CERT_IMAGE || cert.image}
                   alt=""
                   className="absolute inset-0 w-full h-full object-cover"
                 />
               </div>
-              <span className="text-purple text-xs tracking-[.14em] px-6 py-0 relative z-10">
+              <span className="text-amber text-xs tracking-[.14em] px-6 py-0 relative z-10">
                 {String(index + 1).padStart(2, "0")}
               </span>
               <div className="mt-0 px-6 pb-4 relative z-10">
@@ -90,7 +90,7 @@ export function HomeCertificatesSection({
               </div>
               <div className="items-center border-t border-line text-muted flex text-xs justify-between mt-auto py-[22px] px-6 relative z-10">
                 <span>View credential</span>
-                <ArrowUpRight className="text-purple" size={18} aria-hidden="true" />
+                <ArrowUpRight className="text-amber" size={18} aria-hidden="true" />
               </div>
             </Card>
           </button>

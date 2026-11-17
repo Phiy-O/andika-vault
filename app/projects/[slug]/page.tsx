@@ -8,6 +8,7 @@ import { optimizeCloudinaryUrl } from "@/src/lib/cloudinary-url";
 import { ScreenshotSlider } from "@/components/projects/ScreenshotSlider";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/src/lib/auth";
+import { sanitizeContent } from "@/src/lib/sanitize";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -62,7 +63,7 @@ export default async function ProjectDetailPage({
 
   return (
     <PublicShell>
-      <article className="mx-auto w-full px-[10vw] max-md:px-[6vw]">
+      <article className="mx-auto w-full px-[3vw] max-md:px-4">
         {/* Back link */}
         <div className="mt-16 pt-[60px] pb-4">
           <Link
@@ -155,7 +156,7 @@ export default async function ProjectDetailPage({
           {project.body.startsWith("<") ? (
             <div
               className="prose-content"
-              dangerouslySetInnerHTML={{ __html: project.body }}
+              dangerouslySetInnerHTML={{ __html: sanitizeContent(project.body) }}
             />
           ) : (
             paragraphs.map((para, i) => {

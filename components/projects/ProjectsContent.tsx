@@ -3,181 +3,48 @@
 import { ArrowUpRight, Search } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Card } from "../content/Card";
 import { optimizeCloudinaryUrl } from "@/src/lib/cloudinary-url";
-import type { Project } from "@prisma/client";
+import type { ProjectListItem } from "@/src/types";
 
 type FilterOption = "all" | "featured" | "product" | "tool";
-
 const ITEMS_PER_PAGE = 6;
-
 const DEFAULT_PROJECT_THUMBNAIL = "/images/thumbnails/projects-thumbnail.png";
-
+const mono = "font-mono text-[10px] font-bold uppercase tracking-[.1em]";
+const border = "border-2 border-[#1b1b1b]";
 const filters: { value: FilterOption; label: string }[] = [
-  { value: "all", label: "All" },
-  { value: "featured", label: "Featured" },
-  { value: "product", label: "Products" },
-  { value: "tool", label: "Tools" },
+  { value: "all", label: "ALL PROJECTS" }, { value: "featured", label: "FLAGSHIP" },
+  { value: "product", label: "PRODUCTS" }, { value: "tool", label: "TOOLS" },
 ];
 
-export function ProjectsContent({ projects }: { projects: Project[] }) {
+export function ProjectsContent({ projects }: { projects: ProjectListItem[] }) {
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState<FilterOption>("all");
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+  const allProjects = useMemo(() => projects.filter((p) => p.isVisible).sort((a, b) => a.sortOrder - b.sortOrder), [projects]);
+  const filteredProjects = useMemo(() => allProjects.filter((project) => {
+    const query = search.toLowerCase();
+    const matchesFilter = activeFilter === "all" || (activeFilter === "featured" && project.featured) || project.category === activeFilter;
+    return matchesFilter && (!query || `${project.title} ${project.description} ${project.techStack.join(" ")}`.toLowerCase().includes(query));
+  }), [activeFilter, allProjects, search]);
+  const featured = filteredProjects.find((project) => project.featured) ?? filteredProjects[0];
+  const catalog = filteredProjects.filter((project) => project.id !== featured?.id).slice(0, visibleCount);
+  const hasMore = visibleCount < filteredProjects.filter((project) => project.id !== featured?.id).length;
+  const reset = () => setVisibleCount(ITEMS_PER_PAGE);
 
-  const allProjects = useMemo(() => {
-    return projects
-      .filter((p) => p.isVisible)
-      .sort((a, b) => a.sortOrder - b.sortOrder);
-  }, [projects]);
+  return <main className="min-h-screen bg-[#faf6ee] text-[#1b1b1b]"><div className="mx-auto w-full px-[5.5vw] py-10">
+    <section className="grid gap-8 border-b-2 border-[#1b1b1b] pb-8 lg:grid-cols-[7fr_5fr]"><div className="flex flex-col justify-between gap-8"><div><div className="mb-4 flex flex-wrap gap-2"><span className={`${mono} bg-[#1b1b1b] px-2 py-1 text-[#faf6ee]`}>04 // SELECTED WORK</span><span className={`${mono} border border-[#1b1b1b] bg-[#fffdf7] px-2 py-1`}>{allProjects.length} BUILDS // SYSTEM STATUS: NOMINAL</span></div><h1 className="text-5xl font-black uppercase leading-[.9] tracking-[-.07em] sm:text-7xl">THINGS I&apos;VE<br /><span className="text-[#a9362e]">BUILT.</span></h1><p className="mt-5 max-w-xl text-lg leading-7 text-[#58413f]">Products, tools, and experiments shaped through product thinking, careful systems design, and hands-on engineering. Each project is a working record of how ideas become useful software.</p></div><div className="grid grid-cols-3 gap-1"><Stat label="PROJECTS" value={String(allProjects.length)} /><Stat label="FEATURED" value={String(allProjects.filter((p) => p.featured).length)} color="text-[#a9362e]" /><Stat label="STACK ITEMS" value={String(new Set(allProjects.flatMap((p) => p.techStack)).size)} color="text-[#006c49]" /></div></div><Blueprint /></section>
 
-  const filteredProjects = useMemo(() => {
-    return allProjects.filter((project) => {
-      const matchesFilter =
-        activeFilter === "all" ||
-        (activeFilter === "featured" && project.featured) ||
-        (activeFilter === "product" && project.category === "product") ||
-        (activeFilter === "tool" && project.category === "tool");
+    {featured && <section className="mt-8"><div className={`${mono} mb-2 flex justify-between text-[#a9362e]`}><span>★ FLAGSHIP BUILD // FEATURED PROJECT</span><span>REF. 001</span></div><article className={`${border} grid gap-6 bg-[#fffdf7] p-5 shadow-[4px_4px_0_#1b1b1b] lg:grid-cols-[1fr_1fr]`}><div className="flex flex-col justify-between gap-8"><div><span className={`${mono} inline-block border border-[#1b1b1b] bg-[#f16b5e] px-2 py-1 text-[#fffdf7]`}>{featured.category} / FLAGSHIP</span><h2 className="mt-3 text-3xl font-black leading-tight tracking-[-.04em] sm:text-5xl">{featured.title}</h2><p className="mt-4 max-w-xl leading-7 text-[#58413f]">{featured.description}</p></div><div><div className="mb-4 flex flex-wrap gap-2">{featured.techStack.map((tech) => <span key={tech} className={`${mono} border border-[#1b1b1b] bg-[#faf6ee] px-2 py-1`}>{tech}</span>)}</div><Link href={`/projects/${featured.slug}`} className={`${mono} inline-flex items-center gap-2 border-2 border-[#1b1b1b] bg-[#f16b5e] px-4 py-2 text-[#630004] shadow-[3px_3px_0_#1b1b1b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2`}>OPEN PROJECT FILE <ArrowUpRight aria-hidden="true" className="size-4" /></Link></div></div><Terminal project={featured} /></article></section>}
 
-      const matchesSearch =
-        search === "" ||
-        project.title.toLowerCase().includes(search.toLowerCase()) ||
-        project.description.toLowerCase().includes(search.toLowerCase()) ||
-        project.techStack.some((tech) =>
-          tech.toLowerCase().includes(search.toLowerCase())
-        );
+    <section className={`${border} mt-8 flex flex-col gap-3 bg-[#fffdf7] p-3 shadow-[3px_3px_0_#1b1b1b] md:flex-row md:items-center md:justify-between`}><div className="flex flex-wrap gap-1">{filters.map((filter) => <button key={filter.value} onClick={() => { setActiveFilter(filter.value); reset(); }} className={`${mono} border-2 border-[#1b1b1b] px-3 py-2 ${activeFilter === filter.value ? "bg-[#f16b5e] text-[#630004] shadow-[2px_2px_0_#1b1b1b]" : "bg-[#fffdf7]"}`}>{filter.label} [{filter.value === "all" ? allProjects.length : filteredProjectsFor(allProjects, filter.value).length}]</button>)}</div><label className="relative block w-full md:max-w-xs"><Search aria-hidden="true" className="absolute left-2 top-2.5 size-4" /><input aria-label="Search projects" value={search} onChange={(event) => { setSearch(event.target.value); reset(); }} placeholder="Search projects, tools, or stack..." className={`${mono} h-10 w-full border-2 border-[#1b1b1b] bg-[#faf6ee] pl-8 pr-2 outline-none focus-visible:ring-2 focus-visible:ring-[#f16b5e]`} /></label></section>
 
-      return matchesFilter && matchesSearch;
-    });
-  }, [allProjects, activeFilter, search]);
-
-  const visibleProjects = filteredProjects.slice(0, visibleCount);
-  const hasMore = visibleCount < filteredProjects.length;
-
-  return (
-    <div className="mx-auto w-full px-[10vw] max-md:px-[6vw]">
-      {/* Toolbar: Search + Filter */}
-      <section className="py-[60px] border-b border-line">
-        <div className="flex flex-col gap-6 max-md:gap-5">
-          {/* Search */}
-          <div className="relative w-full max-w-[480px]">
-            <Search
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-muted"
-              size={16}
-            />
-            <input
-              type="text"
-              placeholder="Search projects..."
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setVisibleCount(ITEMS_PER_PAGE);
-              }}
-              className="w-full bg-transparent border border-line rounded-lg text-foreground text-sm pl-11 pr-4 py-3 outline-none transition-all duration-200 placeholder:text-muted focus:border-purple"
-            />
-          </div>
-
-          {/* Filter pills */}
-          <div className="flex flex-wrap gap-2">
-            {filters.map((filter) => (
-              <button
-                key={filter.value}
-                onClick={() => {
-                  setActiveFilter(filter.value);
-                  setVisibleCount(ITEMS_PER_PAGE);
-                }}
-                className={`border rounded-lg text-xs px-4 py-2 transition-all duration-200 cursor-pointer ${
-                  activeFilter === filter.value
-                    ? "border-purple text-purple bg-[rgba(169,139,255,.08)]"
-                    : "border-line text-muted hover:border-foreground hover:text-foreground"
-                }`}
-              >
-                {filter.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Results count */}
-      <div className="pt-8 pb-2">
-        <p className="text-muted text-sm">
-          {filteredProjects.length}{" "}
-          {filteredProjects.length === 1 ? "project" : "projects"} found
-        </p>
-      </div>
-
-      {/* Card grid */}
-      <section className="py-8">
-        {filteredProjects.length === 0 ? (
-          <div className="border border-dashed border-line text-muted p-[35px] text-center">
-            <p className="m-0">No projects match your search.</p>
-          </div>
-        ) : (
-          <div className="grid gap-[18px] grid-cols-3 max-md:grid-cols-1 max-lg:grid-cols-2">
-            {visibleProjects.map((project, index) => (
-              <ProjectCard key={project.id} project={project} index={index} />
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* Load more */}
-      {hasMore && (
-        <div className="flex justify-center pb-[100px] pt-4">
-          <button
-            onClick={() => setVisibleCount((prev) => prev + ITEMS_PER_PAGE)}
-            className="border border-line rounded-lg text-foreground text-xs px-6 py-3 transition-all duration-200 cursor-pointer hover:shadow-[0_0_2px_var(--foreground)] hover:-translate-y-0.5"
-          >
-            Load more
-          </button>
-        </div>
-      )}
-    </div>
-  );
+    <section className="mt-10"><div className="mb-4 flex items-end justify-between border-b-2 border-[#1b1b1b] pb-2"><div><p className={`${mono} text-[#58413f]`}>ENGINEERING CATALOG // ACTIVE RECORDS</p><h2 className="text-3xl font-black uppercase tracking-[-.04em]">ALL BUILDS</h2></div><span className={`${mono} hidden sm:block`}>SORT: CURATED ORDER</span></div>{filteredProjects.length === 0 ? <div className={`${border} bg-[#fffdf7] p-10 text-center text-[#58413f]`}>No projects match your search.</div> : <div className="grid gap-5 md:grid-cols-2">{catalog.map((project, index) => <ProjectCard key={project.id} project={project} index={index} />)}</div>}{hasMore && <button onClick={() => setVisibleCount((count) => count + ITEMS_PER_PAGE)} className={`${mono} mx-auto mt-8 block border-2 border-[#1b1b1b] bg-[#fffdf7] px-5 py-2 shadow-[2px_2px_0_#1b1b1b]`}>LOAD MORE BUILDS [↙]</button>}</section>
+    <div className={`${border} mt-14 flex flex-col gap-4 bg-[#1b1b1b] p-5 text-[#faf6ee] shadow-[4px_4px_0_#f16b5e] sm:flex-row sm:items-center sm:justify-between`}><div><p className={`${mono} text-[#f16b5e]`}>ARCHIVE ACCESS // CONTINUOUSLY UPDATED</p><p className="mt-2 text-xl font-bold">More experiments are waiting in the lab.</p></div><Link href="/contact" className={`${mono} border-2 border-[#faf6ee] px-4 py-2 text-[#faf6ee]`}>START A BUILD ↗</Link></div>
+  </div></main>;
 }
 
-function ProjectCard({
-  project,
-  index,
-}: {
-  project: Project;
-  index: number;
-}) {
-  return (
-    <Card href={`/projects/${project.slug}`} className="min-h-[360px] max-md:min-h-0">
-      <div className="h-[220px] mb-6 overflow-hidden relative max-md:h-[180px]">
-        <img
-          src={optimizeCloudinaryUrl(project.thumbnail || DEFAULT_PROJECT_THUMBNAIL, 800)}
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-      </div>
-      <span className="text-purple text-xs tracking-[.14em] px-6 py-0 relative z-10">
-        {String(index + 1).padStart(2, "0")}
-      </span>
-      <div className="mt-[18px] px-6 pb-4 relative z-10 flex-1 flex flex-col">
-        <h3 className="text-[clamp(22px,2vw,30px)] font-medium tracking-[-.04em] leading-[1.05] mb-3.5 line-clamp-2">
-          {project.title}
-        </h3>
-        <p className="text-muted text-sm leading-[1.7] mb-[18px] line-clamp-2 flex-1">
-          {project.description}
-        </p>
-        <div className="flex flex-wrap gap-2 mb-0">
-          {project.techStack.map((tech) => (
-            <span
-              className="items-center border border-line rounded-[5px] text-muted inline-flex text-[11px] h-[28px] justify-center px-2.5 py-0"
-              key={tech}
-            >
-              {tech}
-            </span>
-          ))}
-        </div>
-      </div>
-      <div className="items-center border-t border-line text-muted flex text-xs justify-between mt-auto py-[22px] px-6 relative z-10">
-        <span>View project</span>
-        <ArrowUpRight className="text-purple" size={18} aria-hidden="true" />
-      </div>
-    </Card>
-  );
-}
+function filteredProjectsFor(projects: ProjectListItem[], filter: FilterOption) { return projects.filter((project) => filter === "featured" ? project.featured : project.category === filter); }
+function Stat({ label, value, color = "text-[#1b1b1b]" }: { label: string; value: string; color?: string }) { return <div className={`${border} bg-[#fffdf7] p-3 shadow-[2px_2px_0_#1b1b1b]`}><p className={`${mono} text-[#8b716e]`}>{label}</p><p className={`mt-1 text-2xl font-black ${color}`}>{value}</p></div>; }
+function Blueprint() { return <div className={`${border} bg-[#fffdf7] p-4 shadow-[4px_4px_0_#1b1b1b]`}><div className={`${mono} flex justify-between border-b-2 border-[#1b1b1b] pb-3`}><span>FIG. 04 // SYSTEM_BLUEPRINT</span><span>●●●</span></div><div className="relative flex min-h-[250px] items-center justify-center overflow-hidden bg-[#73b8ff] p-8"><div className="absolute inset-0 opacity-30 [background-image:linear-gradient(#1b1b1b_1px,transparent_1px),linear-gradient(90deg,#1b1b1b_1px,transparent_1px)] [background-size:24px_24px]" /><div className="relative grid w-full max-w-xs grid-cols-3 gap-2"><div className="col-span-2 h-12 border-2 border-[#1b1b1b] bg-[#fffdf7]" /><div className="h-12 border-2 border-[#1b1b1b] bg-[#f16b5e]" /><div className="h-20 border-2 border-[#1b1b1b] bg-[#f16b5e]" /><div className="col-span-2 h-20 border-2 border-[#1b1b1b] bg-[#fffdf7]" /><div className="col-span-3 h-8 border-2 border-[#1b1b1b] bg-[#1b1b1b]" /></div></div><div className={`${mono} flex justify-between border border-[#1b1b1b] bg-[#faf6ee] px-2 py-2`}><span>LAYERS: 03 // GRID LOCKED</span><span>v2.4</span></div></div>; }
+function Terminal({ project }: { project: ProjectListItem }) { return <div className="border-2 border-[#1b1b1b] bg-[#1b1b1b] p-4 font-mono text-xs text-[#b8f7c8] shadow-[4px_4px_0_#73b8ff]"><div className="mb-5 flex justify-between border-b border-[#b8f7c8]/40 pb-2 text-[#faf6ee]"><span>BUILD_DIAGNOSTICS.LOG</span><span>● LIVE</span></div><p>$ inspect --project {project.slug}</p><p className="mt-2">status: <span className="text-[#f16b5e]">production-ready</span></p><p>stack: {project.techStack.slice(0, 3).join(" / ")}</p><p>routing: dynamic/[slug]</p><p>deployment: edge-isr</p><p className="mt-5 text-[#73b8ff]">$ █</p></div>; }
+function ProjectCard({ project, index }: { project: ProjectListItem; index: number }) { return <article className={`${border} flex flex-col bg-[#fffdf7] shadow-[3px_3px_0_#1b1b1b]`}><Link href={`/projects/${project.slug}`} className="group"><div className="relative aspect-[16/8] overflow-hidden border-b-2 border-[#1b1b1b] bg-[#f4ebdc] p-3"><img src={optimizeCloudinaryUrl(project.thumbnail || DEFAULT_PROJECT_THUMBNAIL, 800)} alt="" className="size-full object-cover transition-transform group-hover:scale-[1.02]" /><span className={`${mono} absolute right-2 top-2 border border-[#1b1b1b] bg-[#faf6ee] px-2 py-1`}>REF.{String(index + 2).padStart(3, "0")}</span></div><div className="p-5"><div className="flex justify-between gap-3"><span className={`${mono} text-[#a9362e]`}>{project.category}</span><ArrowUpRight aria-hidden="true" className="size-4" /></div><h3 className="mt-3 text-2xl font-black leading-tight tracking-[-.04em]">{project.title}</h3><p className="mt-2 line-clamp-2 text-sm leading-6 text-[#58413f]">{project.description}</p></div></Link><div className={`${mono} mt-auto flex flex-wrap gap-2 border-t-2 border-[#1b1b1b] px-5 py-3`}>{project.techStack.slice(0, 4).map((tech) => <span key={tech}>{tech}</span>)}</div></article>; }

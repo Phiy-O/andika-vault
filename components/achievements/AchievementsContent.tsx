@@ -1,216 +1,47 @@
 "use client";
 
 import { ArrowUpRight, Search } from "lucide-react";
-
 import { useMemo, useState } from "react";
-import { Card } from "../content/Card";
 import { CertificateModal } from "../certificates/CertificateModal";
 import type { Certificate } from "@prisma/client";
+import type { CertificateListItem } from "@/src/types";
 
 type Category = "all" | "certificate";
-
-type AchievementItem = {
-  id: string;
-  title: string;
-  description: string;
-  date: string;
-  category: "certificate";
-  issuer?: string;
-  image?: string;
-  credentialUrl?: string;
-  cert: Certificate;
-};
-
 const ITEMS_PER_PAGE = 6;
+const dateFormatter = new Intl.DateTimeFormat("en", { month: "short", year: "numeric" });
+const mono = "font-mono text-[10px] font-bold uppercase tracking-[.1em]";
+const border = "border-2 border-[#1b1b1b]";
+const categories = [{ value: "all" as const, label: "ALL" }, { value: "certificate" as const, label: "CERTIFICATIONS" }];
 
-const dateFormatter = new Intl.DateTimeFormat("en", {
-  month: "short",
-  year: "numeric",
-});
+function yearOf(date: Date) { return new Date(date).getFullYear(); }
 
-function mapCertificatesToItems(certs: Certificate[]): AchievementItem[] {
-  return certs
-    .filter((c) => c.isVisible)
-    .sort((a, b) => a.sortOrder - b.sortOrder)
-    .map((c) => ({
-      id: c.id,
-      title: c.title,
-      description: c.description,
-      date: dateFormatter.format(new Date(c.issueDate)),
-      category: "certificate" as const,
-      issuer: c.issuer,
-      image: c.image ?? undefined,
-      credentialUrl: c.credentialUrl ?? undefined,
-      cert: c,
-    }));
-}
-
-const categories: { value: Category; label: string }[] = [
-  { value: "all", label: "All Certificates" },
-  { value: "certificate", label: "Certificates" },
-];
-
-export function AchievementsContent({ certificates }: { certificates: Certificate[] }) {
+export function AchievementsContent({ certificates }: { certificates: CertificateListItem[] }) {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<Category>("all");
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
-  const [modalCert, setModalCert] = useState<Certificate | null>(null);
+  const [modalCert, setModalCert] = useState<CertificateListItem | null>(null);
+  const items = useMemo(() => certificates.filter((cert) => cert.isVisible).sort((a, b) => a.sortOrder - b.sortOrder), [certificates]);
+  const filtered = useMemo(() => items.filter((cert) => {
+    const query = search.toLowerCase();
+    return (activeCategory === "all" || activeCategory === "certificate") && (!query || `${cert.title} ${cert.description} ${cert.issuer}`.toLowerCase().includes(query));
+  }), [activeCategory, items, search]);
+  const featured = filtered[0] ?? items[0];
+  const archive = filtered.slice(1, visibleCount + 1);
+  const groups = [...new Set(archive.map((cert) => yearOf(cert.issueDate)))];
+  const reset = () => setVisibleCount(ITEMS_PER_PAGE);
 
-  const allItems = useMemo(() => {
-    return mapCertificatesToItems(certificates);
-  }, [certificates]);
-
-  const filteredItems = useMemo(() => {
-    return allItems.filter((item) => {
-      const matchesCategory =
-        activeCategory === "all" || item.category === activeCategory;
-      const matchesSearch =
-        search === "" ||
-        item.title.toLowerCase().includes(search.toLowerCase()) ||
-        item.description.toLowerCase().includes(search.toLowerCase()) ||
-        (item.issuer && item.issuer.toLowerCase().includes(search.toLowerCase()));
-      return matchesCategory && matchesSearch;
-    });
-  }, [allItems, activeCategory, search]);
-
-  const visibleItems = filteredItems.slice(0, visibleCount);
-  const hasMore = visibleCount < filteredItems.length;
-
-  return (
-    <div className="mx-auto w-full px-[10vw] max-md:px-[6vw]">
-      {/* Toolbar: Search + Filter */}
-      <section className="py-[60px] border-b border-line">
-        <div className="flex flex-col gap-6 max-md:gap-5">
-          {/* Search */}
-          <div className="relative w-full max-w-[480px]">
-            <Search
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-muted"
-              size={16}
-            />
-            <input
-              type="text"
-              placeholder="Search achievements..."
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setVisibleCount(ITEMS_PER_PAGE);
-              }}
-              className="w-full bg-transparent border border-line rounded-lg text-foreground text-sm pl-11 pr-4 py-3 outline-none transition-all duration-200 placeholder:text-muted focus:border-purple"
-            />
-          </div>
-
-          {/* Category filter pills */}
-          <div className="flex flex-wrap gap-2">
-            {categories.map((cat) => (
-              <button
-                key={cat.value}
-                onClick={() => {
-                  setActiveCategory(cat.value);
-                  setVisibleCount(ITEMS_PER_PAGE);
-                }}
-                className={`border rounded-lg text-xs px-4 py-2 transition-all duration-200 cursor-pointer ${
-                  activeCategory === cat.value
-                    ? "border-purple text-purple bg-[rgba(169,139,255,.08)]"
-                    : "border-line text-muted hover:border-foreground hover:text-foreground"
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Results count */}
-      <div className="pt-8 pb-2">
-        <p className="text-muted text-sm">
-          {filteredItems.length}{" "}
-          {filteredItems.length === 1 ? "achievement" : "achievements"} found
-        </p>
-      </div>
-
-      {/* Card grid */}
-      <section className="py-8">
-        {filteredItems.length === 0 ? (
-          <div className="border border-dashed border-line text-muted p-[35px] text-center">
-            <p className="m-0">No achievements match your search.</p>
-          </div>
-        ) : (
-          <div className="grid gap-[18px] grid-cols-3 max-md:grid-cols-1 max-lg:grid-cols-2">
-            {visibleItems.map((item, index) => (
-              <AchievementCard key={item.id} item={item} index={index} onSelect={setModalCert} />
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* Load more */}
-      {hasMore && (
-        <div className="flex justify-center pb-[100px] pt-4">
-          <button
-            onClick={() => setVisibleCount((prev) => prev + ITEMS_PER_PAGE)}
-            className="border border-line rounded-lg text-foreground text-xs px-6 py-3 transition-all duration-200 cursor-pointer hover:shadow-[0_0_2px_var(--foreground)] hover:-translate-y-0.5"
-          >
-            Load more
-          </button>
-        </div>
-      )}
-
-      {modalCert && (
-        <CertificateModal cert={modalCert} onClose={() => setModalCert(null)} />
-      )}
-    </div>
-  );
+  return <main className="min-h-screen bg-[#faf6ee] text-[#1b1b1b]"><div className="mx-auto w-full px-[5.5vw] py-10">
+    <section className="grid gap-8 border-b-2 border-[#1b1b1b] pb-8 lg:grid-cols-[7fr_5fr]"><div className="flex flex-col justify-between gap-8"><div><div className="mb-4 flex flex-wrap gap-1"><span className={`${mono} bg-[#1b1b1b] px-2 py-1 text-[#faf6ee]`}>05 // MILESTONES</span><span className={`${mono} border-2 border-[#1b1b1b] bg-[#fffdf7] px-2 py-1 shadow-[2px_2px_0_#1b1b1b]`}>VERIFIED ARCHIVE // CONTINUOUS EVOLUTION</span></div><h1 className="font-serif text-4xl font-bold tracking-[-.04em] sm:text-5xl">Milestones worth remembering.</h1><p className="mt-4 max-w-xl font-serif text-lg leading-7 text-[#58413f]">A structured record of engineering achievements, certifications, and research fellowships that shaped my journey. Documenting cloud-native architecture, systems benchmarking, and verifiable open-source impact.</p></div><div className="grid grid-cols-3 gap-1"><Stat label="TOTAL LOGGED" value={`${items.length} UNITS`} color="text-[#a9362e]" /><Stat label="EPOCHS" value={`${items.length ? Math.min(...items.map((x) => yearOf(x.issueDate))) : "—"} — ${items.length ? Math.max(...items.map((x) => yearOf(x.issueDate))) : "—"}`} /><Stat label="INTEGRITY" value="100% VERIFIED" color="text-[#006c49]" /></div></div><ArchiveGraphic /></section>
+    {featured && <section className="mt-8"><div className={`${mono} mb-2 text-[#a9362e]`}>★ LEAD RECOGNITION // HIGHEST DISTINCTION</div><article className={`${border} grid gap-6 bg-[#fffdf7] p-5 shadow-[4px_4px_0_#1b1b1b] lg:grid-cols-[5fr_7fr]`}><Verification cert={featured} /><div><span className={`${mono} inline-block border border-[#1b1b1b] bg-[#f16b5e] px-2 py-1 text-[#fffdf7]`}>DISTRIBUTED SYSTEMS ARCHITECTURE</span><h2 className="mt-3 font-serif text-3xl font-bold leading-tight">{featured.title}</h2><p className={`${mono} mt-2 text-[#a9362e]`}>{featured.issuer} / {dateFormatter.format(new Date(featured.issueDate))}</p><p className="mt-3 font-serif leading-6 text-[#58413f]">{featured.description}</p><button onClick={() => setModalCert(featured)} className={`${mono} mt-5 border-2 border-[#1b1b1b] bg-[#f16b5e] px-4 py-2 text-[#fffdf7] shadow-[3px_3px_0_#1b1b1b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2`}>VIEW CREDENTIAL ↗</button></div></article></section>}
+    <section className={`${border} mt-8 flex flex-col gap-3 bg-[#fffdf7] p-3 shadow-[3px_3px_0_#1b1b1b] md:flex-row md:items-center md:justify-between`}><div className="flex flex-wrap gap-1">{categories.map((category) => <button key={category.value} onClick={() => { setActiveCategory(category.value); reset(); }} className={`${mono} border-2 border-[#1b1b1b] px-3 py-2 ${activeCategory === category.value ? "bg-[#f16b5e] text-[#fffdf7] shadow-[2px_2px_0_#1b1b1b]" : "bg-[#fffdf7]"}`}>{category.label} [{category.value === "all" ? items.length : items.length}]</button>)}</div><label className="relative block w-full md:max-w-xs"><Search aria-hidden="true" className="absolute left-2 top-2.5 size-4" /><input aria-label="Search achievements" value={search} onChange={(event) => { setSearch(event.target.value); reset(); }} placeholder="Search achievements..." className={`${mono} h-10 w-full border-2 border-[#1b1b1b] bg-[#faf6ee] pl-8 pr-2 outline-none focus-visible:ring-2 focus-visible:ring-[#f16b5e]`} /></label></section>
+    {filtered.length === 0 ? <div className={`${border} mt-8 bg-[#fffdf7] p-10 text-center text-[#58413f]`}>No achievements match your search.</div> : <section className="mt-10">{groups.map((year) => <div key={year} className="mb-8"><div className="mb-3 flex items-end justify-between border-b-2 border-[#1b1b1b] pb-1"><h2 className={`${mono} text-sm`}>■ {year} {"//"} RECENT MILESTONES</h2><span className={mono}>{archive.filter((x) => yearOf(x.issueDate) === year).length} RECORDS</span></div><div className="grid gap-4 md:grid-cols-2">{archive.filter((cert) => yearOf(cert.issueDate) === year).map((cert, index) => <CertificateCard key={cert.id} cert={cert} index={index} onSelect={setModalCert} />)}</div></div>)}</section>}
+    {visibleCount < filtered.length - 1 && <button onClick={() => setVisibleCount((count) => count + ITEMS_PER_PAGE)} className={`${mono} mx-auto block border-2 border-[#1b1b1b] bg-[#fffdf7] px-5 py-2 shadow-[2px_2px_0_#1b1b1b]`}>LOAD MORE MILESTONES [↙]</button>}
+    <div className={`${border} mt-12 flex flex-col gap-3 bg-[#fffdf7] p-4 shadow-[3px_3px_0_#1b1b1b] sm:flex-row sm:items-center sm:justify-between`}><span className="font-serif text-lg">The journey continues.</span><span className={mono}>MORE CREDENTIALS IN PROGRESS ↗</span></div>
+    {modalCert && <CertificateModal cert={modalCert as Certificate} onClose={() => setModalCert(null)} />}
+  </div></main>;
 }
 
-function AchievementCard({
-  item,
-  index,
-  onSelect,
-}: {
-  item: AchievementItem;
-  index: number;
-  onSelect: (cert: Certificate) => void;
-}) {
-  return (
-    <button onClick={() => onSelect(item.cert)} className="text-left block w-full cursor-pointer">
-      <Card as="article" className="min-h-[360px]">
-      {/* Certificate image */}
-      {item.image && (
-        <div className="h-[200px] overflow-hidden relative max-md:h-[160px]">
-          <img
-            src={item.image}
-            alt=""
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-        </div>
-      )}
-
-      {/* Number index */}
-      <span className="text-purple text-xs tracking-[.14em] px-6 py-0 relative z-10 mt-4">
-        {String(index + 1).padStart(2, "0")}
-      </span>
-
-      {/* Content */}
-      <div className="px-6 pb-4 pt-3 relative z-10 flex-1 flex flex-col">
-        <p className="text-muted text-[10px] tracking-[.12em] mb-[14px] uppercase">
-          {item.issuer} / {item.date}
-        </p>
-
-        <h3 className="text-[clamp(20px,2vw,28px)] font-medium tracking-[-.04em] leading-[1.1] mb-3 line-clamp-2">
-          {item.title}
-        </h3>
-        <p className="text-muted text-sm leading-[1.7] mb-0 line-clamp-2 flex-1">
-          {item.description}
-        </p>
-      </div>
-
-      {/* Footer */}
-      <div className="items-center border-t border-line text-muted flex text-xs justify-between mt-auto py-[22px] px-6 relative z-10">
-        <span>View credential</span>
-        <ArrowUpRight className="text-purple" size={18} aria-hidden="true" />
-      </div>
-    </Card>
-    </button>
-  );
-}
+function Stat({ label, value, color = "text-[#1b1b1b]" }: { label: string; value: string; color?: string }) { return <div className={`${border} bg-[#fffdf7] p-3 shadow-[3px_3px_0_#1b1b1b]`}><p className={`${mono} text-[#8b716e]`}>{label}</p><p className={`mt-1 font-serif text-lg font-bold ${color}`}>{value}</p></div>; }
+function ArchiveGraphic() { return <div className={`${border} bg-[#fffdf7] p-4 shadow-[4px_4px_0_#1b1b1b]`}><div className={`${mono} flex justify-between border-b-2 border-[#1b1b1b] pb-3`}><span>● ● ●</span><span>FIG. 05 // CREDENTIAL_ARCHIVE.RAW</span></div><div className="flex min-h-[210px] items-center justify-center p-6"><div className="grid w-full grid-cols-3 items-end gap-2"><div className="h-12 border-2 border-[#1b1b1b] bg-[#f4ebdc]" /><div className="h-28 border-2 border-[#1b1b1b] bg-[#f16b5e]" /><div className="h-20 border-2 border-[#1b1b1b] bg-[#73b8ff]" /></div></div><div className={`${mono} flex justify-between border border-[#1b1b1b] bg-[#faf6ee] px-2 py-2`}><span>LEDGER SYNC // SHA-256 VALIDATED</span><span>LOC: SFO/WEST</span></div></div>; }
+function Verification({ cert }: { cert: CertificateListItem }) { return <div className={`${border} bg-[#faf6ee] p-4`}><div className={`${mono} flex justify-between border-b border-[#1b1b1b] pb-2`}><span>ATTESTATION PROTOCOL</span><span className="text-[#006c49]">● ACTIVE STATUS</span></div><div className="flex items-center gap-4 py-6"><div className={`${border} flex size-16 items-center justify-center bg-[#fffdf7] text-2xl shadow-[2px_2px_0_#1b1b1b]`}>♜</div><div><p className={`${mono}`}>VERIFIED CREDENTIAL</p><p className={`${mono} mt-1 text-[#58413f]`}>HASH: 0x98AF72C0...E426</p><p className={`${mono} mt-1 text-[#8b716e]`}>EXPIRY: PERPETUAL RECORD</p></div></div><div className={`${mono} flex justify-between border-t border-[#e8e0d3] pt-2`}><span>SEAL: {cert.id.slice(0, 8)}</span><span className="bg-[#1b1b1b] px-1 text-[#faf6ee]">SIG: VALID</span></div></div>; }
+function CertificateCard({ cert, index, onSelect }: { cert: CertificateListItem; index: number; onSelect: (cert: CertificateListItem) => void }) { return <button onClick={() => onSelect(cert)} className={`${border} flex w-full flex-col bg-[#fffdf7] text-left shadow-[2px_2px_0_#1b1b1b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2`}><div className={`${mono} flex justify-between border-b border-[#1b1b1b] bg-[#faf6ee] px-3 py-2`}><span>◈ {cert.issuer}</span><span>REF.{String(index + 1).padStart(2, "0")}</span></div><div className="flex-1 p-4"><p className={`${mono} text-[#a9362e]`}>{dateFormatter.format(new Date(cert.issueDate))}</p><h3 className="mt-2 font-serif text-xl font-bold leading-tight">{cert.title}</h3><p className="mt-2 font-serif text-sm leading-5 text-[#58413f]">{cert.description}</p></div><div className={`${mono} flex justify-between border-t border-[#1b1b1b] px-4 py-2 text-[#a9362e]`}><span>VIEW EVIDENCE RECORD ↗</span><ArrowUpRight aria-hidden="true" className="size-4" /></div></button>; }

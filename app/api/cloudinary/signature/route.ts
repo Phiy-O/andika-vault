@@ -1,14 +1,12 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/src/lib/auth";
+import { requireAdmin } from "@/src/lib/auth";
 import {
   getUploadSignature,
   CLOUDINARY_FOLDER,
 } from "@/src/lib/cloudinary";
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session) return new NextResponse("Unauthorized", { status: 401 });
+  if (!(await requireAdmin())) return new NextResponse("Unauthorized", { status: 401 });
 
   const { timestamp, signature } = getUploadSignature();
 

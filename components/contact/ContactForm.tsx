@@ -1,115 +1,25 @@
 "use client";
 
+import { CheckCircle2, Send } from "lucide-react";
 import { useState } from "react";
-import { Send, CheckCircle2 } from "lucide-react";
+
+const mono = "font-mono text-[10px] font-bold uppercase tracking-[.1em]";
+const field = "w-full border border-[#1b1b1b] bg-[#fffdf7] px-3 py-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-[#f16b5e]";
 
 export function ContactForm() {
-  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">(
-    "idle"
-  );
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [error, setError] = useState("");
-
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = e.currentTarget;
-    const data = Object.fromEntries(new FormData(form).entries());
-    setStatus("sending");
-    setError("");
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    setStatus("sending"); setError("");
     try {
-      const res = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+      const res = await fetch("/api/contact", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(Object.fromEntries(new FormData(form).entries())) });
       const body = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        setStatus("error");
-        setError(body.error ?? "Failed to send message. Please try again.");
-        return;
-      }
-      setStatus("sent");
-      form.reset();
-    } catch {
-      setStatus("error");
-      setError("Network error. Please try again.");
-    }
+      if (!res.ok) { setStatus("error"); setError(body.error ?? "Failed to send message. Please try again."); return; }
+      setStatus("sent"); form.reset();
+    } catch { setStatus("error"); setError("Network error. Please try again."); }
   }
-
-  if (status === "sent") {
-    return (
-      <div className="mt-10 rounded-lg border border-green-500/30 bg-green-500/10 px-6 py-8 text-center">
-        <CheckCircle2 size={32} className="mx-auto mb-3 text-green-400" />
-        <p className="text-foreground font-medium">Message sent!</p>
-        <p className="mt-1 text-sm text-muted">
-          Thank you for reaching out. I&apos;ll get back to you as soon as I
-          can.
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <form className="mt-10 flex flex-col gap-5" onSubmit={handleSubmit}>
-      <div
-        aria-hidden="true"
-        className="absolute -left-[9999px] h-px w-px overflow-hidden"
-      >
-        <label htmlFor="website">Website</label>
-        <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" />
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="name" className="text-foreground text-[13px] tracking-[.06em] uppercase">
-          Name
-        </label>
-        <input
-          id="name"
-          name="name"
-          type="text"
-          required
-          placeholder="Your name"
-          className="bg-transparent border border-line rounded-lg px-5 py-4 text-foreground text-[15px] outline-none transition-all duration-200 placeholder:text-muted/50 focus:border-purple focus:shadow-[0_0_8px_rgba(169,139,255,.15)]"
-        />
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="email" className="text-foreground text-[13px] tracking-[.06em] uppercase">
-          Email
-        </label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          required
-          placeholder="you@example.com"
-          className="bg-transparent border border-line rounded-lg px-5 py-4 text-foreground text-[15px] outline-none transition-all duration-200 placeholder:text-muted/50 focus:border-purple focus:shadow-[0_0_8px_rgba(169,139,255,.15)]"
-        />
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="message" className="text-foreground text-[13px] tracking-[.06em] uppercase">
-          Message
-        </label>
-        <textarea
-          id="message"
-          name="message"
-          required
-          rows={5}
-          placeholder="Tell me about your project…"
-          className="bg-transparent border border-line rounded-lg px-5 py-4 text-foreground text-[15px] outline-none transition-all duration-200 placeholder:text-muted/50 focus:border-purple focus:shadow-[0_0_8px_rgba(169,139,255,.15)] resize-y min-h-[120px]"
-        />
-      </div>
-      {status === "error" && (
-        <p className="m-0 text-sm text-red-400">{error}</p>
-      )}
-      <button
-        type="submit"
-        disabled={status === "sending"}
-        className="inline-flex items-center justify-center gap-3 rounded-lg text-base py-4 px-7 transition-all duration-200 hover:-translate-y-0.5 bg-gradient-to-br from-[#a98bff] to-[#7391ff] text-[#f0f0f0] hover:brightness-[1.05] hover:shadow-[0_0_16px_rgba(255,255,255,.25)] w-fit max-md:w-full max-md:py-3 max-md:px-5 max-md:text-xs disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        {status === "sending" ? "Sending…" : "Send message"}
-        <Send size={16} aria-hidden="true" />
-      </button>
-      <p className="text-muted/60 text-[11px] mt-0">
-        Your message is stored securely and only visible to me.
-      </p>
-    </form>
-  );
+  if (status === "sent") return <div className="border-2 border-[#1b1b1b] bg-[#d9f5e6] p-8 text-center shadow-[3px_3px_0_#1b1b1b]" role="status"><CheckCircle2 className="mx-auto mb-3 text-[#006b55]" /><p className="font-bold">MESSAGE ACCEPTED.</p><p className="mt-2 text-sm text-[#58413f]">Thank you. I&apos;ll respond as soon as possible.</p></div>;
+  return <form className="border-2 border-[#1b1b1b] bg-[#fffdf7] p-4 shadow-[4px_4px_0_#1b1b1b] sm:p-6" onSubmit={handleSubmit}><div className="mb-5 flex items-start justify-between gap-3 border-b-2 border-[#1b1b1b] pb-4"><div><p className={`${mono} text-[#a9362e]`}>AUTHENTICATED ROUTE</p><h2 className="mt-1 text-3xl font-black uppercase tracking-[-.04em]">SEND A MESSAGE.</h2><p className="mt-1 text-sm text-[#58413f]">Fill in fields below. Incoming dispatch routes to local inbox.</p></div><span className={`${mono} hidden bg-[#2cb67d] px-2 py-1 text-[#003d2e] sm:block`}>SECURE</span></div><div className="absolute -left-[9999px] h-px w-px overflow-hidden"><label htmlFor="website">Website</label><input id="website" name="website" tabIndex={-1} autoComplete="off" /></div><div className="grid gap-4 sm:grid-cols-2"><label className="block"><span className={mono}>YOUR NAME *</span><input id="name" name="name" required className={`${field} mt-1`} placeholder="Alex Mercer" /></label><label className="block"><span className={mono}>EMAIL ADDRESS *</span><input id="email" name="email" type="email" required className={`${field} mt-1`} placeholder="alex@example.com" /></label></div><label className="mt-4 block"><span className={mono}>SUBJECT / SCOPE *</span><input id="subject" name="subject" required className={`${field} mt-1`} placeholder="Architecture inquiry & systems advisory" /></label><label className="mt-4 block"><span className={mono}>YOUR MESSAGE *</span><textarea id="message" name="message" required rows={7} className={`${field} mt-1 resize-y`} placeholder="Tell me what you are building..." /></label>{status === "error" && <p className="mt-3 border border-[#a9362e] bg-[#ffe0dc] p-2 text-sm text-[#630004]" role="alert">{error}</p>}<div className="mt-5 flex flex-col gap-4 border-t-2 border-[#1b1b1b] pt-4 sm:flex-row sm:items-center sm:justify-between"><label className="flex items-start gap-2 text-xs text-[#58413f]"><input name="consent" type="checkbox" required className="mt-0.5 accent-[#f16b5e]" />I acknowledge direct technical dispatch.</label><button type="submit" disabled={status === "sending"} className={`${mono} inline-flex items-center justify-center gap-2 border-2 border-[#1b1b1b] bg-[#f16b5e] px-5 py-3 shadow-[3px_3px_0_#1b1b1b] disabled:cursor-not-allowed disabled:opacity-60`}>{status === "sending" ? "TRANSMITTING..." : "TRANSMIT PACKET"}<Send size={14} /></button></div><p className={`${mono} mt-4 text-[#58413f]`}>PAYLOAD LIMIT: 64KB // DIRECT ENCRYPTED DISPATCH</p></form>;
 }

@@ -1,22 +1,4 @@
 import { ArrowUpRight, Mail } from "lucide-react";
 import Link from "next/link";
-
-export function HomeContactSection({ email }: { email?: string | null }) {
-  const contactEmail = email ?? "andikapiyo12@gmail.com";
-
-  return (
-    <section className="mx-auto max-w-7xl px-[5.5vw] py-12" id="contact" aria-labelledby="home-contact-title">
-      <div className="grid gap-8 border-2 border-foreground bg-[#e76f51] px-6 py-7 shadow-[5px_5px_0_var(--foreground)] lg:grid-cols-[1fr_auto] lg:items-center lg:px-8">
-        <div>
-          <p className="mb-3 inline-flex border border-foreground bg-background px-2 py-1 font-mono text-[9px] uppercase tracking-[.12em]">Ready to deploy</p>
-          <h2 id="home-contact-title" className="mb-3 max-w-[620px] text-[clamp(38px,5vw,68px)] font-semibold uppercase leading-[.88] tracking-[-.07em]">Let&apos;s build something <em>good.</em></h2>
-          <p className="m-0 max-w-xl text-sm leading-[1.6]">Have a project, an interesting problem, or an idea worth exploring? Let&apos;s talk.</p>
-        </div>
-        <div className="flex flex-wrap gap-3 lg:justify-end">
-          <Link className="inline-flex items-center gap-2 border-2 border-foreground bg-background px-5 py-3 text-xs font-semibold uppercase shadow-[3px_3px_0_var(--foreground)] transition-transform hover:-translate-y-0.5" href="/contact">Get in touch <ArrowUpRight size={15} aria-hidden="true" /></Link>
-          <a className="inline-flex items-center gap-2 border-2 border-foreground bg-background px-5 py-3 text-xs font-semibold uppercase transition-colors hover:bg-surface" href={`mailto:${contactEmail}`}><Mail size={14} aria-hidden="true" /> Email me</a>
-        </div>
-      </div>
-    </section>
-  );
-}
+const mono = "font-mono text-[10px] font-bold uppercase tracking-[.1em]";
+export function HomeContactSection({ email }: { email?: string | null }) { const contactEmail = email ?? "andikapiyo12@gmail.com"; return <section className="mx-auto w-full px-[5.5vw] py-10" id="contact" aria-labelledby="home-contact-title"><div className="grid gap-6 border-2 border-[#1d1d1b] bg-[#f46d66] p-5 shadow-[4px_4px_0_#1d1d1b] sm:p-8 lg:grid-cols-[1fr_auto] lg:items-center"><div><p className={`${mono} mb-3 inline-flex border border-[#1d1d1b] bg-[#fffdf7] px-2 py-1`}>05 / READY TO DEPLOY</p><h2 id="home-contact-title" className="mb-3 max-w-[620px] font-serif text-4xl font-black uppercase leading-[.9] tracking-[-.06em] sm:text-6xl">LET&apos;S BUILD SOMETHING GOOD.</h2><p className="m-0 max-w-xl text-sm leading-6">Have a project, an interesting problem, or an idea worth exploring? Let&apos;s talk.</p></div><div className="flex flex-wrap gap-3"><Link className={`${mono} inline-flex items-center gap-2 border-2 border-[#1d1d1b] bg-[#fffdf7] px-4 py-3 shadow-[3px_3px_0_#1d1d1b]`} href="/contact">GET IN TOUCH <ArrowUpRight size={14} /></Link><a className={`${mono} inline-flex items-center gap-2 border-2 border-[#1d1d1b] bg-[#fffdf7] px-4 py-3`} href={`mailto:${contactEmail}`}><Mail size={14} /> EMAIL ME</a></div></div></section>; }

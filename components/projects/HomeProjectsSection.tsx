@@ -1,93 +1,9 @@
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
-import { SectionEyebrow } from "../content/SectionEyebrow";
-import { Card } from "../content/Card";
 import { optimizeCloudinaryUrl } from "@/src/lib/cloudinary-url";
 import type { Project } from "@prisma/client";
-
-type HomeProjectsSectionProps = {
-  projects: Project[];
-};
-
+const mono = "font-mono text-[10px] font-bold uppercase tracking-[.1em]";
 const DEFAULT_PROJECT_THUMBNAIL = "/images/thumbnails/projects-thumbnail.png";
-
-export function HomeProjectsSection({ projects }: HomeProjectsSectionProps) {
-  const visibleProjects = projects
-    .filter((project) => project.isVisible)
-    .sort((a, b) => a.sortOrder - b.sortOrder)
-    .slice(0, 3);
-
-  return (
-    <section
-      className="border-b border-line mx-auto py-[130px] px-[10vw] relative max-md:py-[90px] max-md:px-[6vw]"
-      id="projects"
-      aria-labelledby="home-projects-title"
-    >
-      <div className="items-end grid gap-[60px] grid-cols-[1.1fr_.9fr] mx-auto mb-[64px] w-full max-md:items-start max-md:gap-[34px] max-md:grid-cols-1 max-md:mb-[44px]">
-        <div>
-          <SectionEyebrow>Projects</SectionEyebrow>
-          <h2
-            className="text-[clamp(48px,6vw,78px)] mb-0 max-md:text-[clamp(36px,8vw,56px)]"
-            id="home-projects-title"
-          >
-            Things I&apos;ve <em>shaped.</em>
-          </h2>
-        </div>
-        <div className="items-start flex flex-col gap-7">
-          <p className="text-muted text-base leading-[1.75] m-0 max-w-[430px]">
-            A selection of work where product thinking, design, and engineering
-            meet.
-          </p>
-          <Link
-            className="border border-line rounded-lg text-foreground inline-flex items-center w-fit text-xs px-5 py-3 transition-all duration-200 hover:shadow-[0_0_2px_var(--foreground)] hover:-translate-y-0.5"
-            href="/projects"
-          >
-            View all projects{" "}
-            <span className="text-foreground text-[17px] ml-2" aria-hidden="true">
-              <ArrowUpRight size={18} />
-            </span>
-          </Link>
-        </div>
-      </div>
-
-      <div className="grid gap-[18px] grid-cols-3 mx-auto w-full max-md:grid-cols-1">
-        {visibleProjects.map((project, index) => (
-          <Card href={`/projects/${project.slug}`} className="min-h-[360px] max-md:min-h-0" key={project.id}>
-            <div className="rounded-tl-[14px] h-[220px] mb-6 overflow-hidden relative max-md:h-[180px]">
-              <img
-                src={optimizeCloudinaryUrl(project.thumbnail || DEFAULT_PROJECT_THUMBNAIL, 800)}
-                alt=""
-                className="absolute inset-0 w-full h-full object-cover"
-              />
-            </div>
-            <span className="text-purple text-xs tracking-[.14em] px-6 py-0 relative z-10">
-              {String(index + 1).padStart(2, "0")}
-            </span>
-            <div className="mt-[18px] px-6 pb-4 relative z-10">
-              <h3 className="text-[clamp(22px,2vw,30px)] font-medium tracking-[-.04em] leading-[1.05] mb-3.5 line-clamp-2">
-                {project.title}
-              </h3>
-              <p className="text-muted text-sm leading-[1.7] mb-[18px] line-clamp-2">
-                {project.description}
-              </p>
-              <div className="flex flex-wrap gap-2 mb-0">
-                {project.techStack.map((tech) => (
-                  <span
-                    className="items-center border border-line rounded-[5px] text-muted inline-flex text-[11px] h-[28px] justify-center px-2.5 py-0"
-                    key={tech}
-                  >
-                    {tech}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div className="items-center border-t border-line text-muted flex text-xs justify-between mt-auto py-[22px] px-6 relative z-10">
-              <span>View project</span>
-              <ArrowUpRight className="text-purple" size={18} aria-hidden="true" />
-            </div>
-          </Card>
-        ))}
-      </div>
-    </section>
-  );
-}
+export function HomeProjectsSection({ projects }: { projects: Project[] }) { const visible = projects.filter((p) => p.isVisible).sort((a, b) => a.sortOrder - b.sortOrder).slice(0, 3); const featured = visible[0]; return <section className="mx-auto w-full border-b-2 border-[#1d1d1b] px-[5.5vw] py-12" id="projects" aria-labelledby="home-projects-title"><div className="mb-7 flex items-end justify-between gap-6 border-b-2 border-[#1d1d1b] pb-4 max-md:flex-col"><div><p className={`${mono} mb-2 text-[#f46d66]`}>01 / SELECTED WORK</p><h2 id="home-projects-title" className="mb-0 font-serif text-3xl font-black uppercase tracking-[-.05em] sm:text-4xl">THINGS I&apos;VE BUILT.</h2><p className="mt-2 text-sm text-[#595652]">Selected projects, experiments, and practical solutions.</p></div><Link className={`${mono} inline-flex items-center gap-2 border-2 border-[#1d1d1b] bg-[#fffdf7] px-4 py-2 shadow-[2px_2px_0_#1d1d1b]`} href="/projects">VIEW ALL PROJECTS [{String(visible.length).padStart(2, "0")}] <ArrowUpRight size={13} /></Link></div><div className="grid gap-5">{featured && <ProjectFeature project={featured} />}</div><div className="mt-5 grid gap-5 md:grid-cols-2">{visible.slice(1).map((project, index) => <ProjectCard key={project.id} project={project} index={index + 2} />)}</div></section>; }
+function ProjectFeature({ project }: { project: Project }) { return <article className="border-2 border-[#1d1d1b] bg-[#fffdf7] p-5 shadow-[4px_4px_0_#1d1d1b] sm:p-8"><div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b-2 border-[#1d1d1b] pb-4"><div className="flex flex-wrap gap-3"><span className={`${mono} border border-[#1d1d1b] bg-[#f46d66] px-2 py-1`}>{project.category}</span><span className={`${mono} text-[#595652]`}>SYS_ID // #PRJ-01</span></div><span className={`${mono} border border-[#1d1d1b] bg-[#faf6ee] px-2 py-1`}>STATUS: PRODUCTION_ACTIVE</span></div><div className="grid gap-7 lg:grid-cols-[5fr_7fr] lg:items-center"><div><h3 className="text-2xl font-black uppercase leading-tight tracking-[-.04em] sm:text-3xl">{project.title}</h3><p className={`${mono} mt-3 text-[#5d8fef]`}>{project.techStack.join(" / ")}</p><p className="mt-3 text-sm leading-6 text-[#595652]">{project.description}</p><div className="mt-5 flex flex-wrap gap-3"><Link href={`/projects/${project.slug}`} className={`${mono} inline-flex items-center gap-2 border-2 border-[#1d1d1b] bg-[#f46d66] px-4 py-2 shadow-[3px_3px_0_#1d1d1b]`}>VIEW CASE STUDY <ArrowUpRight size={13} /></Link>{project.githubUrl && <a href={project.githubUrl} target="_blank" rel="noreferrer" className={`${mono} border-2 border-[#1d1d1b] bg-[#fffdf7] px-4 py-2`}>SOURCE CODE &lt;&gt;</a>}</div></div><div className="border-2 border-[#1d1d1b] bg-[#faf6ee] p-1 shadow-[3px_3px_0_#1d1d1b]"><img src={optimizeCloudinaryUrl(project.thumbnail || DEFAULT_PROJECT_THUMBNAIL, 1000)} alt="" className="aspect-video w-full object-cover" /></div></div></article>; }
+function ProjectCard({ project, index }: { project: Project; index: number }) { return <article className="border-2 border-[#1d1d1b] bg-[#fffdf7] p-5 shadow-[3px_3px_0_#1d1d1b]"><div className="relative mb-4 overflow-hidden border-2 border-[#1d1d1b] bg-[#faf6ee] p-1"><img src={optimizeCloudinaryUrl(project.thumbnail || DEFAULT_PROJECT_THUMBNAIL, 800)} alt="" className="h-[220px] w-full object-cover" /><span className={`${mono} absolute left-3 top-3 border border-[#1d1d1b] bg-[#2cb67d] px-2 py-1`}>PRJ_0{index}</span></div><h3 className="text-xl font-black uppercase leading-tight">{project.title}</h3><p className={`${mono} mt-2 text-[#595652]`}>{project.techStack.join(" / ")}</p><p className="mt-2 text-sm leading-6 text-[#595652]">{project.description}</p><Link href={`/projects/${project.slug}`} className={`${mono} mt-5 inline-flex items-center gap-2 border-2 border-[#1d1d1b] bg-[#faf6ee] px-4 py-2 shadow-[2px_2px_0_#1d1d1b]`}>VIEW CASE STUDY <ArrowUpRight size={13} /></Link></article>; }

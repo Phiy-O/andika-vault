@@ -111,6 +111,21 @@ export function SettingsForm({ settings }: Props) {
         </Field>
       </SectionCard>
 
+      <SectionCard title="About / Elias Reid" description="Editable content used by the About page.">
+        <Field label="Name"><input className={inputClass} value={form.aboutName} onChange={(e) => set("aboutName", e.target.value)} /></Field>
+        <Field label="Role"><input className={inputClass} value={form.aboutRole} onChange={(e) => set("aboutRole", e.target.value)} /></Field>
+        <Field label="Location"><input className={inputClass} value={form.aboutLocation} onChange={(e) => set("aboutLocation", e.target.value)} /></Field>
+        <Field label="Current focus"><input className={inputClass} value={form.aboutFocus} onChange={(e) => set("aboutFocus", e.target.value)} /></Field>
+        <Field label="Discipline"><input className={inputClass} value={form.aboutDiscipline} onChange={(e) => set("aboutDiscipline", e.target.value)} /></Field>
+        <Field label="Philosophy"><input className={inputClass} value={form.aboutPhilosophy} onChange={(e) => set("aboutPhilosophy", e.target.value)} /></Field>
+        <Field label="Core runtime"><input className={inputClass} value={form.aboutRuntime} onChange={(e) => set("aboutRuntime", e.target.value)} /></Field>
+        <Field label="Quote"><textarea rows={2} className={`${inputClass} resize-y`} value={form.aboutQuote} onChange={(e) => set("aboutQuote", e.target.value)} /></Field>
+        <Field label="Intro"><textarea rows={4} className={`${inputClass} resize-y`} value={form.aboutIntro} onChange={(e) => set("aboutIntro", e.target.value)} /></Field>
+        <Field label="Journey JSON"><textarea rows={8} className={`${inputClass} resize-y font-mono text-xs`} value={form.aboutJourney} onChange={(e) => set("aboutJourney", e.target.value)} /></Field>
+        <Field label="Pillars JSON"><textarea rows={8} className={`${inputClass} resize-y font-mono text-xs`} value={form.aboutPillars} onChange={(e) => set("aboutPillars", e.target.value)} /></Field>
+        <Field label="Timeline JSON"><textarea rows={8} className={`${inputClass} resize-y font-mono text-xs`} value={form.aboutTimeline} onChange={(e) => set("aboutTimeline", e.target.value)} /></Field>
+      </SectionCard>
+
       {/* Resume */}
       <SectionCard
         title="Resume / CV"

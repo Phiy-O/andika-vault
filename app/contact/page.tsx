@@ -1,150 +1,21 @@
-import Image from "next/image";
 import Link from "next/link";
+import { Mail } from "lucide-react";
 import { PublicShell } from "../../components/layout/PublicShell";
-import { PageHero } from "../../components/content/PageHero";
-import { CTAButton } from "../../components/content/CTAButton";
 import { ContactForm } from "../../components/contact/ContactForm";
-import { Mail, MapPin, Clock, ArrowUpRight } from "lucide-react";
 import { getSiteSettings } from "@/src/actions/site-setting";
 
 export const revalidate = 3600;
-
-export const metadata = {
-  title: "Contact | Andika",
-  description: "Get in touch with Andika about a thoughtful digital project.",
-};
+export const metadata = { title: "Contact | Andika", description: "Get in touch with Andika about a thoughtful digital project." };
+const mono = "font-mono text-[10px] font-bold uppercase tracking-[.1em]";
 
 export default async function ContactPage() {
   const { data: settings } = await getSiteSettings();
   const email = settings?.email ?? "andikapiyo12@gmail.com";
-  const socialLinks = [
-    { label: "LinkedIn", href: settings?.linkedinUrl ?? "#", icon: "/icons/linkedin-svgrepo-com.svg" },
-    { label: "GitHub", href: settings?.githubUrl ?? "#", icon: "/icons/github-svgrepo-com.svg" },
-    { label: "Instagram", href: settings?.instagramUrl ?? "#", icon: "/icons/instagram-svgrepo-com.svg" },
-  ];
-
-  return (
-    <PublicShell>
-      <PageHero
-        eyebrow="Contact"
-        title={<>Let&apos;s make <em>it real.</em></>}
-        description="Have a product idea, a collaboration in mind, or simply want to say hello? I'd love to hear from you."
-      />
-
-      {/* ── Form + Info grid ── */}
-      <section className="mx-auto w-full px-[10vw] max-md:px-[6vw] border-t border-line pt-[80px] pb-[100px] max-md:pt-[65px] max-md:pb-[70px]">
-        <div className="grid gap-[70px] grid-cols-[1.3fr_1fr] max-md:grid-cols-1 max-md:gap-[50px]">
-
-          {/* ── Contact form ── */}
-          <div>
-            <p className="text-muted text-[11px] tracking-[.18em] mb-4 uppercase">
-              <Mail size={12} className="inline mr-[6px] -mt-[2px]" aria-hidden="true" />
-              Send a message
-            </p>
-            <p className="text-muted text-[17px] leading-[1.7] max-w-[450px] mb-0">
-              Fill in the form below and I&apos;ll get back to you as soon as I
-              can.
-            </p>
-
-            <ContactForm />
-          </div>
-
-          {/* ── Email + Social ── */}
-          <div className="flex flex-col gap-10">
-            {/* Email card */}
-            <div className="border border-line rounded-xl p-8 transition-all duration-200 hover:border-purple/30 hover:shadow-[0_0_20px_rgba(169,139,255,.06)]">
-            <p className="text-muted text-[11px] tracking-[.18em] mb-4 uppercase">
-                <Mail size={12} className="inline mr-[6px] -mt-[2px]" aria-hidden="true" />
-                Email
-              </p>
-              <a
-                className="text-foreground text-lg font-medium block mb-3 transition-colors duration-200 hover:text-purple"
-                href={`mailto:${email}`}
-              >
-                {email}
-              </a>
-              <p className="text-muted text-[14px] leading-[1.7] m-0">
-                The best way to reach me. Share what you&apos;re building and
-                where you are in the process.
-              </p>
-            </div>
-
-            {/* Social cards */}
-            <div>
-              <p className="text-muted text-[11px] tracking-[.18em] mb-[18px] uppercase">
-                Social
-              </p>
-              <div className="flex flex-col gap-2.5">
-                {socialLinks.map((social) => (
-                  <a
-                    className="group flex items-center gap-4 border border-line rounded-xl px-5 py-4 transition-all duration-200 hover:border-purple/30 hover:shadow-[0_0_16px_rgba(169,139,255,.06)] hover:-translate-y-0.5 no-underline"
-                    href={social.href}
-                    key={social.label}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    <Image
-                      src={social.icon}
-                      alt=""
-                      width={22}
-                      height={22}
-                      className="opacity-50 transition-opacity duration-200 group-hover:opacity-90"
-                    />
-                    <span className="text-foreground text-[15px] flex-1">
-                      {social.label}
-                    </span>
-                    <ArrowUpRight
-                      size={16}
-                      className="text-purple opacity-0 -translate-y-1 translate-x-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0 group-hover:translate-x-0"
-                      aria-hidden="true"
-                    />
-                  </a>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Info row ── */}
-      <section className="mx-auto w-full px-[10vw] max-md:px-[6vw] border-t border-line">
-        <div className="grid grid-cols-3 divide-x divide-line max-md:grid-cols-1 max-md:divide-x-0 max-md:divide-y max-md:divide-line">
-          <div className="py-[50px] pr-[50px] max-md:py-[35px] max-md:pr-0">
-            <MapPin size={16} className="text-purple mb-4" aria-hidden="true" />
-            <span className="text-muted block text-[10px] tracking-[.12em] mb-2 uppercase">
-              Based in
-            </span>
-            <span className="text-foreground text-[15px]">Indonesia</span>
-            <span className="text-muted text-[15px] ml-2">· Working worldwide</span>
-          </div>
-          <div className="py-[50px] px-[50px] max-md:py-[35px] max-md:px-0">
-            <Clock size={16} className="text-purple mb-4" aria-hidden="true" />
-            <span className="text-muted block text-[10px] tracking-[.12em] mb-2 uppercase">
-              Response time
-            </span>
-            <span className="text-foreground text-[15px]">Usually within 2–3 days</span>
-          </div>
-          <div className="py-[50px] pl-[50px] max-md:py-[35px] max-md:pl-0">
-            <div className="text-purple mb-4" aria-hidden="true">
-              <span className="relative flex h-3 w-3">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
-                <span className="relative inline-flex h-3 w-3 rounded-full bg-red-500" />
-              </span>
-            </div>
-            <span className="text-muted block text-[10px] tracking-[.12em] mb-2 uppercase">
-              Availability
-            </span>
-            <span className="inline-flex items-center gap-2 text-foreground text-[15px]">
-              Unavailable for freelance
-            </span>
-          </div>
-        </div>
-      </section>
-
-      {/* ── CTA ── */}
-      <div className="mx-auto w-full py-0 px-[10vw] pb-[130px] max-md:px-[6vw] max-md:pb-[90px]">
-        <CTAButton href="/" label="Back to home" />
-      </div>
-    </PublicShell>
-  );
+  const channels = [{ label: "DIRECT INBOX", value: email, href: `mailto:${email}`, icon: Mail, action: "DISPATCH ↗", accent: "#f16b5e" }, { label: "SOURCE REPOSITORIES", value: settings?.githubUrl ?? "GitHub profile", href: settings?.githubUrl, icon: Mail, action: "INSPECT REPOS ↗", accent: "#fffdf7" }, { label: "PROFESSIONAL NETWORK", value: settings?.linkedinUrl ?? "LinkedIn profile", href: settings?.linkedinUrl, icon: Mail, action: "CONNECT ↗", accent: "#73b8ff" }, { label: "PUBLIC BROADCAST", value: settings?.instagramUrl ?? "Instagram profile", href: settings?.instagramUrl, icon: Mail, action: "SIGNAL ↗", accent: "#fffdf7" }];
+  return <PublicShell><main className="min-h-screen bg-[#fcf9f8] text-[#1b1b1b]"><div className="border-b border-[#1b1b1b]/20 bg-[#eae7e7] px-[5.5vw] py-2"><div className={`${mono} mx-auto flex w-full flex-wrap justify-between gap-2 text-[#58413f]`}><span><i className="mr-2 inline-block size-2 rounded-full bg-[#006b55]" />GATEWAY: US-WEST-2 // SECURE_PORT: 443</span><span>HANDSHAKE: ECDHE-RSA-AES128-GCM-SHA256</span><span>PROTOCOL: DISPATCH_V2.6</span></div></div><div className="mx-auto w-full px-[5.5vw] py-10"><section className="border-b-2 border-[#1b1b1b] pb-7"><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex flex-wrap gap-2"><span className={`${mono} bg-[#1b1b1b] px-2 py-1 text-[#fcf9f8]`}>06 // GET IN TOUCH</span><span className={`${mono} border border-[#1b1b1b] bg-[#f6f3f2] px-2 py-1`}>DISPATCH CHANNEL: ENCRYPTED // TLS 1.3 ACTIVE</span></div><span className={`${mono} border-2 border-[#1b1b1b] px-3 py-2 shadow-[2px_2px_0_#1b1b1b]`}><i className="mr-2 inline-block size-2 rounded-full bg-[#006b55]" />STATUS: AVAILABLE FOR SELECTED COLLABORATIONS</span></div><div className="mt-8 grid gap-6 lg:grid-cols-[2fr_1fr] lg:items-end"><div><h1 className="font-sans text-5xl font-black uppercase leading-[.9] tracking-[-.06em] sm:text-7xl">LET&apos;S TALK ABOUT<br /><span className="inline-block -rotate-1 border-2 border-[#1b1b1b] bg-[#f16b5e] px-2 py-1 text-[#630004] shadow-[3px_3px_0_#1b1b1b]">SOMETHING GOOD.</span></h1></div><p className="border-l-2 border-[#1b1b1b] pl-4 text-base leading-6 text-[#58413f]">Have an ambitious architectural concept, a high-throughput systems challenge, or a technical advisory requirement? Let&apos;s initiate a direct handshake.</p></div></section><section className="mt-8 grid gap-6 lg:grid-cols-5"><aside className="space-y-4 lg:col-span-2"><Schematic /><Logistics /><div className="space-y-2">{channels.map((channel) => <Channel key={channel.label} {...channel} />)}</div></aside><div className="lg:col-span-3"><ContactForm /></div></section><Protocol /><section className="mt-8 flex flex-col gap-4 border-2 border-[#1b1b1b] bg-[#fffdf7] p-5 shadow-[3px_3px_0_#1b1b1b] sm:flex-row sm:items-center sm:justify-between"><div><p className={`${mono} text-[#a9362e]`}>VERIFICATION INDEX // PRE-DISPATCH</p><h2 className="mt-1 text-xl font-black uppercase">REVIEW ARCHITECTURE ARCHIVES FIRST?</h2><p className="mt-1 text-sm text-[#58413f]">Review past distributed infrastructure engagements, systems case studies, or published technical dispatches.</p></div><div className="flex flex-wrap gap-2">{[["/projects", "PROJECTS ARCHIVE"], ["/blog", "TECH DISPATCHES"], ["/achievements", "MILESTONES"]].map(([href, label]) => <Link key={href} href={href} className={`${mono} border border-[#1b1b1b] px-3 py-2`}>{label} ↗</Link>)}</div></section></div></main></PublicShell>;
 }
+function Schematic() { return <div className="border-2 border-[#1b1b1b] bg-[#f0eded] p-3 shadow-[4px_4px_0_#1b1b1b]"><div className={`${mono} flex justify-between border-b-2 border-[#1b1b1b] pb-2`}><span><i className="mr-1 inline-block size-2 rounded-full bg-[#f16b5e]" /><i className="mx-1 inline-block size-2 rounded-full bg-[#73b8ff]" /><i className="ml-1 inline-block size-2 rounded-full bg-[#00a988]" /></span><span>FIG. 06 // DIRECT DISPATCH</span></div><div className="relative flex min-h-[220px] items-center justify-center p-5"><div className="grid w-full max-w-xs grid-cols-3 items-center gap-2"><div className="border-2 border-[#1b1b1b] bg-[#1b1b1b] p-3 font-mono text-[9px] text-[#b8f7c8]">user@host:~$<br /><span className="text-white">AUTH: 200 [GPG]</span></div><span className="text-center text-2xl">→</span><div className="border-2 border-[#1b1b1b] bg-[#73b8ff] p-3 text-center font-mono text-[9px]">INCOMING<br />QUEUE</div><span /><div className="text-center text-2xl">↘</div><span /></div></div><p className={`${mono} border-t border-[#1b1b1b] pt-2`}>DISPATCH PROTOCOL // HUMAN-TO-SYSTEM HANDSHAKE</p></div>; }
+function Logistics() { return <div className="border-2 border-[#1b1b1b] p-4 shadow-[3px_3px_0_#1b1b1b]"><div className={`${mono} flex justify-between border-b-2 border-[#1b1b1b] pb-2`}><span>DISPATCH LOGISTICS & PROTOCOL</span><span className="bg-[#73b8ff] px-2 text-[#004878]">PACIFIC NODE</span></div><div className="mt-3 grid grid-cols-2 gap-2 text-xs"><Info label="AVAILABILITY STATE" value="High-Throughput / Advisory" /><Info label="BASE TIMEZONE" value="Indonesia [WIB/UTC+7]" /><Info label="GPG / PGP FINGERPRINT" value="4A7F 8990 C001 54EE 812B 99D1" wide /></div><p className="mt-3 text-xs leading-5 text-[#58413f]">Direct channels are monitored continuously during weekdays. Average first-response SLA is within 24–48 hours for verified technical inquiries.</p></div>; }
+function Info({ label, value, wide }: { label: string; value: string; wide?: boolean }) { return <div className={`${wide ? "col-span-2" : ""} border border-[#1b1b1b] p-2`}><p className={`${mono} text-[#58413f]`}>{label}</p><p className="mt-1 font-mono text-xs font-bold">{value}</p></div>; }
+function Channel({ label, value, href, icon: Icon, action, accent }: { label: string; value: string; href?: string; icon: typeof Mail; action: string; accent: string }) { const content = <><span className="flex size-9 items-center justify-center border-2 border-[#1b1b1b]" style={{ backgroundColor: accent }}><Icon size={16} /></span><span className="min-w-0 flex-1"><b className={`${mono} block text-[#58413f]`}>{label}</b><strong className="block truncate font-mono text-xs">{value}</strong></span><span className={`${mono} border border-[#1b1b1b] px-2 py-1`}>{action}</span></>; return href ? <a href={href} target={href.startsWith("http") ? "_blank" : undefined} rel={href.startsWith("http") ? "noreferrer" : undefined} className="flex items-center gap-2 border-2 border-[#1b1b1b] p-2 shadow-[3px_3px_0_#1b1b1b]">{content}</a> : <div className="flex items-center gap-2 border-2 border-[#1b1b1b] p-2 opacity-60">{content}</div>; }
+function Protocol() { return <section className="mt-10 border-2 border-[#1b1b1b] p-4 shadow-[3px_3px_0_#1b1b1b]"><div className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-[#1b1b1b] pb-2"><span className={`${mono} bg-[#f16b5e] px-2 py-1`}>SPECIFICATION COMPLIANCE</span><span className={mono}>PROTOCOL STATE VALIDATOR</span></div><div className="mt-3 grid gap-2 sm:grid-cols-4">{[["STATE 01: NORMAL", "Clean inputs"], ["STATE 02: REJECT", "Empty / Missing Payload"], ["STATE 03: EN-FLIGHT", "Transmitting Packet"], ["STATE 04: RESOLVED", "Transmission Acknowledged"]].map(([title, body], index) => <div className="border border-[#1b1b1b] p-2" key={title}><p className={`${mono} ${index === 1 ? "text-[#a9362e]" : index === 2 ? "text-[#006b55]" : "text-[#5d8fef]"}`}>{title}</p><p className="mt-1 text-xs text-[#58413f]">{body}</p></div>)}</div></section>; }

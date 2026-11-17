@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/src/lib/auth";
+import { requireAdmin } from "@/src/lib/auth";
 import { projectService } from "@/src/services";
 import { updateProject } from "@/src/actions/project";
 import { cleanupCloudinaryImages } from "@/src/lib/cloudinary-cleanup";
@@ -9,8 +8,7 @@ export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session) return new NextResponse("Unauthorized", { status: 401 });
+  if (!(await requireAdmin())) return new NextResponse("Unauthorized", { status: 401 });
 
   const { id } = await params;
   const body = await req.json();
@@ -20,14 +18,21 @@ export async function PATCH(
     return NextResponse.json({ error: result.error }, { status: 400 });
   }
   // After a successful save, delete Cloudinary assets that are no longer
-  // referenced anywhere (old thumbnail/screenshots replaced or removed).
+  // referenced anywhere. Only reconcile media fields that were actually
+  // submitted so partial updates (e.g. visibility toggles) never treat an
+  // omitted thumbnail or screenshot list as a removal.
+  const thumbnailProvided =
+    typeof body === "object" && body !== null && "thumbnail" in body;
+  const screenshotsProvided =
+    typeof body === "object" && body !== null && Array.isArray(body.screenshots);
+
   const oldUrls = [
-    ...(old?.thumbnail ? [old.thumbnail] : []),
-    ...(old?.screenshots ?? []),
+    ...(thumbnailProvided && old?.thumbnail ? [old.thumbnail] : []),
+    ...(screenshotsProvided ? (old?.screenshots ?? []) : []),
   ];
   const newUrls = [
-    ...(body.thumbnail ? [body.thumbnail] : []),
-    ...(body.screenshots ?? []),
+    ...(thumbnailProvided && body.thumbnail ? [body.thumbnail] : []),
+    ...(screenshotsProvided ? body.screenshots : []),
   ];
   const removed = oldUrls.filter((u) => !newUrls.includes(u));
   if (removed.length) await cleanupCloudinaryImages(removed);
@@ -38,8 +43,7 @@ export async function DELETE(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session) return new NextResponse("Unauthorized", { status: 401 });
+  if (!(await requireAdmin())) return new NextResponse("Unauthorized", { status: 401 });
 
   const { id } = await params;
   try {

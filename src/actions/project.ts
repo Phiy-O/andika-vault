@@ -18,6 +18,7 @@ export async function getProjects(): Promise<ActionResult<Project[]>> {
 }
 
 export async function getAllProjects(): Promise<ActionResult<Project[]>> {
+  if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
     const projects = await projectService.getAll();
     return { data: projects as any };

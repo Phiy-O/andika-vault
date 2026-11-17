@@ -1,125 +1,37 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/src/lib/auth";
+import { blogPostService, projectService } from "@/src/services";
 import { prisma } from "@/lib/prisma";
-import {
-  FileText,
-  FolderKanban,
-  Award,
-  Wrench,
-} from "lucide-react";
+import { FileText, FolderKanban, Award, Wrench, ArrowUpRight, Plus } from "lucide-react";
 import Link from "next/link";
 
-async function getStats() {
-  const [blogCount, projectCount, certificateCount, skillCount] =
-    await Promise.all([
-      prisma.blogPost.count(),
-      prisma.project.count(),
-      prisma.certificate.count(),
-      prisma.skill.count(),
-    ]);
-  return { blogCount, projectCount, certificateCount, skillCount };
+async function getDashboardData() {
+  const [blogCount, projectCount, certificateCount, skillCount, projects, posts] = await Promise.all([
+    prisma.blogPost.count(), prisma.project.count(), prisma.certificate.count(), prisma.skill.count(), projectService.getVisible(), blogPostService.getVisible(),
+  ]);
+  return { counts: { blogCount, projectCount, certificateCount, skillCount }, projects: projects.slice(0, 4), posts: posts.slice(0, 4) };
 }
 
 const statCards = [
-  {
-    label: "Blog Posts",
-    href: "/admin/blog",
-    icon: FileText,
-    countKey: "blogCount" as const,
-    color: "from-[#a98bff] to-[#7391ff]",
-  },
-  {
-    label: "Projects",
-    href: "/admin/projects",
-    icon: FolderKanban,
-    countKey: "projectCount" as const,
-    color: "from-[#f1b86d] to-[#e8954a]",
-  },
-  {
-    label: "Certificates",
-    href: "/admin/certificates",
-    icon: Award,
-    countKey: "certificateCount" as const,
-    color: "from-[#5c7cfa] to-[#4a6ae0]",
-  },
-  {
-    label: "Skills",
-    href: "/admin/skills",
-    icon: Wrench,
-    countKey: "skillCount" as const,
-    color: "from-[#51c9a8] to-[#3db892]",
-  },
+  { label: "Published articles", key: "blogCount" as const, href: "/admin/blog", icon: FileText, accent: "#6b8fe8" },
+  { label: "Published projects", key: "projectCount" as const, href: "/admin/projects", icon: FolderKanban, accent: "#e76f51" },
+  { label: "Verified milestones", key: "certificateCount" as const, href: "/admin/certificates", icon: Award, accent: "#50a878" },
+  { label: "Skills in studio", key: "skillCount" as const, href: "/admin/skills", icon: Wrench, accent: "#c58a56" },
 ];
+
+function PanelHeader({ title, href, action }: { title: string; href?: string; action?: string }) {
+  return <div className="flex items-center justify-between border-b-2 border-foreground px-4 py-3"><h2 className="text-lg font-semibold">{title}</h2>{href && <Link className="inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-[.1em] hover:text-amber" href={href}>{action ?? "View all"} <ArrowUpRight size={13} aria-hidden="true" /></Link>}</div>;
+}
 
 export default async function AdminPage() {
   const session = await getServerSession(authOptions);
-  const stats = await getStats();
-
-  return (
-    <div>
-      {/* header */}
-      <div className="mb-10">
-        <p className="text-muted text-[11px] tracking-[.18em] mb-5 uppercase">
-          Dashboard
-        </p>
-        <h1 className="text-[clamp(32px,5vw,43px)] font-medium tracking-[-.065em] leading-[.96] text-foreground">
-          Welcome back{session?.user?.name ? `, ${session.user.name}` : ""}
-        </h1>
-        <p className="mt-4 text-muted text-[15px] leading-[1.7] max-w-md">
-          Here&apos;s an overview of your portfolio content.
-        </p>
-      </div>
-
-      {/* stat cards */}
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {statCards.map((card) => {
-          const Icon = card.icon;
-          return (
-            <Link
-              key={card.href}
-              href={card.href}
-              className="group rounded-xl border border-line bg-surface/30 p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-purple hover:shadow-[0_0_2px_var(--foreground)]"
-            >
-              <div
-                className={`mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br ${card.color}`}
-              >
-                <Icon size={18} className="text-white" />
-              </div>
-              <p className="text-3xl font-medium tracking-[-.03em] text-foreground">
-                {stats[card.countKey]}
-              </p>
-              <p className="mt-1 text-sm text-muted">{card.label}</p>
-            </Link>
-          );
-        })}
-      </div>
-
-      {/* quick links */}
-      <div className="mt-12 border-t border-line pt-8">
-        <p className="text-muted text-[10px] tracking-[.12em] mb-5 uppercase">
-          Quick Actions
-        </p>
-        <div className="flex flex-wrap gap-3">
-          <Link
-            href="/admin/blog"
-            className="rounded-lg border border-line px-5 py-3 text-sm text-foreground transition-all duration-200 hover:-translate-y-0.5 hover:border-purple hover:shadow-[0_0_2px_var(--foreground)]"
-          >
-            + New Blog Post
-          </Link>
-          <Link
-            href="/admin/projects"
-            className="rounded-lg border border-line px-5 py-3 text-sm text-foreground transition-all duration-200 hover:-translate-y-0.5 hover:border-purple hover:shadow-[0_0_2px_var(--foreground)]"
-          >
-            + New Project
-          </Link>
-          <Link
-            href="/"
-            className="rounded-lg border border-line px-5 py-3 text-sm text-foreground transition-all duration-200 hover:-translate-y-0.5 hover:border-purple hover:shadow-[0_0_2px_var(--foreground)]"
-          >
-            View Site
-          </Link>
-        </div>
-      </div>
+  const { counts, projects, posts } = await getDashboardData();
+  return <div>
+    <div className="mb-8 flex flex-wrap items-end justify-between gap-6 border-b-2 border-foreground pb-7"><div><p className="mb-3 font-mono text-[10px] uppercase tracking-[.16em] text-amber">Workspace / Overview</p><h1 className="text-[clamp(34px,5vw,58px)] font-semibold uppercase leading-[.9] tracking-[-.07em]">Welcome back, <em>{session?.user?.name ?? "admin"}.</em></h1><p className="mt-4 max-w-xl text-sm leading-[1.7] text-muted">Manage your portfolio content, technical case studies, and engineering dispatches from one central workspace.</p></div><div className="flex gap-2"><Link href="/admin/blog/new" className="inline-flex items-center gap-2 border-2 border-foreground bg-background px-4 py-3 text-xs font-semibold uppercase shadow-[3px_3px_0_var(--foreground)]"><Plus size={15} aria-hidden="true" /> Write article</Link><Link href="/admin/projects/new" className="inline-flex items-center gap-2 border-2 border-foreground bg-[#e76f51] px-4 py-3 text-xs font-semibold uppercase shadow-[3px_3px_0_var(--foreground)]"><Plus size={15} aria-hidden="true" /> New project</Link></div></div>
+    <div className="mb-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{statCards.map((card) => { const Icon = card.icon; return <Link href={card.href} key={card.key} className="border-2 border-foreground bg-background p-4 shadow-[4px_4px_0_var(--foreground)] transition-transform hover:-translate-y-0.5"><div className="mb-7 flex items-start justify-between"><span className="font-mono text-[9px] uppercase tracking-[.12em] text-muted">{card.label}</span><span className="border border-foreground p-2" style={{ backgroundColor: card.accent }}><Icon size={16} aria-hidden="true" /></span></div><strong className="block text-4xl font-semibold tracking-[-.06em]">{counts[card.key].toString().padStart(2, "0")}</strong><span className="mt-2 block font-mono text-[9px] uppercase tracking-[.1em] text-muted">Content synced ↗</span></Link>; })}</div>
+    <div className="grid gap-6 xl:grid-cols-[1.65fr_1fr]">
+      <div className="space-y-6"><section className="border-2 border-foreground bg-background shadow-[4px_4px_0_var(--foreground)]"><PanelHeader title="Recent projects" href="/admin/projects" action="View all projects" /><div className="divide-y divide-line">{projects.length ? projects.map((project) => <Link href={`/admin/projects/${project.id}/edit`} className="grid gap-2 px-4 py-4 transition-colors hover:bg-surface sm:grid-cols-[1fr_130px_100px] sm:items-center" key={project.id}><span><strong className="block text-sm">{project.title}</strong><small className="font-mono text-[10px] text-muted">/projects/{project.slug}</small></span><span className="w-fit border border-line px-2 py-1 font-mono text-[9px]">{project.category}</span><span className="font-mono text-[9px] uppercase text-[#25825c]">● Published</span></Link>) : <p className="px-4 py-6 text-sm text-muted">No projects yet.</p>}</div></section><section className="border-2 border-foreground bg-background shadow-[4px_4px_0_var(--foreground)]"><PanelHeader title="Recent articles & dispatches" href="/admin/blog" action="View all articles" /><div className="divide-y divide-line">{posts.length ? posts.map((post) => <Link href={`/admin/blog/${post.id}/edit`} className="grid gap-2 px-4 py-4 transition-colors hover:bg-surface sm:grid-cols-[1fr_130px_80px] sm:items-center" key={post.id}><span><strong className="block text-sm">{post.title}</strong><small className="font-mono text-[10px] text-muted">/blog/{post.slug}</small></span><span className="w-fit border border-line px-2 py-1 font-mono text-[9px]">{post.category}</span><span className="font-mono text-[9px] text-muted">{post.readTime}</span></Link>) : <p className="px-4 py-6 text-sm text-muted">No articles yet.</p>}</div></section></div>
+      <aside className="space-y-6"><section className="border-2 border-foreground bg-background p-4 shadow-[4px_4px_0_var(--foreground)]"><div className="mb-4 flex items-center justify-between border-b-2 border-foreground pb-3"><h2 className="text-lg font-semibold">Quick actions</h2><span className="font-mono text-[9px] uppercase text-muted">Studio ops</span></div><div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">{[["Add project", "/admin/projects/new", "Case study spec"], ["Draft article", "/admin/blog/new", "Technical dispatch"], ["Log milestone", "/admin/certificates/new", "Award / certificate"], ["Manage skills", "/admin/skills", "Stack inventory"]].map(([label, href, description]) => <Link href={href} key={href} className="border-2 border-foreground p-3 transition-colors hover:bg-[#e76f51]"><strong className="block text-sm">{label}</strong><small className="mt-2 block text-xs text-muted">{description}</small></Link>)}</div></section><section className="border-2 border-foreground bg-surface p-4 shadow-[4px_4px_0_var(--foreground)]"><p className="mb-2 font-mono text-[9px] uppercase tracking-[.12em] text-muted">Workspace status</p><p className="text-sm leading-[1.6]">Content studio online. Existing records remain available through each management module.</p></section></aside>
     </div>
-  );
+  </div>;
 }

@@ -2,27 +2,37 @@
 
 import { blogPostService } from "@/src/services";
 import { blogPostSchema, blogPostUpdateSchema } from "@/src/lib/validations";
-import type { BlogPostCreateInput, BlogPostUpdateInput } from "@/src/types";
+import type {
+  BlogPostCreateInput,
+  BlogPostListItem,
+  BlogPostUpdateInput,
+} from "@/src/types";
 import type { BlogPost } from "@prisma/client";
 import { requireAdmin } from "@/src/lib/auth";
+import { actionError } from "./action-error";
 
 type ActionResult<T> = { data?: T; error?: string };
 
-export async function getAllBlogPosts(): Promise<ActionResult<BlogPost[]>> {
+export async function getAllBlogPosts(): Promise<
+  ActionResult<BlogPostListItem[]>
+> {
+  if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
     const posts = await blogPostService.getAll();
-    return { data: posts as any };
-  } catch (e: any) {
-    return { error: e.message ?? "Failed to fetch posts" };
+    return { data: posts };
+  } catch (e) {
+    return { error: actionError(e, "Failed to fetch posts") };
   }
 }
 
-export async function getBlogPosts(): Promise<ActionResult<BlogPost[]>> {
+export async function getBlogPosts(): Promise<
+  ActionResult<BlogPostListItem[]>
+> {
   try {
     const posts = await blogPostService.getVisible();
-    return { data: posts as any };
-  } catch (e: any) {
-    return { error: e.message ?? "Failed to fetch posts" };
+    return { data: posts };
+  } catch (e) {
+    return { error: actionError(e, "Failed to fetch posts") };
   }
 }
 
@@ -31,9 +41,9 @@ export async function getBlogPost(
 ): Promise<ActionResult<BlogPost | null>> {
   try {
     const post = await blogPostService.getBySlug(slug);
-    return { data: post as any ?? null };
-  } catch (e: any) {
-    return { error: e.message ?? "Failed to fetch post" };
+    return { data: post ?? null };
+  } catch (e) {
+    return { error: actionError(e, "Failed to fetch post") };
   }
 }
 
@@ -43,11 +53,10 @@ export async function createBlogPost(
   if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
     const parsed = blogPostSchema.parse(input);
-    const post = await blogPostService.create(parsed as any);
-    return { data: post as any };
-  } catch (e: any) {
-    if (e.issues) return { error: e.issues.map((i: any) => i.message).join(", ") };
-    return { error: e.message ?? "Failed to create post" };
+    const post = await blogPostService.create(parsed);
+    return { data: post };
+  } catch (e) {
+    return { error: actionError(e, "Failed to create post") };
   }
 }
 
@@ -58,11 +67,10 @@ export async function updateBlogPost(
   if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
     const parsed = blogPostUpdateSchema.parse(input);
-    const post = await blogPostService.update(id, parsed as any);
-    return { data: post as any };
-  } catch (e: any) {
-    if (e.issues) return { error: e.issues.map((i: any) => i.message).join(", ") };
-    return { error: e.message ?? "Failed to update post" };
+    const post = await blogPostService.update(id, parsed);
+    return { data: post };
+  } catch (e) {
+    return { error: actionError(e, "Failed to update post") };
   }
 }
 
@@ -73,7 +81,7 @@ export async function deleteBlogPost(
   try {
     await blogPostService.delete(id);
     return {};
-  } catch (e: any) {
-    return { error: e.message ?? "Failed to delete post" };
+  } catch (e) {
+    return { error: actionError(e, "Failed to delete post") };
   }
 }

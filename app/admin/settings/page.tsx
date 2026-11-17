@@ -7,7 +7,7 @@ export default async function AdminSettingsPage() {
 
   return (
     <section>
-      <div className="mb-8">
+      <div className="mb-8 border-b-2 border-foreground pb-6">
         <h1 className="text-3xl font-medium tracking-[-.06em] text-foreground">
           Settings
         </h1>

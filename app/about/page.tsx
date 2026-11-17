@@ -1,13 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
-import { AboutSkills } from "../../components/about/AboutSkills";
 import { PublicShell } from "../../components/layout/PublicShell";
-import { PageHero } from "../../components/content/PageHero";
+import { AboutSkills } from "../../components/about/AboutSkills";
 import { skillService } from "@/src/services";
 import { getSiteSettings } from "@/src/actions/site-setting";
-import { CTAButton } from "../../components/content/CTAButton";
-import { SectionEyebrow } from "../../components/content/SectionEyebrow";
-import { Sparkles, Target, Layers, Download } from "lucide-react";
+import { parseAboutContent } from "@/src/lib/about-content";
 
 export const revalidate = 3600;
 
@@ -16,150 +13,50 @@ export const metadata = {
   description: "Learn about Andika's approach to building useful digital products.",
 };
 
+function SectionHeader({ index, label, note, color = "#f16b5e" }: { index: string; label: string; note: string; color?: string }) {
+  return <div className="mb-6 flex items-center justify-between border-b-2 border-foreground pb-3 max-md:items-start max-md:gap-4"><div className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[.08em]"><span className="h-3 w-3 border-2 border-foreground" style={{ backgroundColor: color }} />{index} // {label}</div><span className="font-mono text-[9px] uppercase tracking-[.1em] text-muted max-md:text-right">[ {note} ]</span></div>;
+}
+
 export default async function AboutPage() {
-  const [skills, settings] = await Promise.all([
-    skillService.getVisible(),
-    getSiteSettings(),
-  ]);
+  const [skills, settings] = await Promise.all([skillService.getVisible(), getSiteSettings()]);
+  const content = parseAboutContent(settings.data!);
+  const resumeUrl = settings.data?.resumeUrl ?? "/resume/dummy-resume.pdf";
+
   return (
     <PublicShell>
-      <PageHero
-        eyebrow="About me"
-        title={<>Making the digital <em>feel more human.</em></>}
-        description="I am a software engineer focused on turning complex ideas into clear, useful, and quietly memorable digital experiences."
-      />
-
-      {/* Photo + Narrative */}
-      <section className="mx-auto w-full px-[10vw] max-md:px-[6vw] border-t border-line pt-[80px] pb-[120px] max-md:pt-[65px] max-md:pb-[85px]">
-        <div className="grid gap-[70px] grid-cols-[1fr_1.2fr] items-center max-md:grid-cols-1 max-md:gap-[50px]">
-          <div className="relative rounded-[18px] overflow-hidden aspect-[4/5] max-md:aspect-[4/3] border border-line/50 transition-all duration-300 hover:border-purple/30 hover:shadow-[0_0_30px_rgba(169,139,255,.08)]">
-            <Image
-              src="/images/andika-profile.png"
-              alt="Andika"
-              fill
-              className="object-cover transition-transform duration-500 hover:scale-[1.02]"
-              sizes="(max-width: 768px) 100vw, 45vw"
-              priority
-            />
-          </div>
-          <div className="flex flex-col gap-6">
-            <p className="text-muted text-[11px] tracking-[.18em] mb-4 uppercase">
-              <Sparkles size={12} className="inline mr-[6px] -mt-[2px]" aria-hidden="true" />
-              The short version
-            </p>
-            <p className="text-muted text-lg leading-[1.8] m-0">
-              Good work lives somewhere between sharp strategy and genuine
-              curiosity about people. I care about the details, the architecture
-              underneath, and the moment a product simply clicks.
-            </p>
-            <p className="text-muted text-lg leading-[1.8] m-0">
-              My work sits at the intersection of product thinking, thoughtful
-              interface design, and dependable full-stack engineering.
-            </p>
-            <div className="flex gap-6 mt-2">
-              <div>
-                <span className="text-foreground text-[26px] font-medium tracking-[-.04em]">5+</span>
-                <span className="text-muted block text-[11px] tracking-[.06em] uppercase mt-1">Years coding</span>
+      <main className="bg-background px-[5.5vw] pb-20 pt-16 text-foreground">
+        <div className="mx-auto w-full space-y-16">
+          <section>
+            <SectionHeader index="01" label="Behind the code" note="Profile verified // discipline: dev architect" />
+            <div className="grid gap-6 lg:grid-cols-12">
+              <div className="space-y-5 lg:col-span-7">
+                <h1 className="max-w-3xl text-[clamp(42px,5vw,68px)] font-bold leading-[.94] tracking-[-.06em]">A little more about me.</h1>
+                <p className="max-w-2xl text-lg font-semibold leading-[1.3] text-[#a9362e]">Curious about how things work. Even more curious about how to make them better.</p>
+                <p className="max-w-2xl text-base leading-[1.65]">{content.aboutIntro}</p>
+                <div className="border-2 border-foreground bg-surface p-5 shadow-[3px_3px_0_var(--foreground)]">
+                  <div className="mb-4 flex justify-between border-b border-line pb-2 font-mono text-[10px] uppercase tracking-[.08em]"><span>Spec sheet // ELIAS_REID.V2</span><span className="bg-[#00aa76] px-2 py-1 text-[#003522]">Active on call</span></div>
+                  <div className="grid gap-4 sm:grid-cols-3 font-mono text-[10px] uppercase tracking-[.06em]"><div><span className="text-muted">Primary role</span><strong className="mt-1 block font-sans text-sm normal-case tracking-normal">{content.aboutRole}</strong></div><div><span className="text-muted">Location</span><strong className="mt-1 block font-sans text-sm normal-case tracking-normal">{content.aboutLocation}</strong></div><div><span className="text-muted">Current focus</span><strong className="mt-1 block font-sans text-sm normal-case tracking-normal text-[#a9362e]">{content.aboutFocus}</strong></div></div>
+                </div>
               </div>
-              <div>
-                <span className="text-foreground text-[26px] font-medium tracking-[-.04em]">20+</span>
-                <span className="text-muted block text-[11px] tracking-[.06em] uppercase mt-1">Projects built</span>
-              </div>
-              <div>
-                <span className="text-foreground text-[26px] font-medium tracking-[-.04em]">∞</span>
-                <span className="text-muted block text-[11px] tracking-[.06em] uppercase mt-1">Cups of coffee</span>
+              <div className="border-2 border-foreground bg-surface p-3 shadow-[4px_4px_0_var(--foreground)] lg:col-span-5">
+                <div className="mb-2 flex items-center justify-between border-b-2 border-foreground pb-2 font-mono text-[9px] uppercase"><span className="flex gap-1.5"><i className="h-3 w-3 rounded-full border border-foreground bg-[#f16b5e]" /><i className="h-3 w-3 rounded-full border border-foreground bg-[#73b8ff]" /><i className="h-3 w-3 rounded-full border border-foreground bg-[#00aa76]" /></span><span>Fig. 01 // architect profile</span></div>
+                <div className="border-2 border-foreground bg-background p-5"><div className="relative mx-auto aspect-square max-w-[230px] overflow-hidden rounded-xl border-2 border-foreground bg-surface shadow-[3px_3px_0_var(--foreground)]"><Image src="/images/andika-profile.png" alt="Andika profile" fill className="object-cover" sizes="230px" priority /></div><div className="mt-5 flex justify-between font-mono text-[9px] uppercase"><span className="border-2 border-foreground bg-background px-2 py-1">● {content.aboutRole}</span><span className="border-2 border-foreground bg-background px-2 py-1 text-[#a9362e]">{content.aboutLocation}</span></div></div>
+                <div className="mt-2 border-2 border-foreground bg-background p-3 font-mono text-[10px] leading-[1.7] uppercase"><p><b className="text-[#58413f]">Discipline:</b> {content.aboutDiscipline}</p><p><b className="text-[#58413f]">Philosophy:</b> {content.aboutPhilosophy}</p><p><b className="text-[#58413f]">Core runtime:</b> {content.aboutRuntime}</p></div>
               </div>
             </div>
-          </div>
+          </section>
+
+          <section className="border-t-2 border-foreground pt-7"><SectionHeader index="02" label="The journey" note="Narrative log // chronology" color="#73b8ff" /><div className="grid gap-8 lg:grid-cols-12"><div className="space-y-5 lg:col-span-8"><h2 className="text-4xl font-bold tracking-[-.04em]">How it started.</h2>{content.journey.slice(0, 2).map((item) => <p className="leading-[1.7]" key={item.title}>{item.body}</p>)}</div><div className="border-2 border-foreground bg-surface p-4 font-mono text-xs leading-[1.8] shadow-[3px_3px_0_var(--foreground)] lg:col-span-4"><p className="border-b border-line pb-2 font-bold uppercase">Dispatch // origin notes</p><p className="mt-4 text-[#a9362e]">int main(void) &#123;</p><p className="pl-4 text-[#006c49]">printf(&quot;Init: Curiosity&quot;);</p><p className="pl-4">return ARCH_RESILIENT;</p><p>&#125;</p><p className="mt-5 border-t border-line pt-3 text-[#006c49]">Canonical state: stable 0xDEADBEEF</p></div></div></section>
+
+          <section className="border-t-2 border-foreground pt-7"><SectionHeader index="03" label="Engineering focus" note="Three core pillars of operation" color="#00aa76" /><h2 className="mb-2 text-4xl font-bold tracking-[-.04em]">The kind of work I enjoy.</h2><p className="mb-7 max-w-2xl text-muted">A disciplined intersection between tactile graphical user interfaces, deterministic backend topologies, and low-level hardware experimentation.</p><div className="grid gap-5 md:grid-cols-3">{content.pillars.map((pillar, index) => <article className="border-2 border-foreground bg-surface p-5 shadow-[3px_3px_0_var(--foreground)]" key={pillar.title}><div className="mb-5 flex justify-between border-b-2 border-foreground pb-3"><span className="font-mono text-xl">{String(index + 1).padStart(2, "0")}</span><span className="bg-[#f16b5e] px-2 py-1 font-mono text-[9px] uppercase text-background">{pillar.tag}</span></div><h3 className="text-2xl font-bold">{pillar.title}</h3><p className="mt-2 text-sm leading-[1.6] text-muted">{pillar.description}</p><div className="mt-5 flex gap-1 font-mono text-[9px] uppercase"><span className="border border-line px-2 py-1">Systems</span><span className="border border-line px-2 py-1">Reliable</span></div></article>)}</div></section>
+
+          <section className="border-t-2 border-foreground pt-7"><SectionHeader index="04" label="Tools I work with" note="Current stack // selected instruments" /><h2 className="mb-7 text-4xl font-bold tracking-[-.04em]">Tools I work with.</h2><div className="border-2 border-foreground bg-surface p-5"><AboutSkills skills={skills as any} /></div></section>
+
+          <section className="border-t-2 border-foreground pt-7"><SectionHeader index="05" label="A journey in progress" note="Selected chapters // engineering timeline" color="#73b8ff" /><h2 className="mb-7 text-4xl font-bold tracking-[-.04em]">A journey in progress.</h2><div className="space-y-3">{content.timeline.map((item, index) => <article className="grid gap-3 border-2 border-foreground bg-surface p-4 md:grid-cols-[100px_1fr]" key={item.title}><span className="font-mono text-xs text-[#a9362e]">[{String(index + 1).padStart(2, "0")}]</span><div><h3 className="font-bold">{item.title}</h3><p className="mt-1 text-sm text-muted">{item.description}</p></div></article>)}</div></section>
+
+          <section className="border-2 border-foreground bg-[#f16b5e] p-6 shadow-[4px_4px_0_var(--foreground)] md:flex md:items-center md:justify-between"><div><p className="font-mono text-[10px] uppercase">Ready to build // collaborate</p><h2 className="mt-2 text-3xl font-bold tracking-[-.04em]">Know you a little about me.</h2></div><Link href={resumeUrl} target="_blank" className="mt-5 inline-block border-2 border-foreground bg-background px-4 py-3 font-mono text-[10px] font-bold uppercase shadow-[3px_3px_0_var(--foreground)] md:mt-0">View resume ↗</Link></section>
         </div>
-      </section>
-
-      {/* Skills */}
-      <section className="mx-auto w-full px-[10vw] max-md:px-[6vw] border-t border-line pt-[80px] pb-[120px] max-md:pt-[65px] max-md:pb-[85px]">
-        <SectionEyebrow>
-          Skills
-        </SectionEyebrow>
-        <h2 className="text-[clamp(32px,4vw,48px)] font-medium tracking-[-.04em] leading-[1.1] mt-0 mb-10 max-w-[680px]">
-          The skills, tools and technologies I am really good at.
-        </h2>
-        <AboutSkills skills={skills as any} />
-      </section>
-
-      {/* Resume */}
-      <section className="mx-auto w-full px-[10vw] max-md:px-[6vw] border-t border-line pt-[80px] pb-[120px] max-md:pt-[65px] max-md:pb-[85px]">
-        <SectionEyebrow>
-          Resume
-        </SectionEyebrow>
-        <h2 className="text-[clamp(32px,4vw,48px)] font-medium tracking-[-.04em] leading-[1.1] mt-0 mb-6 max-w-[680px]">
-          Want the full picture?
-        </h2>
-        <p className="text-muted text-base leading-[1.75] mb-8 max-w-[480px]">
-          A complete overview of my experience, education, and skills in a single PDF.
-        </p>
-        <Link
-          href={settings?.data?.resumeUrl ?? "/resume/dummy-resume.pdf"}
-          target="_blank"
-          download
-          className="border border-line rounded-lg text-foreground inline-flex items-center gap-2.5 text-xs px-5 py-3 transition-all duration-200 hover:shadow-[0_0_2px_var(--foreground)] hover:-translate-y-0.5"
-        >
-          <Download size={14} />
-          Download resume
-        </Link>
-      </section>
-
-      {/* How I Work */}
-      <section className="mx-auto w-full px-[10vw] max-md:px-[6vw] border-t border-line pt-[80px] pb-[120px] max-md:pt-[65px] max-md:pb-[85px]">
-      <SectionEyebrow>
-          <Target size={12} className="inline mr-[6px] -mt-[2px]" aria-hidden="true" />
-          Process
-        </SectionEyebrow>
-        <h2 className="text-[clamp(32px,4vw,48px)] font-medium tracking-[-.04em] leading-[1.1] mt-0 mb-[60px] max-w-[680px]">
-          How I work
-        </h2>
-        <div className="grid gap-[25px] grid-cols-3 max-md:grid-cols-1">
-          <article className="border border-line rounded-xl p-8 pt-6 transition-all duration-300 hover:border-purple/30 hover:shadow-[0_0_24px_rgba(169,139,255,.06)] hover:-translate-y-1 max-md:p-6">
-            <div className="flex items-center justify-between mb-5">
-              <span className="text-purple text-xs font-medium">01</span>
-              <Layers size={18} className="text-purple/50" aria-hidden="true" />
-            </div>
-            <h3 className="text-[22px] font-medium tracking-[-.03em] mt-0 mb-3 mx-0">
-              Start with clarity
-            </h3>
-            <p className="text-muted text-sm leading-[1.7] m-0">
-              Understand the real problem before reaching for a solution.
-            </p>
-          </article>
-          <article className="border border-line rounded-xl p-8 pt-6 transition-all duration-300 hover:border-purple/30 hover:shadow-[0_0_24px_rgba(169,139,255,.06)] hover:-translate-y-1 max-md:p-6">
-            <div className="flex items-center justify-between mb-5">
-              <span className="text-purple text-xs font-medium">02</span>
-              <Layers size={18} className="text-purple/50" aria-hidden="true" />
-            </div>
-            <h3 className="text-[22px] font-medium tracking-[-.03em] mt-0 mb-3 mx-0">
-              Build with intent
-            </h3>
-            <p className="text-muted text-sm leading-[1.7] m-0">
-              Choose simple, durable systems that can grow with the idea.
-            </p>
-          </article>
-          <article className="border border-line rounded-xl p-8 pt-6 transition-all duration-300 hover:border-purple/30 hover:shadow-[0_0_24px_rgba(169,139,255,.06)] hover:-translate-y-1 max-md:p-6">
-            <div className="flex items-center justify-between mb-5">
-              <span className="text-purple text-xs font-medium">03</span>
-              <Layers size={18} className="text-purple/50" aria-hidden="true" />
-            </div>
-            <h3 className="text-[22px] font-medium tracking-[-.03em] mt-0 mb-3 mx-0">
-              Leave room for people
-            </h3>
-            <p className="text-muted text-sm leading-[1.7] m-0">
-              Make technology feel approachable, useful, and considered.
-            </p>
-          </article>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <div className="mx-auto w-full py-0 px-[10vw] pb-[130px] max-md:px-[6vw] max-md:pb-[90px]">
-      <CTAButton href="/contact" label="Have a project in mind" />
-    </div>
+      </main>
     </PublicShell>
   );
 }

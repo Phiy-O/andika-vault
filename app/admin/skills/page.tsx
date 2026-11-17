@@ -10,7 +10,7 @@ export default async function AdminSkillsPage() {
 
   return (
     <section>
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-8 flex items-end justify-between gap-4 border-b-2 border-foreground pb-6">
         <div>
           <h1 className="text-3xl font-medium tracking-[-.06em] text-foreground">
             Skills
@@ -21,7 +21,7 @@ export default async function AdminSkillsPage() {
         </div>
         <a
           href="/admin/skills/new"
-          className="rounded-lg bg-purple px-4 py-2 text-sm font-medium text-[#17151c] transition-opacity hover:opacity-90"
+          className="border-2 border-foreground bg-[#e76f51] px-4 py-2 text-sm font-semibold uppercase shadow-[3px_3px_0_var(--foreground)] transition-transform hover:-translate-y-0.5"
         >
           + New Skill
         </a>
