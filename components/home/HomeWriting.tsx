@@ -1,0 +1,8 @@
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
+import type { BlogPost } from "@prisma/client";
+
+export function HomeWriting({ posts }: { posts: BlogPost[] }) {
+  const visible = posts.filter((post) => post.isVisible).sort((a, b) => a.sortOrder - b.sortOrder).slice(0, 4);
+  return <section className="mx-auto max-w-7xl border-b border-line px-[5.5vw] py-20" id="writing" aria-labelledby="writing-title"><div className="mb-7 flex items-end justify-between gap-6 border-b border-line pb-5"><div><p className="mb-3 font-mono text-[10px] uppercase tracking-[.16em] text-amber">03 / Notes & writing</p><h2 id="writing-title" className="mb-0 text-[clamp(40px,5vw,68px)] uppercase">Occasionally, <em>I write.</em></h2></div><Link className="hidden border border-foreground px-4 py-3 font-mono text-[9px] uppercase sm:inline-flex" href="/blog">Explore all writing <ArrowUpRight size={14} aria-hidden="true" /></Link></div><div className="border-2 border-foreground">{visible.length ? visible.map((post, index) => <Link className="grid gap-2 border-b border-line px-4 py-4 last:border-b-0 sm:grid-cols-[100px_1fr_auto] sm:items-center" href={`/blog/${post.slug}`} key={post.id}><span className="font-mono text-[9px] text-muted">{String(index + 1).padStart(2, "0")} / {post.category}</span><span className="text-sm font-semibold uppercase">{post.title}</span><span className="flex items-center gap-2 font-mono text-[9px] text-muted">{post.readTime} <ArrowUpRight size={13} aria-hidden="true" /></span></Link>) : <p className="px-4 py-5 text-sm text-muted">Writing archive is being prepared.</p>}</div></section>;
+}

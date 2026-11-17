@@ -1,104 +1,28 @@
-import Image from "next/image";
 import Link from "next/link";
-import { SectionEyebrow } from "../content/SectionEyebrow";
+import { ArrowUpRight } from "lucide-react";
 import { getSiteSettings } from "@/src/actions/site-setting";
-
-const randomLinks = [
-  { label: "Dicoding", href: "#" },
-  { label: "Udemy", href: "#" },
-  { label: "Fullstack", href: "#" },
-  { label: "Free Course", href: "#" },
-  { label: "Hobby", href: "#" },
-]
-
-const exploreLinks = [
-  { label: "Projects", href: "/projects" },
-  { label: "Blog", href: "/blog" },
-  { label: "Achievements", href: "/achievements" },
-  { label: "Web Development", href: "#" },
-  { label: "Tutorial", href: "#" },
-  { label: "Personal", href: "#" },
-  { label: "Information", href: "#" },
-];
-
-const aboutLinks = [
-  { label: "About me", href: "/about" },
-  { label: "Contact", href: "/contact" },
-  { label: "Resume", href: "/resume.pdf" },
-  { label: "Skills", href: "#" },
-  { label: "Rentalin", href: "#" },
-  { label: "Dashboard", href: "#" },
-];
-
-const quickLinks = [
-  { label: "Home", href: "/#top" },
-  { label: "LinkedIn", href: "https://linkedin.com", external: true },
-  { label: "GitHub", href: "https://github.com", external: true },
-];
-
-function FooterColumn({ title, links }: { title: string; links: { label: string; href: string; external?: boolean }[] }) {
-  return (
-    <div className="flex flex-col gap-3.5">
-      <p className="text-foreground text-base font-medium tracking-[.02em]">{title}</p>
-      <ul className="list-none p-0 m-0 flex flex-col gap-2">
-        {links.map((link) => (
-          <li key={link.label}>
-            <Link
-              className="text-muted text-[15px] transition-colors duration-200 hover:text-foreground"
-              href={link.href}
-              {...(link.external ? { target: "_blank", rel: "noreferrer" } : {})}
-            >
-              {link.label}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
 
 export async function Footer() {
   const { data: settings } = await getSiteSettings();
-  const socialIcons = [
-    { label: "LinkedIn", href: settings?.linkedinUrl ?? "#", icon: "/icons/linkedin-svgrepo-com.svg" },
-    { label: "GitHub", href: settings?.githubUrl ?? "#", icon: "/icons/github-svgrepo-com.svg" },
-    { label: "Instagram", href: settings?.instagramUrl ?? "#", icon: "/icons/instagram-svgrepo-com.svg" },
-  ];
+  const socialLinks = [
+    { label: "GitHub", href: settings?.githubUrl },
+    { label: "LinkedIn", href: settings?.linkedinUrl },
+    { label: "Instagram", href: settings?.instagramUrl },
+  ].filter((link): link is { label: string; href: string } => Boolean(link.href));
 
   return (
-    <footer className="bg-surface" id="contact">
-      <div className="py-[90px] px-[10vw] max-md:py-[65px] max-md:px-[6vw]">
-        <div className="flex justify-between items-start gap-20 max-md:flex-col max-md:gap-[70px]">
-          <div className="max-w-[420px] max-md:max-w-none">
-            <SectionEyebrow>Have a good idea?</SectionEyebrow>
-            <h2 className="text-[clamp(52px,7vw,92px)] font-medium tracking-[-.065em] leading-[.96] mb-5">Let&apos;s make<br /><em>it real.</em></h2>
-            <p className="text-muted text-[14px] leading-[1.7]">Building thoughtful digital products that are clear, useful, and built to last.</p>
-          </div>
-          <div className="grid grid-cols-4 gap-32 max-md:grid-cols-4 max-md:gap-8 max-md:w-full">
-            <FooterColumn title="Random" links={randomLinks} />
-            <FooterColumn title="Explore" links={exploreLinks} />
-            <FooterColumn title="About me" links={aboutLinks} />
-            <FooterColumn title="Quick links" links={quickLinks} />
-          </div>
+    <footer className="border-t-2 border-foreground bg-background">
+      <div className="mx-auto flex max-w-7xl flex-col gap-8 px-[5.5vw] py-10 lg:flex-row lg:items-end lg:justify-between">
+        <div className="max-w-md">
+          <p className="mb-3 font-mono text-[10px] uppercase tracking-[.14em]">Andika / Software Engineer</p>
+          <p className="m-0 text-sm leading-[1.6] text-muted">Full-stack & systems software engineer specializing in resilient architectures, practical user systems, and runtime performance.</p>
         </div>
+        <nav className="flex flex-wrap items-center gap-2" aria-label="Footer links">
+          {socialLinks.map((link) => <a className="inline-flex items-center gap-1 border border-foreground px-3 py-2 font-mono text-[9px] uppercase tracking-[.08em] transition-colors hover:bg-surface" href={link.href} key={link.label} target="_blank" rel="noreferrer">{link.label} <ArrowUpRight size={12} aria-hidden="true" /></a>)}
+          <Link className="inline-flex items-center gap-1 border border-foreground px-3 py-2 font-mono text-[9px] uppercase tracking-[.08em] transition-colors hover:bg-surface" href="#top">Back to top <ArrowUpRight size={12} aria-hidden="true" /></Link>
+        </nav>
       </div>
-      <div className="border-t border-line flex justify-between items-center py-6 px-[10vw] max-md:px-[6vw]">
-        <p className="text-muted text-[11px]">© 2025 Andika. Built with care❤️</p>
-        <div className="flex items-center gap-3">
-          {socialIcons.map((social) => (
-            <a
-              className="flex items-center justify-center w-10 h-10 text-white/60 transition-all duration-200 hover:text-white"
-              href={social.href}
-              key={social.label}
-              aria-label={social.label}
-              rel="noreferrer"
-              target="_blank"
-            >
-              <Image src={social.icon} alt="" width={24} height={24} />
-            </a>
-          ))}
-        </div>
-      </div>
+      <div className="mx-auto flex max-w-7xl flex-col gap-2 border-t border-line px-[5.5vw] py-5 font-mono text-[9px] uppercase tracking-[.08em] text-muted sm:flex-row sm:items-center sm:justify-between"><span>© 2026 Andika. Built with care.</span><span>Available for thoughtful work / Indonesia</span></div>
     </footer>
   );
 }

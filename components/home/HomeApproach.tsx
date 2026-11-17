@@ -1,0 +1,3 @@
+export function HomeApproach() {
+  return <section className="mx-auto max-w-7xl border-b border-line px-[5.5vw] py-8" id="approach" aria-label="Approach statement"><div className="flex items-start gap-4 border-2 border-foreground bg-surface px-5 py-5 text-sm leading-[1.6] shadow-[4px_4px_0_var(--foreground)]"><span className="mt-1 h-2 w-2 shrink-0 border border-foreground bg-[#e76f51]" aria-hidden="true" /><p className="m-0">Beyond writing code, I enjoy understanding how systems work, solving practical problems, and exploring ideas across software and hardware.</p><span className="ml-auto hidden shrink-0 font-mono text-[9px] uppercase tracking-[.12em] text-muted sm:block">Background ↗</span></div></section>;
+}
