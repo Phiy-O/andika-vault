@@ -145,8 +145,9 @@ Reuse the workspace status bar pattern so editors and workspaces feel related:
 
 - Left: coral `SYNC READY` chip; `Workspace // <Module>`; `/ Editor`; record
   mode (`New record` or `Record 04A2`).
-- Right: dirty state chip (`Unsaved changes` coral, `All changes saved` with a
-  green dot), `Mode // New|Edit`, and a small `Live database` chip.
+- Right: dirty state chip (`Unsaved changes` coral; `No changes yet` for a new
+  record; `All changes saved` with a green dot for an unchanged edit),
+  `Mode // New|Edit`, and a small `Live database` chip.
 - `aria-live="polite"` on the dirty state.
 - Same `min-h-11`, 2px border, surface background, 2px offset shadow as the
   workspace strip.
@@ -236,9 +237,11 @@ Three panels, each with a numbered header strip:
    - Achievements: image or certificate placeholder, issuer + date, title,
      credential chip.
    - Skills: icon in a bordered square, name, category, "About page" note.
-   - If `isVisible` is false, show a `DRAFT` badge. The link stays available to
-     signed-in admins as a draft preview, matching the list workspaces and the
-     detail pages, which already allow admin preview of invisible records.
+   - If `isVisible` is false, show a `DRAFT` badge. For Projects and Articles,
+     the link stays available to signed-in admins as a draft preview, matching
+     the list workspaces and the detail pages, which already allow admin
+     preview of invisible records. Achievements and Skills have no per-record
+     draft route, so their path row is not a link until the record is visible.
    - Empty states are intentional: "Add a thumbnail to preview this record."
 3. **Record**
    - Definition rows: mode, short ID, created, updated. In create mode, show
@@ -362,8 +365,12 @@ Use existing admin tokens only:
 - Update only the chrome: cream surface, 2px border, square corners, toolbar
   wash, foreground text, coral active states. Remove `prose-invert` so article
   content is readable on the cream editor surface.
-- Keep dynamic import, extension configuration, content initialization, focus
-  guard, and HTML output unchanged.
+- Keep dynamic import, extension configuration, focus guard, and HTML output
+  unchanged. The only initialization change is the mount-import suppression:
+  suppress the change emission caused by the mount-time HTML import, so a saved
+  article is not immediately marked dirty. Real user edits still emit normally.
+  The article's existing `bodyFormat` stays read-only and is shown as a format
+  hint; it remains in the payload.
 
 **Shared admin modal**
 
@@ -373,6 +380,9 @@ Use existing admin tokens only:
 - Visual-only change. Keep the dialog element, focus behavior, backdrop click,
   body scroll lock, `onClose`, footer props, and `noFooter` contract exactly as
   they are.
+- Add `type="button"` to the close, cancel, and confirm controls. The dialog is
+  rendered inside the editor form; without an explicit type those buttons can
+  submit the surrounding form. This is a correctness fix, not a contract change.
 - This also refreshes the Messages and Skills dialogs. No layout or behavior
   change on those screens.
 
