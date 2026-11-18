@@ -65,11 +65,11 @@ const extensions = [
         placeholder: "Start writing...",
         classNames: {
             contentEditable:
-                "prose prose-invert max-w-none focus:outline-none px-4 py-3 min-h-[280px] text-sm text-foreground bg-surface/30 cursor-text",
-            placeholder: "text-muted text-sm px-4 py-3",
+                "prose max-w-none focus:outline-none px-4 py-4 min-h-[360px] text-sm text-foreground bg-background cursor-text",
+            placeholder: "text-muted text-sm px-4 py-4",
         },
         styles: {
-            contentEditable: { caretColor: "#f5f0e9" },
+            contentEditable: { caretColor: "#1b1b1b" },
         },
     }),
     boldExtension,
@@ -109,36 +109,44 @@ function EditorShell({ content, onChange }: Props) {
     const wrapperRef = useRef<HTMLDivElement>(null);
     const initialized = useRef(false);
     const onChangeRef = useRef(onChange);
-    onChangeRef.current = onChange;
+    const suppressChanges = useRef(false);
     const [currentBlock, setCurrentBlock] = useState<BlockFormat>("p");
     const [currentAlign, setCurrentAlign] = useState<ElementFormatType>("left");
     const [prompt, setPrompt] = useState<null | {
         mode: "link" | "image";
         value: string;
     }>(null);
-    // The Provider renders the contentEditable in a sibling container, so
-    // focus-within on the wrapper never fires — track focus manually.
     const [focused, setFocused] = useState(false);
 
-    // Inject initial HTML content once on mount
+    useEffect(() => {
+        onChangeRef.current = onChange;
+    }, [onChange]);
+
+    // Inject initial HTML content once on mount, suppressing the import emissions
     useEffect(() => {
         if (!editor || initialized.current) return;
         initialized.current = true;
         if (content) {
-            // defer to avoid flushSync inside lifecycle method
-            queueMicrotask(() => commands.importFromHTML(content));
+            suppressChanges.current = true;
+            queueMicrotask(() => {
+                commands.importFromHTML(content);
+                queueMicrotask(() => {
+                    suppressChanges.current = false;
+                });
+            });
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [editor]);
 
     // Emit HTML changes to parent + keep block type in sync with selection.
-    // Without this, currentBlock is stale (computed once at render), so the
-    // dropdown label is wrong and toggleHeading silently toggles back.
+    // Only emit when not suppressing mount-time import changes.
     useEffect(() => {
         if (!editor) return;
         return editor.registerUpdateListener(({ editorState }) => {
             const html = commands.exportToHTML();
-            onChangeRef.current(html);
+            if (!suppressChanges.current) {
+                onChangeRef.current(html);
+            }
             setCurrentBlock(commands.getCurrentBlockType());
             editorState.read(() => {
                 const selection = $getSelection();
@@ -261,13 +269,13 @@ function EditorShell({ content, onChange }: Props) {
     return (
         <div
             ref={wrapperRef}
-            className={`overflow-visible rounded-lg border transition-colors ${focused
-                    ? "border-purple ring-2 ring-purple/30"
+            className={`overflow-visible border-2 transition-colors ${focused
+                    ? "border-purple shadow-[2px_2px_0_var(--foreground)]"
                     : "border-line"
-                }`}
+                } bg-background`}
         >
             {/* Toolbar */}
-            <div className="flex flex-wrap items-center gap-0.5 border-b border-line bg-surface/50 px-2 py-1.5">
+            <div className="flex flex-wrap items-center gap-0.5 border-b-2 border-line bg-admin-wash px-2 py-1.5">
                 {/* Undo / Redo */}
                 <ToolbarGroup>
                     <TbBtn label="Undo" icon={<Undo size={14} />} action={() => commands.undo()} />
@@ -358,7 +366,7 @@ function EditorShell({ content, onChange }: Props) {
                             }
                         }}
                         placeholder="https://..."
-                        className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-purple"
+                        className="w-full h-10 border-2 border-line bg-background px-3 font-sans text-sm text-foreground outline-none transition-colors focus:border-foreground focus-visible:outline-2 focus-visible:outline-purple focus-visible:outline-offset-0"
                     />
                 </label>
             </Modal>
@@ -404,22 +412,22 @@ function BlockDropdown({
             <button
                 type="button"
                 onClick={() => setOpen((v) => !v)}
-                className="flex items-center gap-1.5 rounded px-2 py-1.5 text-xs font-medium text-muted hover:bg-surface hover:text-foreground transition-colors"
+                className="flex items-center gap-1.5 border-2 border-line bg-surface px-2 py-1.5 text-xs font-space font-bold tracking-[-.01em] text-foreground hover:bg-admin-wash transition-colors"
             >
                 {active?.icon}
                 <span>{active?.label ?? "Paragraph"}</span>
                 <ChevronDown size={12} />
             </button>
             {open && (
-                <div className="absolute left-0 top-full z-50 mt-1 w-40 rounded-lg border border-line bg-[#17151c] p-1 shadow-xl">
+                <div className="absolute left-0 top-full z-50 mt-1 w-40 border-2 border-line bg-surface p-1 shadow-[3px_3px_0_var(--foreground)]">
                     {options.map((opt) => (
                         <button
                             key={opt.value}
                             type="button"
                             onMouseDown={(e) => { e.preventDefault(); onChange(opt.value); setOpen(false); }}
-                            className={`flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-xs transition-colors ${opt.value === value
-                                    ? "bg-purple/20 text-purple"
-                                    : "text-muted hover:bg-surface hover:text-foreground"
+                            className={`flex w-full items-center gap-2 border-2 border-transparent px-3 py-1.5 text-xs font-sans transition-colors ${opt.value === value
+                                    ? "bg-purple text-foreground"
+                                    : "text-muted hover:bg-admin-wash hover:text-foreground"
                                 }`}
                         >
                             {opt.icon}
@@ -462,22 +470,22 @@ function AlignDropdown({
             <button
                 type="button"
                 onClick={() => setOpen((v) => !v)}
-                className="flex items-center gap-1.5 rounded px-2 py-1.5 text-xs font-medium text-muted hover:bg-surface hover:text-foreground transition-colors"
+                className="flex items-center gap-1.5 border-2 border-line bg-surface px-2 py-1.5 text-xs font-space font-bold tracking-[-.01em] text-foreground hover:bg-admin-wash transition-colors"
             >
                 {active.icon}
                 <span>{active.label}</span>
                 <ChevronDown size={12} />
             </button>
             {open && (
-                <div className="absolute left-0 top-full z-50 mt-1 w-40 rounded-lg border border-line bg-[#17151c] p-1 shadow-xl">
+                <div className="absolute left-0 top-full z-50 mt-1 w-40 border-2 border-line bg-surface p-1 shadow-[3px_3px_0_var(--foreground)]">
                     {options.map((opt) => (
                         <button
                             key={opt.value}
                             type="button"
                             onMouseDown={(e) => { e.preventDefault(); onChange(opt.value); setOpen(false); }}
-                            className={`flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-xs transition-colors ${opt.value === value
-                                    ? "bg-purple/20 text-purple"
-                                    : "text-muted hover:bg-surface hover:text-foreground"
+                            className={`flex w-full items-center gap-2 border-2 border-transparent px-3 py-1.5 text-xs font-sans transition-colors ${opt.value === value
+                                    ? "bg-purple text-foreground"
+                                    : "text-muted hover:bg-admin-wash hover:text-foreground"
                                 }`}
                         >
                             {opt.icon}
@@ -508,36 +516,13 @@ function TbBtn({
                 e.preventDefault();
                 action();
             }}
-            className={`rounded p-1.5 transition-colors ${active
-                    ? "bg-purple/20 text-purple"
-                    : "text-muted hover:bg-surface hover:text-foreground"
+            className={`border-2 border-transparent p-1.5 transition-colors ${active
+                    ? "bg-purple text-foreground"
+                    : "text-muted hover:bg-admin-wash hover:text-foreground"
                 }`}
             title={label}
         >
             {icon}
-        </button>
-    );
-}
-
-function InsertBtn({
-    label,
-    icon,
-    action,
-}: {
-    label: string;
-    icon: React.ReactNode;
-    action: () => void;
-}) {
-    return (
-        <button
-            type="button"
-            onMouseDown={(e) => {
-                e.preventDefault();
-                action();
-            }}
-            className="flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-sm text-muted hover:bg-surface hover:text-foreground transition-colors"
-        >
-            {icon} {label}
         </button>
     );
 }

@@ -3,10 +3,29 @@
 import { useRouter } from "next/navigation";
 import { useState, useMemo } from "react";
 import type { BlogPost } from "@prisma/client";
-import slugify from "@/src/lib/slugify";
 import dynamic from "next/dynamic";
+import slugify from "@/src/lib/slugify";
 import { useToast } from "@/components/ui/Toast";
 import { ImageUploader } from "./ImageUploader";
+import { EditorShell } from "@/components/admin/editor/EditorShell";
+import { EditorHeader } from "@/components/admin/editor/EditorHeader";
+import { EditorHeaderActions, EditorMetaChip } from "@/components/admin/editor/EditorHeader";
+import { EditorSection } from "@/components/admin/editor/EditorSection";
+import { EditorRail, EditorPanel } from "@/components/admin/editor/EditorRail";
+import { EditorPreview } from "@/components/admin/editor/EditorPreview";
+import { EditorField, EditorSelect, editorInputClass, editorMonoInputClass, editorTextareaClass } from "@/components/admin/editor/EditorField";
+import { EditorToggle } from "@/components/admin/editor/EditorToggle";
+import {
+  useEditorDirty,
+  useUnsavedGuard,
+  confirmDiscard,
+} from "@/components/admin/editor/useEditorState";
+import {
+  responseError,
+  formatDate,
+  formatRelativeTime,
+  shortRecordId,
+} from "@/components/admin/workspace/utils";
 
 const LexKitEditor = dynamic(
   () => import("./LexKitEditor").then((m) => m.LexKitEditor),
@@ -34,9 +53,7 @@ export function BlogForm({ post }: Props) {
   const [slug, setSlug] = useState(post?.slug ?? "");
   const [excerpt, setExcerpt] = useState(post?.excerpt ?? "");
   const [body, setBody] = useState(post?.body ?? "");
-  const [bodyFormat, setBodyFormat] = useState<"html" | "markdown">(
-    (post?.bodyFormat as "html" | "markdown") ?? "html"
-  );
+  const bodyFormat = (post?.bodyFormat as "html" | "markdown") ?? "html";
   const [category, setCategory] = useState(post?.category ?? "");
   const [tags, setTags] = useState<string[]>(post?.tags ?? []);
   const [tagInput, setTagInput] = useState("");
@@ -49,7 +66,6 @@ export function BlogForm({ post }: Props) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  /* Auto-compute read time from body: ~200 WPM */
   const computedReadTime = useMemo(() => {
     const text = body.replace(/<[^>]*>/g, "");
     const words = text.split(/\s+/).filter(Boolean).length;
@@ -104,233 +120,319 @@ export function BlogForm({ post }: Props) {
         body: JSON.stringify(payload),
       });
       if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error ?? "Failed to save post");
+        throw new Error(await responseError(res, "Failed to save post"));
       }
       showToast(isEdit ? "Blog berhasil diupdate" : "Blog berhasil dibuat");
       router.push("/admin/blog");
       router.refresh();
-    } catch (e: any) {
-      setError(e.message);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Failed to save post");
     } finally {
       setSaving(false);
     }
   }
 
-  return (
-    <form onSubmit={handleSubmit} className="space-y-8">
-      {error && (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
-          {error}
-        </div>
-      )}
+  function handleCancel() {
+    if (confirmDiscard(dirty)) router.back();
+  }
 
-      {/* Title & Slug */}
-      <div className="grid gap-6 md:grid-cols-2">
-        <Field label="Title" required>
-          <input
-            value={title}
-            onChange={(e) => handleTitleChange(e.target.value)}
-            className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-purple"
-            required
-          />
-        </Field>
-        <Field label="Slug" required>
-          <input
-            value={slug}
-            onChange={(e) => setSlug(e.target.value)}
-            className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-purple font-mono"
-            required
-          />
-        </Field>
-      </div>
+  function handleBack() {
+    if (confirmDiscard(dirty)) router.push("/admin/blog");
+  }
 
-      {/* Excerpt */}
-      <Field label="Excerpt" required>
-        <textarea
-          value={excerpt}
-          onChange={(e) => setExcerpt(e.target.value)}
-          rows={3}
-          className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-purple resize-none"
-          required
+  const dirty = useEditorDirty({
+    title,
+    slug,
+    excerpt,
+    body,
+    bodyFormat,
+    category,
+    tags,
+    publishedAt,
+    thumbnail,
+    isVisible,
+    sortOrder,
+  });
+  useUnsavedGuard({ dirty, saving });
+
+  const words = body.replace(/<[^>]*>/g, "").trim().split(/\s+/).filter(Boolean).length;
+
+  const metaChips = (
+    <>
+      <EditorMetaChip>{category || "Article"}</EditorMetaChip>
+      <EditorMetaChip>{computedReadTime}</EditorMetaChip>
+      {isEdit && <EditorMetaChip>{formatRelativeTime(post!.updatedAt)}</EditorMetaChip>}
+    </>
+  );
+
+  const header = (
+    <EditorHeader
+      eyebrow="Editor // Articles"
+      eyebrowNote={isEdit ? `Record ${shortRecordId(post!.id)}` : "New record"}
+      title={isEdit ? "Edit Post" : "New Post"}
+      description={
+        isEdit ? `Update "${post!.title}".` : "Write a new dispatch for your blog."
+      }
+      meta={metaChips}
+      actions={
+        <EditorHeaderActions
+          backLabel="Back to Articles"
+          onBack={handleBack}
+          publicHref={isEdit && slug ? `/blog/${slug}` : null}
+          publicLabel={isVisible ? "View Article" : "Preview Draft"}
+          publicDisabledReason="Save the article before previewing it."
+          submitLabel={isEdit ? "Update Post" : "Create Post"}
+          saving={saving}
         />
-      </Field>
+      }
+    />
+  );
 
-      {/* Category: dropdown + free-text */}
-      <div className="grid gap-6 md:grid-cols-3">
-        <Field label="Category" required>
-          <select
-            value={CATEGORIES.includes(category) ? category : "custom"}
-            onChange={(e) => {
-              const val = e.target.value;
-              setCategory(val === "custom" ? "" : val);
-            }}
-            className="w-full rounded-lg border border-line bg-[#17151c] px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-purple"
+  const rail = (
+    <EditorRail>
+      <EditorPanel index="01" title="Publishing">
+        <div className="space-y-4">
+          <EditorToggle
+            id="blog-published"
+            label="Published"
+            badge={isVisible ? "Published" : "Draft"}
+            checked={isVisible}
+            onChange={setIsVisible}
+            description="Visible on the public site. Turn off to keep this record as a draft."
+          />
+          <EditorField
+            id="blog-sort-order"
+            label="Sort Order"
+            hint="Lower numbers appear first."
           >
-            <option value="" disabled>Select category</option>
-            {CATEGORIES.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-            <option value="custom">Custom…</option>
-          </select>
-          {!CATEGORIES.includes(category) && (
             <input
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              placeholder="Type custom category"
-              className="mt-2 w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-purple"
+              id="blog-sort-order"
+              type="number"
+              value={sortOrder}
+              onChange={(e) => setSortOrder(Number(e.target.value))}
+              className={editorInputClass}
+            />
+          </EditorField>
+        </div>
+      </EditorPanel>
+
+      <EditorPanel index="02" title="Public Preview">
+        <EditorPreview
+          title={title || "Untitled post"}
+          description={excerpt}
+          image={thumbnail}
+          imageAlt={title}
+          eyebrow={`${category || "Article"} / ${computedReadTime}`}
+          badges={tags.slice(0, 3)}
+          path={`/blog/${slug || "your-slug"}`}
+          href={isEdit && slug ? `/blog/${slug}` : undefined}
+          draft={!isVisible}
+          emptyLabel="Add a thumbnail to preview this record."
+        />
+      </EditorPanel>
+
+      <EditorPanel index="03" title="Record">
+        <dl className="space-y-2 font-sans text-[12px]">
+          <div className="flex justify-between gap-3">
+            <dt className="font-jet text-[9px] font-bold uppercase tracking-[.08em] text-muted">Mode</dt>
+            <dd className="text-foreground">{isEdit ? "Edit" : "New"}</dd>
+          </div>
+          <div className="flex justify-between gap-3">
+            <dt className="font-jet text-[9px] font-bold uppercase tracking-[.08em] text-muted">ID</dt>
+            <dd className="font-jet text-[11px] text-foreground">
+              {isEdit ? shortRecordId(post!.id) : "-"}
+            </dd>
+          </div>
+          <div className="flex justify-between gap-3">
+            <dt className="font-jet text-[9px] font-bold uppercase tracking-[.08em] text-muted">Created</dt>
+            <dd className="text-foreground">
+              {isEdit ? formatDate(post!.createdAt) : "Created when saved"}
+            </dd>
+          </div>
+          <div className="flex justify-between gap-3">
+            <dt className="font-jet text-[9px] font-bold uppercase tracking-[.08em] text-muted">Updated</dt>
+            <dd className="text-foreground">
+              {isEdit ? formatRelativeTime(post!.updatedAt) : "-"}
+            </dd>
+          </div>
+          <div className="flex justify-between gap-3">
+            <dt className="font-jet text-[9px] font-bold uppercase tracking-[.08em] text-muted">Read time</dt>
+            <dd className="text-foreground">{computedReadTime}</dd>
+          </div>
+          <div className="flex justify-between gap-3">
+            <dt className="font-jet text-[9px] font-bold uppercase tracking-[.08em] text-muted">Words</dt>
+            <dd className="text-foreground">{words}</dd>
+          </div>
+        </dl>
+      </EditorPanel>
+    </EditorRail>
+  );
+
+  return (
+    <EditorShell
+      section="Articles"
+      mode={isEdit ? "edit" : "new"}
+      recordId={post?.id}
+      onSubmit={handleSubmit}
+      error={error}
+      dirty={dirty}
+      saving={saving}
+      submitLabel={isEdit ? "Update Post" : "Create Post"}
+      onCancel={handleCancel}
+      header={header}
+      rail={rail}
+    >
+      <EditorSection index="01" title="Identity" meta="Required fields">
+        <div className="grid gap-5 md:grid-cols-2">
+          <EditorField id="blog-title" label="Title" required>
+            <input
+              id="blog-title"
+              value={title}
+              onChange={(e) => handleTitleChange(e.target.value)}
+              className={editorInputClass}
               required
             />
-          )}
-        </Field>
-        <Field label="Read Time">
-          <div className="rounded-lg border border-line bg-surface/30 px-3 py-2 text-sm text-foreground/70">
-            {computedReadTime}
-          </div>
-        </Field>
-        <Field label="Published Date" required>
-          <input
-            type="date"
-            value={publishedAt}
-            onChange={(e) => setPublishedAt(e.target.value)}
-            className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-purple"
+          </EditorField>
+          <EditorField
+            id="blog-slug"
+            label="Slug"
+            required
+            hint={`Public path: /blog/${slug || "your-slug"}`}
+          >
+            <input
+              id="blog-slug"
+              value={slug}
+              onChange={(e) => setSlug(e.target.value)}
+              className={editorMonoInputClass}
+              required
+            />
+          </EditorField>
+        </div>
+        <EditorField
+          id="blog-excerpt"
+          label="Excerpt"
+          required
+          counter={`${excerpt.length} characters`}
+        >
+          <textarea
+            id="blog-excerpt"
+            value={excerpt}
+            onChange={(e) => setExcerpt(e.target.value)}
+            rows={3}
+            className={editorTextareaClass}
             required
           />
-        </Field>
-      </div>
+        </EditorField>
+      </EditorSection>
 
-      {/* Tags */}
-      <Field label="Tags">
-        <div className="flex gap-2">
-          <input
-            value={tagInput}
-            onChange={(e) => setTagInput(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTag(); } }}
-            placeholder="Type and press Enter"
-            className="flex-1 rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-purple"
-          />
-          <button
-            type="button"
-            onClick={addTag}
-            className="rounded-lg border border-line px-3 text-sm text-muted transition-colors hover:bg-surface hover:text-foreground"
-          >
-            Add
-          </button>
-        </div>
-        {tags.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-2">
-            {tags.map((tag, i) => (
-              <span
-                key={i}
-                className="inline-flex items-center gap-1.5 rounded-md border border-line bg-surface/50 px-2.5 py-1 text-xs text-muted"
+      <EditorSection index="02" title="Classification & Schedule" meta="Metadata">
+        <div className="grid gap-5 md:grid-cols-3">
+          <EditorField label="Category" required>
+            <EditorSelect
+              value={CATEGORIES.includes(category) ? category : "custom"}
+              onChange={(e) => {
+                const val = e.target.value;
+                setCategory(val === "custom" ? "" : val);
+              }}
+            >
+              <option value="" disabled>Select category</option>
+              {CATEGORIES.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+              <option value="custom">Custom…</option>
+            </EditorSelect>
+            {!CATEGORIES.includes(category) && (
+              <EditorField
+                label=""
+                required
+                className="mt-2"
               >
-                {tag}
-                <button
-                  type="button"
-                  onClick={() => removeTag(i)}
-                  className="text-muted hover:text-red-400"
-                >
-                  ×
-                </button>
-              </span>
-            ))}
+                <input
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  placeholder="Type custom category"
+                  className={editorInputClass}
+                  required
+                />
+              </EditorField>
+            )}
+          </EditorField>
+          <EditorField label="Read Time">
+            <div className="h-10 border-2 border-line bg-surface px-3 font-sans text-sm text-foreground/70 flex items-center">
+              {computedReadTime}
+            </div>
+          </EditorField>
+          <EditorField label="Published Date" required>
+            <input
+              type="date"
+              value={publishedAt}
+              onChange={(e) => setPublishedAt(e.target.value)}
+              className={editorInputClass}
+              required
+            />
+          </EditorField>
+        </div>
+
+        <EditorField label="Tags">
+          <div className="flex gap-2">
+            <input
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTag(); } }}
+              placeholder="Type and press Enter"
+              className={editorInputClass}
+            />
+            <button
+              type="button"
+              onClick={addTag}
+              className="inline-flex h-10 shrink-0 items-center border-2 border-line bg-surface px-4 font-jet text-[9px] font-bold uppercase tracking-[.08em] shadow-[2px_2px_0_var(--foreground)] transition-transform hover:-translate-y-0.5 hover:bg-admin-wash"
+            >
+              Add
+            </button>
           </div>
-        )}
-      </Field>
+          {tags.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              {tags.map((tag, i) => (
+                <span
+                  key={`${tag}-${i}`}
+                  className="inline-flex items-center gap-1.5 border border-line bg-surface px-2.5 py-1 font-jet text-[9px] font-bold uppercase tracking-[.06em] text-foreground"
+                >
+                  {tag}
+                  <button
+                    type="button"
+                    onClick={() => removeTag(i)}
+                    className="text-muted hover:text-admin-alert"
+                    aria-label={`Remove ${tag}`}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+        </EditorField>
+      </EditorSection>
 
-      {/* Thumbnail */}
-      <Field label="Thumbnail">
-        <ImageUploader value={thumbnail} onChange={setThumbnail} />
-      </Field>
-
-      {/* Body with Rich Editor */}
-      <Field label="Body" required>
-        <LexKitEditor key={post?.id ?? "new"} content={body} onChange={setBody} />
-      </Field>
-
-      {/* Toggles */}
-      <div className="flex flex-wrap gap-8">
-        <Toggle label="Visible" checked={isVisible} onChange={setIsVisible} />
-        <Field label="Sort Order">
-          <input
-            type="number"
-            value={sortOrder}
-            onChange={(e) => setSortOrder(Number(e.target.value))}
-            className="w-24 rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-purple"
+      <EditorSection index="03" title="Media" meta="Thumbnail">
+        <EditorField label="Thumbnail">
+          <ImageUploader
+            value={thumbnail}
+            onChange={setThumbnail}
+            aspect="video"
           />
-        </Field>
-      </div>
+        </EditorField>
+      </EditorSection>
 
-      {/* Submit */}
-      <div className="flex items-center gap-4 border-t border-line pt-6">
-        <button
-          type="submit"
-          disabled={saving}
-          className="rounded-lg bg-purple px-6 py-2.5 text-sm font-medium text-[#17151c] transition-opacity hover:opacity-90 disabled:opacity-50"
+      <EditorSection index="04" title="Body" meta="Rich text content">
+        <EditorField
+          id="blog-body"
+          label="Body"
+          required
+          hint={`Format: ${bodyFormat.toUpperCase()}. Rich text. Read time and word count update automatically.`}
         >
-          {saving ? "Saving…" : isEdit ? "Update Post" : "Create Post"}
-        </button>
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="rounded-lg border border-line px-6 py-2.5 text-sm text-muted transition-colors hover:bg-surface hover:text-foreground"
-        >
-          Cancel
-        </button>
-      </div>
-    </form>
-  );
-}
-
-// ── Helpers ──
-
-function Field({
-  label,
-  required,
-  children,
-}: {
-  label: string;
-  required?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className="block space-y-1.5">
-      <span className="text-xs font-medium tracking-wider text-muted uppercase">
-        {label}
-        {required && <span className="ml-1 text-purple">*</span>}
-      </span>
-      {children}
-    </label>
-  );
-}
-
-function Toggle({
-  label,
-  checked,
-  onChange,
-}: {
-  label: string;
-  checked: boolean;
-  onChange: (v: boolean) => void;
-}) {
-  return (
-    <label className="flex cursor-pointer items-center gap-3">
-      <button
-        type="button"
-        role="switch"
-        aria-checked={checked}
-        onClick={() => onChange(!checked)}
-        className={`relative h-5 w-9 rounded-full transition-colors ${
-          checked ? "bg-purple" : "bg-line"
-        }`}
-      >
-        <span
-          className={`absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${
-            checked ? "translate-x-4" : ""
-          }`}
-        />
-      </button>
-      <span className="text-sm text-foreground">{label}</span>
-    </label>
+          <LexKitEditor key={post?.id ?? "new"} content={body} onChange={setBody} />
+        </EditorField>
+      </EditorSection>
+    </EditorShell>
   );
 }
