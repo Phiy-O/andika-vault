@@ -47,7 +47,9 @@ consistent and future modules inherit the pattern.
   editing.
 - No new "archived" or extra publishing states. `isVisible` remains the only
   public/draft switch.
-- No changes to the list workspaces, public pages, sidebar, or navbar.
+- No changes to list workspace layouts, public pages, sidebar, or navbar. The
+  shared admin `Modal` gets a visual-only pass (agreed), which also refreshes
+  the Messages and Skills dialogs that use it.
 - No new dependencies.
 - No rich-text upgrade for the project body. It stays an HTML/Markdown textarea.
 - No dual "Save draft" / "Publish" buttons that silently change `isVisible`.
@@ -157,12 +159,20 @@ Reuse the workspace status bar pattern so editors and workspaces feel related:
   tracking -0.05em, weight 700.
 - Subtitle: one sentence. Create mode explains what the record is for; edit
   mode names the record. Example: `Update "Personal Portfolio Platform".`
-- Metadata row: public path chip (`/projects/{slug}`), last updated relative
-  (edit only), module context chip (category, read time, issuer, or skill
-  category). Path chip includes a copy button.
-- Actions: `Back to <module>` secondary, `View public page` secondary (edit
-  only, disabled with an explanation when the record is not published or has no
-  public route), primary submit (`Create Project` / `Update Project`, etc.).
+- Metadata row: public path chip, last updated relative (edit only), module
+  context chip (category, read time, issuer, or skill category). Path chip
+  includes a copy button. Paths: `/projects/{slug}`, `/blog/{slug}`,
+  `/achievements`, `/about`.
+- Actions: `Back to <module>` secondary, `View public page` or
+  `Preview draft` secondary (edit only), primary submit (`Create Project` /
+  `Update Project`, etc.).
+- Draft behavior follows the existing product: `/projects/[slug]` and
+  `/blog/[slug]` load invisible records for authenticated admins, and the list
+  actions link drafts without gating on `isVisible`. The editor therefore shows
+  `Preview draft` for hidden records instead of disabling the action. Create
+  mode keeps the action disabled until the first save. Achievements link to the
+  `/achievements` archive; Skills link to `/about` because there is no
+  per-skill public route or anchor.
 
 ### 8.4 Section panels
 
@@ -226,7 +236,9 @@ Three panels, each with a numbered header strip:
    - Achievements: image or certificate placeholder, issuer + date, title,
      credential chip.
    - Skills: icon in a bordered square, name, category, "About page" note.
-   - If `isVisible` is false, show a `DRAFT` overlay/badge and do not link out.
+   - If `isVisible` is false, show a `DRAFT` badge. The link stays available to
+     signed-in admins as a draft preview, matching the list workspaces and the
+     detail pages, which already allow admin preview of invisible records.
    - Empty states are intentional: "Add a thumbnail to preview this record."
 3. **Record**
    - Definition rows: mode, short ID, created, updated. In create mode, show
@@ -336,7 +348,11 @@ Use existing admin tokens only:
 - `ImageUploader` is restyled and gains drag-and-drop, a Replace action, and a
   visible Remove action. Upload path, size limit, accepted types, and cleanup
   semantics are unchanged.
-- Thumbnail preview uses a 16:9 frame; certificate image uses a 4:3 frame.
+- The uploader keeps its `{ value, onChange, label }` contract and gains one
+  optional presentation prop (`aspect`), defaulting to the current 16:9 frame;
+  Achievements passes the 4:3 certificate frame. These are display-only props;
+  no upload behavior changes.
+- The rail preview composes its own frame and does not depend on the uploader.
 - Screenshot rows keep drag reordering and gain keyboard-accessible
   Move up / Move down buttons. Remove still confirms. Max 10 is enforced in the
   UI and server schema.
@@ -348,6 +364,17 @@ Use existing admin tokens only:
   content is readable on the cream editor surface.
 - Keep dynamic import, extension configuration, content initialization, focus
   guard, and HTML output unchanged.
+
+**Shared admin modal**
+
+- Restyle `components/ui/Modal.tsx` to the same language: square corners,
+  2px border, hard offset shadow, cream surface, Space Grotesk title, coral
+  primary action, foreground-on-coral text.
+- Visual-only change. Keep the dialog element, focus behavior, backdrop click,
+  body scroll lock, `onClose`, footer props, and `noFooter` contract exactly as
+  they are.
+- This also refreshes the Messages and Skills dialogs. No layout or behavior
+  change on those screens.
 
 ### 8.10 Responsive and accessibility
 
@@ -391,6 +418,8 @@ Update:
 
 - `components/admin/ImageUploader.tsx` (visual + drag/drop + replace; same API)
 - `components/admin/LexKitEditor.tsx` (chrome only)
+- `components/ui/Modal.tsx` (visual-only admin dialog refresh; shared contract
+  unchanged)
 
 Trim to form-only pages (header moves into `EditorShell`):
 
@@ -417,6 +446,7 @@ No changes to APIs, services, repositories, validations, schema, auth, or
 | Sticky bar overlaps content or admin chrome | Keep in normal flow, bottom padding, verify at 390/768/1024/1440 |
 | Uploader refactor breaks Cloudinary flow | Reuse the existing `handleFile` logic; only add drop handling and replace UI |
 | Published/Draft copy misrepresents data | Map explicitly to `isVisible`; no additional status invention |
+| Shared Modal refresh affects Messages and Skills | Visual-only change; keep the dialog contract and verify both screens still open, confirm, and close |
 | Four forms drift again | All shared chrome and controls live in `components/admin/editor/` |
 
 ## 11. Verification
@@ -428,6 +458,8 @@ No changes to APIs, services, repositories, validations, schema, auth, or
 - If admin authentication is available, exercise each create/edit flow:
   create, update, visibility toggle, upload, screenshot reorder, cancel guard,
   Ctrl/Cmd+S, error state, and public link.
+- Verify the shared Modal still opens, confirms, closes, locks body scroll, and
+  closes on backdrop click on the editor, Messages, and Skills screens.
 - Visual checks at 1440, 1280, 1024, 768, and 390 widths.
 - If credentials remain unavailable, report that interaction and visual checks
   for authenticated pages were not executed. Do not claim they passed.
