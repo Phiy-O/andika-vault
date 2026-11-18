@@ -11,19 +11,5 @@ export default async function EditCertificatePage({
   const certificate = await certificateService.getById(id);
   if (!certificate) notFound();
 
-  return (
-    <section>
-      <div className="mb-8">
-        <h1 className="text-3xl font-medium tracking-[-.06em] text-foreground">
-          Edit Certificate
-        </h1>
-        <p className="mt-1 text-sm text-muted">
-          Update &ldquo;{certificate.title}&rdquo;.
-        </p>
-      </div>
-      <div className="max-w-3xl">
-        <CertificateForm certificate={certificate} />
-      </div>
-    </section>
-  );
+  return <CertificateForm certificate={certificate} />;
 }
