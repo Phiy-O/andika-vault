@@ -63,119 +63,133 @@ export default async function ProjectDetailPage({
 
   return (
     <PublicShell>
-      <article className="mx-auto w-full px-[3vw] max-md:px-4">
-        {/* Back link */}
-        <div className="mt-16 pt-[60px] pb-4">
-          <Link
-            href="/projects"
-            className="inline-flex items-center gap-2 text-muted text-sm hover:text-foreground transition-colors"
-          >
-            <ChevronLeft size={16} />
-            Back to projects
-          </Link>
-        </div>
-
-        {/* Hero image */}
-        {heroImage && (
-          <div className="relative w-full h-[420px] max-md:h-[240px] rounded-[18px] overflow-hidden border border-line/50 mb-12 mt-2">
-            <Image
-              src={optimizeCloudinaryUrl(heroImage, 1600)}
-              alt={`${project.title} cover`}
-              fill
-              sizes="(max-width: 768px) 100vw, 80vw"
-              unoptimized
-              className="object-cover"
-            />
-          </div>
-        )}
-
-        {/* Header */}
-        <header className="w-full mx-auto mb-14">
-          <div className="flex items-center gap-3 text-muted text-[11px] tracking-[.18em] uppercase mb-6">
-            <span className="border border-purple/30 text-purple rounded-md text-[11px] px-2.5 py-1 inline-block">
-              {project.category}
-            </span>
-            {project.featured && (
-              <>
-                <span className="w-1 h-1 rounded-full bg-line" />
-                <span>Featured</span>
-              </>
-            )}
+      <main className="bg-background px-[5.5vw] pb-24 pt-16 text-foreground max-md:px-4">
+        <article className="mx-auto w-full max-w-[1100px]">
+          {/* Back link */}
+          <div className="mb-10">
+            <Link
+              href="/projects"
+              className="inline-flex items-center gap-2 border-2 border-foreground bg-surface px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wide shadow-[3px_3px_0_var(--foreground)] transition-transform hover:translate-x-[-2px] hover:translate-y-[-2px]"
+            >
+              <ChevronLeft size={14} />
+              Back to projects
+            </Link>
           </div>
 
-          <h1 className="text-[clamp(36px,4.5vw,64px)] font-medium tracking-[-.04em] leading-[1.05] mb-6">
-            {project.title}
-          </h1>
-
-          <p className="text-muted text-lg leading-[1.7] max-w-[600px] mb-8">
-            {project.description}
-          </p>
-
-          {/* Tech stack */}
-          <div className="flex flex-wrap gap-2 mb-8">
-            {project.techStack.map((tech) => (
-              <span
-                key={tech}
-                className="border border-line rounded-[5px] text-muted text-[11px] h-[28px] inline-flex items-center justify-center px-2.5"
-              >
-                {tech}
-              </span>
-            ))}
-          </div>
-
-          {/* Links */}
-          <div className="flex gap-4">
-            {project.liveUrl && project.liveUrl !== "#" && (
-              <Link
-                href={project.liveUrl}
-                target="_blank"
-                className="border border-line rounded-lg text-foreground inline-flex items-center gap-2 text-xs px-5 py-3 transition-all duration-200 hover:shadow-[0_0_2px_var(--foreground)] hover:-translate-y-0.5"
-              >
-                <ExternalLink size={14} />
-                Live site
-              </Link>
-            )}
-            {project.githubUrl && project.githubUrl !== "#" && (
-              <Link
-                href={project.githubUrl}
-                target="_blank"
-                className="border border-line rounded-lg text-foreground inline-flex items-center gap-2 text-xs px-5 py-3 transition-all duration-200 hover:shadow-[0_0_2px_var(--foreground)] hover:-translate-y-0.5"
-              >
-                <GitBranch size={14} />
-                Source code
-              </Link>
-            )}
-          </div>
-        </header>
-
-        {/* Project screenshots slider */}
-        <ScreenshotSlider images={project.screenshots} title={project.title} />
-
-        {/* Body */}
-        <div className="w-full mx-auto space-y-5 text-[15px] leading-[1.8] text-foreground/90 pb-[130px] max-md:pb-[90px]">
-          {project.body.startsWith("<") ? (
-            <div
-              className="prose-content"
-              dangerouslySetInnerHTML={{ __html: sanitizeContent(project.body) }}
-            />
-          ) : (
-            paragraphs.map((para, i) => {
-              if (para.startsWith("**")) {
-                return (
-                  <p key={i} className="font-medium text-foreground">
-                    {para.replace(/\*\*/g, "")}
-                  </p>
-                );
-              }
-              return (
-                <p key={i} className="text-muted">
-                  {para}
-                </p>
-              );
-            })
+          {/* Hero */}
+          {heroImage && (
+            <div className="relative w-full aspect-[16/9] overflow-hidden border-2 border-foreground bg-surface shadow-[4px_4px_0_var(--foreground)] mb-12">
+              <Image
+                src={optimizeCloudinaryUrl(heroImage, 1600)}
+                alt={`${project.title} cover`}
+                fill
+                sizes="(max-width: 768px) 100vw, 80vw"
+                unoptimized
+                className="object-cover"
+              />
+            </div>
           )}
-        </div>
-      </article>
+
+          {/* Header */}
+          <header className="mb-12">
+            <div className="mb-6 flex flex-wrap items-center gap-3">
+              <span className="border-2 border-foreground bg-foreground px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wide text-background">
+                {project.category}
+              </span>
+              {project.featured && (
+                <span className="border-2 border-[#f16b5e] bg-[#f16b5e] px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wide text-background">
+                  Featured
+                </span>
+              )}
+              <span className="ml-auto font-mono text-[10px] uppercase tracking-wide text-muted">
+                Project // {slug}
+              </span>
+            </div>
+
+            <h1 className="text-[clamp(36px,4.5vw,64px)] font-bold tracking-[-.04em] leading-[1.05] mb-6">
+              {project.title}
+            </h1>
+
+            <p className="text-lg leading-[1.7] text-muted max-w-[720px] mb-8">
+              {project.description}
+            </p>
+
+            {/* Tech stack */}
+            <div className="mb-8 flex flex-wrap gap-2">
+              {project.techStack.map((tech) => (
+                <span
+                  key={tech}
+                  className="border-2 border-foreground bg-surface px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wide shadow-[2px_2px_0_var(--foreground)]"
+                >
+                  {tech}
+                </span>
+              ))}
+            </div>
+
+            {/* Links */}
+            <div className="flex flex-wrap gap-3">
+              {project.liveUrl && project.liveUrl !== "#" && (
+                <Link
+                  href={project.liveUrl}
+                  target="_blank"
+                  className="inline-flex items-center gap-2 border-2 border-foreground bg-foreground px-5 py-3 font-bold shadow-[4px_4px_0_var(--line)] transition-transform hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0_var(--line)]"
+                >
+                  <ExternalLink size={16} />
+                  Live site
+                </Link>
+              )}
+              {project.githubUrl && project.githubUrl !== "#" && (
+                <Link
+                  href={project.githubUrl}
+                  target="_blank"
+                  className="inline-flex items-center gap-2 border-2 border-foreground bg-surface px-5 py-3 font-bold shadow-[4px_4px_0_var(--foreground)] transition-transform hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0_var(--line)]"
+                >
+                  <GitBranch size={16} />
+                  Source code
+                </Link>
+              )}
+            </div>
+          </header>
+
+          {/* Screenshots */}
+          <section className="mb-16 border-t-2 border-foreground pt-10">
+            <h2 className="mb-6 font-mono text-[11px] font-bold uppercase tracking-[.08em]">Screenshots // Visual reference</h2>
+            <div className="border-2 border-foreground bg-surface p-3 shadow-[4px_4px_0_var(--foreground)]">
+              <ScreenshotSlider images={project.screenshots} title={project.title} />
+            </div>
+          </section>
+
+          {/* Body */}
+          <section className="border-t-2 border-foreground pt-10">
+            <h2 className="mb-6 font-mono text-[11px] font-bold uppercase tracking-[.08em]">Details // Case study</h2>
+            <div className="prose-content max-w-none">
+              {project.body.startsWith("<") ? (
+                <div
+                  className="border-2 border-foreground bg-surface p-6 shadow-[4px_4px_0_var(--foreground)]"
+                  dangerouslySetInnerHTML={{ __html: sanitizeContent(project.body) }}
+                />
+              ) : (
+                <div className="space-y-5">
+                  {paragraphs.map((para, i) => {
+                    if (para.startsWith("**")) {
+                      return (
+                        <p key={i} className="border-l-4 border-foreground bg-surface pl-4 py-3 font-bold text-lg">
+                          {para.replace(/\*\*/g, "")}
+                        </p>
+                      );
+                    }
+                    return (
+                      <p key={i} className="leading-[1.8] text-foreground">
+                        {para}
+                      </p>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </section>
+        </article>
+      </main>
     </PublicShell>
   );
 }

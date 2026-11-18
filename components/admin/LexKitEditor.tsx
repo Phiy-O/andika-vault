@@ -126,15 +126,31 @@ function EditorShell({ content, onChange }: Props) {
     useEffect(() => {
         if (!editor || initialized.current) return;
         initialized.current = true;
-        if (content) {
-            suppressChanges.current = true;
+        
+        // Ensure content is valid HTML before importing
+        const safeContent = (() => {
+            if (!content || typeof content !== 'string') return "<p></p>";
+            const trimmed = content.trim();
+            if (!trimmed) return "<p></p>";
+            // If content is plain text without HTML tags, wrap it
+            if (!trimmed.startsWith('<')) return `<p>${trimmed}</p>`;
+            return trimmed;
+        })();
+        
+        suppressChanges.current = true;
+        queueMicrotask(() => {
+            try {
+                commands.importFromHTML(safeContent);
+            } catch (e) {
+                // Fallback to empty paragraph on import error
+                try {
+                    commands.importFromHTML("<p></p>");
+                } catch {}
+            }
             queueMicrotask(() => {
-                commands.importFromHTML(content);
-                queueMicrotask(() => {
-                    suppressChanges.current = false;
-                });
+                suppressChanges.current = false;
             });
-        }
+        });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [editor]);
 

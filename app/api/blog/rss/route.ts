@@ -27,10 +27,8 @@ export async function GET() {
     /\/+$/,
     ""
   );
-  const channelTitle = settings?.siteTitle?.trim() || "Andika | Blog";
-  const channelDescription =
-    settings?.metaDescription?.trim() ||
-    "Technical notes, engineering experiments, and practical ideas.";
+  const channelTitle = "Andika | Blog";
+  const channelDescription = "Technical notes, engineering experiments, and practical ideas.";
   const feedUrl = `${siteUrl}/api/blog/rss`;
   const lastBuildDate = new Date().toUTCString();
 

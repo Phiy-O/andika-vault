@@ -25,8 +25,8 @@ export function WorkspaceHeader({
   description: string;
   publicHref: string;
   publicLabel?: string;
-  newHref: string;
-  newLabel: string;
+  newHref?: string;
+  newLabel?: string;
   records: Array<{ updatedAt: string | Date }>;
   refreshing: boolean;
   onRefresh: () => void;
@@ -117,13 +117,15 @@ export function WorkspaceHeader({
             {publicLabel}
             <ExternalLink size={12} aria-hidden="true" />
           </Link>
-          <Link
-            href={newHref}
-            className="inline-flex h-10 items-center gap-2 border-2 border-line bg-purple px-4 font-space text-[12px] font-bold tracking-[-.01em] shadow-[3px_3px_0_var(--foreground)] transition-transform hover:-translate-y-0.5 hover:bg-[#ef7e70] motion-reduce:transform-none"
-          >
-            <Plus size={13} strokeWidth={2.2} aria-hidden="true" />
-            {newLabel}
-          </Link>
+          {newHref && newLabel && (
+            <Link
+              href={newHref}
+              className="inline-flex h-10 items-center gap-2 border-2 border-line bg-purple px-4 font-space text-[12px] font-bold tracking-[-.01em] shadow-[3px_3px_0_var(--foreground)] transition-transform hover:-translate-y-0.5 hover:bg-[#ef7e70] motion-reduce:transform-none"
+            >
+              <Plus size={13} strokeWidth={2.2} aria-hidden="true" />
+              {newLabel}
+            </Link>
+          )}
         </div>
       </div>
     </>

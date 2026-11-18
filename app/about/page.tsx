@@ -5,6 +5,7 @@ import { AboutSkills } from "../../components/about/AboutSkills";
 import { skillService } from "@/src/services";
 import { getSiteSettings } from "@/src/actions/site-setting";
 import { parseAboutContent } from "@/src/lib/about-content";
+import { SITE_SETTINGS_DEFAULTS } from "@/src/lib/validations/site-settings";
 
 export const revalidate = 3600;
 
@@ -19,8 +20,9 @@ function SectionHeader({ index, label, note, color = "#f16b5e" }: { index: strin
 
 export default async function AboutPage() {
   const [skills, settings] = await Promise.all([skillService.getVisible(), getSiteSettings()]);
-  const content = parseAboutContent(settings.data!);
-  const resumeUrl = settings.data?.resumeUrl ?? "/resume/dummy-resume.pdf";
+  const settingsData = settings.data ?? SITE_SETTINGS_DEFAULTS;
+  const content = parseAboutContent(settingsData);
+  const resumeUrl = settingsData.resumeUrl ?? "/resume/dummy-resume.pdf";
 
   return (
     <PublicShell>
@@ -50,7 +52,7 @@ export default async function AboutPage() {
 
           <section className="border-t-2 border-foreground pt-7"><SectionHeader index="03" label="Engineering focus" note="Three core pillars of operation" color="#00aa76" /><h2 className="mb-2 text-4xl font-bold tracking-[-.04em]">The kind of work I enjoy.</h2><p className="mb-7 max-w-2xl text-muted">A disciplined intersection between tactile graphical user interfaces, deterministic backend topologies, and low-level hardware experimentation.</p><div className="grid gap-5 md:grid-cols-3">{content.pillars.map((pillar, index) => <article className="border-2 border-foreground bg-surface p-5 shadow-[3px_3px_0_var(--foreground)]" key={pillar.title}><div className="mb-5 flex justify-between border-b-2 border-foreground pb-3"><span className="font-mono text-xl">{String(index + 1).padStart(2, "0")}</span><span className="bg-[#f16b5e] px-2 py-1 font-mono text-[9px] uppercase text-background">{pillar.tag}</span></div><h3 className="text-2xl font-bold">{pillar.title}</h3><p className="mt-2 text-sm leading-[1.6] text-muted">{pillar.description}</p><div className="mt-5 flex gap-1 font-mono text-[9px] uppercase"><span className="border border-line px-2 py-1">Systems</span><span className="border border-line px-2 py-1">Reliable</span></div></article>)}</div></section>
 
-          <section className="border-t-2 border-foreground pt-7"><SectionHeader index="04" label="Tools I work with" note="Current stack // selected instruments" /><h2 className="mb-7 text-4xl font-bold tracking-[-.04em]">Tools I work with.</h2><div className="border-2 border-foreground bg-surface p-5"><AboutSkills skills={skills as any} /></div></section>
+          <section className="border-t-2 border-foreground pt-7"><SectionHeader index="04" label="Tools I work with" note="Current stack // selected instruments" /><h2 className="mb-7 text-4xl font-bold tracking-[-.04em]">Tools I work with.</h2><div className="border-2 border-foreground bg-surface p-5"><AboutSkills skills={skills} /></div></section>
 
           <section className="border-t-2 border-foreground pt-7"><SectionHeader index="05" label="A journey in progress" note="Selected chapters // engineering timeline" color="#73b8ff" /><h2 className="mb-7 text-4xl font-bold tracking-[-.04em]">A journey in progress.</h2><div className="space-y-3">{content.timeline.map((item, index) => <article className="grid gap-3 border-2 border-foreground bg-surface p-4 md:grid-cols-[100px_1fr]" key={item.title}><span className="font-mono text-xs text-[#a9362e]">[{String(index + 1).padStart(2, "0")}]</span><div><h3 className="font-bold">{item.title}</h3><p className="mt-1 text-sm text-muted">{item.description}</p></div></article>)}</div></section>
 

@@ -6,13 +6,14 @@ const aboutPillar = z.object({ title: z.string().min(1), description: z.string()
 const aboutTimelineItem = z.object({ title: z.string().min(1), description: z.string().min(1) });
 
 export const siteSettingsSchema = z.object({
+  // Social & Contact
   email: z.string().email("Email tidak valid"),
   linkedinUrl: safeUrlString,
   githubUrl: safeUrlString,
   instagramUrl: safeUrlString,
-  siteTitle: z.string().min(1, "Judul situs wajib diisi"),
-  metaDescription: z.string().min(1, "Deskripsi meta wajib diisi"),
+  // Resume / CV
   resumeUrl: safeUrlString,
+  // About
   aboutName: z.string().min(1),
   aboutRole: z.string().min(1),
   aboutLocation: z.string().min(1),
@@ -52,14 +53,12 @@ export const SITE_SETTINGS_DEFAULTS: SiteSettings = {
   linkedinUrl: "https://linkedin.com",
   githubUrl: "https://github.com",
   instagramUrl: "https://instagram.com",
-  siteTitle: "Elias Reid | Dev Architect",
-  metaDescription: "The portfolio of Elias Reid, a dev architect building resilient systems and useful software.",
   resumeUrl: "/resume/dummy-resume.pdf",
   aboutName: "Elias Reid",
   aboutRole: "Dev Architect",
   aboutLocation: "Seattle, WA [PST/UTC-8]",
   aboutFocus: "Distributed State & Edge",
-  aboutIntro: "Hi, I’m a software developer with a strong interest in building useful applications and understanding the systems behind them. I enjoy working across frontend interfaces, backend architecture, and practical technology experiments with deterministic behavior and mechanical rigor.",
+  aboutIntro: "Hi, I'm a software developer with a strong interest in building useful applications and understanding the systems behind them. I enjoy working across frontend interfaces, backend architecture, and practical technology experiments with deterministic behavior and mechanical rigor.",
   aboutDiscipline: "Full-Stack & Distributed Systems",
   aboutPhilosophy: "Deterministic, resilient, pragmatic",
   aboutRuntime: "Go · TypeScript · Linux Kernel",

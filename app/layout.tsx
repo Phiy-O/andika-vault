@@ -41,13 +41,10 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { data: settings } = await getSiteSettings();
-  const title = settings?.siteTitle ?? "Andika | Portofolio";
-  const description =
-    settings?.metaDescription ??
-    "The portfolio and journal of Andika, a software engineer creating thoughtful digital products.";
   const siteUrl = process.env.NEXTAUTH_URL || "https://andika.dev";
   const image = `${siteUrl}/images/andika-profile.png`;
+  const title = "Andika | Portofolio";
+  const description = "The portfolio and journal of Andika, a software engineer creating thoughtful digital products.";
 
   return {
     metadataBase: new URL(siteUrl),
