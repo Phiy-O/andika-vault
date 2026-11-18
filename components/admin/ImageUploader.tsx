@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import Image from "next/image";
-import { Upload, X, Loader2 } from "lucide-react";
+import { Upload, Loader2, RefreshCw } from "lucide-react";
 
 const MAX_SIZE_MB = 5;
 const ACCEPTED = [
@@ -13,17 +13,26 @@ const ACCEPTED = [
   "image/svg+xml",
 ];
 
+const secondaryBtn =
+  "inline-flex h-10 items-center gap-2 border-2 border-line bg-surface px-4 font-jet text-[9px] font-bold uppercase tracking-[.08em] shadow-[2px_2px_0_var(--foreground)] transition-transform hover:-translate-y-0.5 hover:bg-admin-wash disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transform-none";
+
+const alertBtn =
+  "inline-flex h-10 items-center gap-2 border-2 border-admin-alert bg-surface px-4 font-jet text-[9px] font-bold uppercase tracking-[.08em] text-admin-alert shadow-[2px_2px_0_var(--foreground)] transition-transform hover:-translate-y-0.5 hover:bg-[#f9e8e6] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transform-none";
+
 export function ImageUploader({
   value,
   onChange,
   label = "Upload image",
+  aspect = "video",
 }: {
   value: string;
   onChange: (url: string) => void;
   label?: string;
+  aspect?: "video" | "certificate";
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [dragging, setDragging] = useState(false);
   const [error, setError] = useState("");
 
   async function handleFile(file: File) {
@@ -71,43 +80,91 @@ export function ImageUploader({
   return (
     <div>
       {value ? (
-        <div className="flex items-center gap-3">
-          <div className="relative h-16 w-24 overflow-hidden rounded-lg border border-line">
+        <div>
+          <div
+            className={`relative border-2 border-line bg-admin-wash ${
+              aspect === "certificate" ? "aspect-[4/3]" : "aspect-video"
+            }`}
+          >
             <Image
               src={value}
               alt="preview"
               fill
-              sizes="96px"
+              sizes="320px"
               unoptimized
               className="object-cover"
             />
+            {uploading && (
+              <div className="absolute inset-0 grid place-items-center bg-background/80">
+                <span className="flex items-center gap-2 font-sans text-sm text-muted">
+                  <Loader2 size={16} className="animate-spin" /> Uploading...
+                </span>
+              </div>
+            )}
           </div>
-          <button
-            type="button"
-            onClick={handleRemove}
-            className="rounded p-1.5 text-muted transition-colors hover:bg-surface hover:text-red-400"
-            title="Remove image"
-          >
-            <X size={16} />
-          </button>
+          <div className="mt-3 flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => inputRef.current?.click()}
+              disabled={uploading}
+              className={secondaryBtn}
+            >
+              <RefreshCw size={14} /> Replace
+            </button>
+            <button
+              type="button"
+              onClick={handleRemove}
+              disabled={uploading}
+              className={alertBtn}
+            >
+              Remove
+            </button>
+          </div>
         </div>
       ) : (
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          disabled={uploading}
-          className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-line px-3 py-6 text-sm text-muted transition-colors hover:border-purple hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+        <div
+          onDragOver={(event) => {
+            event.preventDefault();
+            setDragging(true);
+          }}
+          onDragLeave={(event) => {
+            if (!event.currentTarget.contains(event.relatedTarget as Node | null))
+              setDragging(false);
+          }}
+          onDrop={(event) => {
+            event.preventDefault();
+            setDragging(false);
+            const file = event.dataTransfer.files?.[0];
+            if (file) void handleFile(file);
+          }}
+          className={`border-2 border-dashed p-6 text-center transition-colors ${
+            dragging || uploading
+              ? "border-purple bg-admin-wash"
+              : "border-line bg-surface"
+          }`}
         >
-          {uploading ? (
-            <>
-              <Loader2 size={16} className="animate-spin" /> Uploading...
-            </>
-          ) : (
-            <>
-              <Upload size={16} /> {label} (maks {MAX_SIZE_MB}MB)
-            </>
-          )}
-        </button>
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            disabled={uploading}
+            className="mx-auto flex flex-col items-center gap-2 font-sans text-sm text-muted transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {uploading ? (
+              <>
+                <Loader2 size={20} className="animate-spin" />
+                <span>Uploading...</span>
+              </>
+            ) : (
+              <>
+                <Upload size={20} />
+                <span>{label}</span>
+              </>
+            )}
+          </button>
+          <p className="mt-2 font-sans text-xs text-muted/80">
+            PNG, JPG, WebP, GIF or SVG. Max 5 MB.
+          </p>
+        </div>
       )}
       <input
         ref={inputRef}
@@ -120,7 +177,14 @@ export function ImageUploader({
           e.target.value = "";
         }}
       />
-      {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
+      {error && (
+        <p
+          role="alert"
+          className="mt-2 font-jet text-[9px] uppercase tracking-[.06em] text-admin-alert"
+        >
+          {error}
+        </p>
+      )}
     </div>
   );
 }
