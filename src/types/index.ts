@@ -109,6 +109,8 @@ export const skillListSelect = {
   category: true,
   sortOrder: true,
   isVisible: true,
+  createdAt: true,
+  updatedAt: true,
 } satisfies Prisma.SkillSelect;
 
 export type SkillListItem = Prisma.SkillGetPayload<{
