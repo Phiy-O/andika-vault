@@ -3,13 +3,30 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
+import { Check } from "lucide-react";
 import type { Skill } from "@prisma/client";
 import { useToast } from "@/components/ui/Toast";
 import { skillCategories } from "@/src/types";
-
-interface Props {
-  skill?: Skill | null;
-}
+import { EditorShell } from "@/components/admin/editor/EditorShell";
+import { EditorHeader } from "@/components/admin/editor/EditorHeader";
+import { EditorHeaderActions, EditorMetaChip } from "@/components/admin/editor/EditorHeader";
+import { EditorSection } from "@/components/admin/editor/EditorSection";
+import { EditorRail, EditorPanel } from "@/components/admin/editor/EditorRail";
+import { EditorPreview } from "@/components/admin/editor/EditorPreview";
+import { EditorField, EditorSelect, editorInputClass } from "@/components/admin/editor/EditorField";
+import { EditorToggle } from "@/components/admin/editor/EditorToggle";
+import {
+  useEditorDirty,
+  useUnsavedGuard,
+  confirmDiscard,
+} from "@/components/admin/editor/useEditorState";
+import {
+  responseError,
+  formatDate,
+  formatRelativeTime,
+  shortRecordId,
+  formatCategory,
+} from "@/components/admin/workspace/utils";
 
 const ICON_OPTIONS = [
   "javascript",
@@ -27,6 +44,10 @@ const ICON_OPTIONS = [
   "storybook",
   "git",
 ];
+
+interface Props {
+  skill?: Skill | null;
+}
 
 export function SkillForm({ skill }: Props) {
   const router = useRouter();
@@ -73,172 +94,230 @@ export function SkillForm({ skill }: Props) {
         body: JSON.stringify(body),
       });
       if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error ?? "Failed to save skill");
+        throw new Error(await responseError(res, "Failed to save skill"));
       }
       showToast(isEdit ? "Skill berhasil diupdate" : "Skill berhasil dibuat");
       router.push("/admin/skills");
       router.refresh();
-    } catch (e: any) {
-      setError(e.message);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Failed to save skill");
     } finally {
       setSaving(false);
     }
   }
 
-  return (
-    <form onSubmit={handleSubmit} className="space-y-8">
-      {error && (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
-          {error}
-        </div>
-      )}
+  function handleCancel() {
+    if (confirmDiscard(dirty)) router.back();
+  }
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <Field label="Name" required>
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. JavaScript"
-            className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-purple"
-            required
-          />
-        </Field>
-        <Field label="Category" required>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-purple"
-          >
-            {skillCategories.map((c) => (
-              <option key={c.value} value={c.value} className="bg-[#1a1821]">
-                {c.label}
-              </option>
-            ))}
-          </select>
-        </Field>
-      </div>
+  function handleBack() {
+    if (confirmDiscard(dirty)) router.push("/admin/skills");
+  }
 
-      <Field label="Icon" required>
-        <div className="grid grid-cols-4 gap-2 sm:grid-cols-7">
-          {ICON_OPTIONS.map((key) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => selectIcon(key)}
-              className={`flex h-14 items-center justify-center rounded-lg border transition-all duration-200 ${
-                iconKey === key
-                  ? "border-purple bg-purple/10"
-                  : "border-line hover:border-foreground hover:bg-surface"
-              }`}
-              title={key}
-            >
-              <Image
-                src={`/icons/skills/${key}.svg`}
-                alt=""
-                width={26}
-                height={26}
-                className="h-6.5 w-6.5"
-              />
-            </button>
-          ))}
-        </div>
-        {iconSrc && (
-          <div className="mt-3 flex items-center gap-2 text-xs text-muted">
-            <Image
-              src={iconSrc}
-              alt=""
-              width={18}
-              height={18}
-              className="h-4.5 w-4.5"
-            />
-            <code className="text-muted">{iconSrc}</code>
-          </div>
-        )}
-      </Field>
+  const dirty = useEditorDirty({
+    name,
+    iconSrc,
+    category,
+    sortOrder,
+    isVisible,
+  });
+  useUnsavedGuard({ dirty, saving });
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <Field label="Sort Order">
-          <input
-            type="number"
-            value={sortOrder}
-            onChange={(e) => setSortOrder(Number(e.target.value))}
-            className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-purple"
-          />
-        </Field>
-      </div>
-
-      <div className="flex flex-wrap gap-8">
-        <Toggle label="Visible" checked={isVisible} onChange={setIsVisible} />
-      </div>
-
-      <div className="flex items-center gap-4 border-t border-line pt-6">
-        <button
-          type="submit"
-          disabled={saving}
-          className="rounded-lg bg-purple px-6 py-2.5 text-sm font-medium text-[#17151c] transition-opacity hover:opacity-90 disabled:opacity-50"
-        >
-          {saving ? "Saving…" : isEdit ? "Update Skill" : "Create Skill"}
-        </button>
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="rounded-lg border border-line px-6 py-2.5 text-sm text-muted transition-colors hover:bg-surface hover:text-foreground"
-        >
-          Cancel
-        </button>
-      </div>
-    </form>
+  const metaChips = (
+    <>
+      <EditorMetaChip>{formatCategory(category)}</EditorMetaChip>
+      {isEdit && <EditorMetaChip>{formatRelativeTime(skill!.updatedAt)}</EditorMetaChip>}
+    </>
   );
-}
 
-function Field({
-  label,
-  required,
-  children,
-}: {
-  label: string;
-  required?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className="block space-y-1.5">
-      <span className="text-xs font-medium tracking-wider text-muted uppercase">
-        {label}
-        {required && <span className="ml-1 text-purple">*</span>}
-      </span>
-      {children}
-    </label>
-  );
-}
-
-function Toggle({
-  label,
-  checked,
-  onChange,
-}: {
-  label: string;
-  checked: boolean;
-  onChange: (v: boolean) => void;
-}) {
-  return (
-    <label className="flex cursor-pointer items-center gap-3">
-      <button
-        type="button"
-        role="switch"
-        aria-checked={checked}
-        onClick={() => onChange(!checked)}
-        className={`relative h-5 w-9 rounded-full transition-colors ${
-          checked ? "bg-purple" : "bg-line"
-        }`}
-      >
-        <span
-          className={`absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${
-            checked ? "translate-x-4" : ""
-          }`}
+  const header = (
+    <EditorHeader
+      eyebrow="Editor // Skills"
+      eyebrowNote={isEdit ? `Record ${shortRecordId(skill!.id)}` : "New record"}
+      title={isEdit ? "Edit Skill" : "New Skill"}
+      description={
+        isEdit ? `Update "${skill!.name}".` : "Add a tool to the studio stack."
+      }
+      meta={metaChips}
+      actions={
+        <EditorHeaderActions
+          backLabel="Back to Skills"
+          onBack={handleBack}
+          publicHref={isEdit ? "/about" : null}
+          publicLabel="View About Page"
+          publicDisabledReason="Save the skill before viewing the About page."
+          submitLabel={isEdit ? "Update Skill" : "Create Skill"}
+          saving={saving}
         />
-      </button>
-      <span className="text-sm text-foreground">{label}</span>
-    </label>
+      }
+    />
+  );
+
+  const rail = (
+    <EditorRail>
+      <EditorPanel index="01" title="Publishing">
+        <div className="space-y-4">
+          <EditorToggle
+            id="skill-published"
+            label="Published"
+            badge={isVisible ? "Published" : "Draft"}
+            checked={isVisible}
+            onChange={setIsVisible}
+            description="Visible on the public site. Turn off to keep this record as a draft."
+          />
+          <EditorField
+            id="skill-sort-order"
+            label="Sort Order"
+            hint="Lower numbers appear first."
+          >
+            <input
+              id="skill-sort-order"
+              type="number"
+              value={sortOrder}
+              onChange={(e) => setSortOrder(Number(e.target.value))}
+              className={editorInputClass}
+            />
+          </EditorField>
+        </div>
+      </EditorPanel>
+
+      <EditorPanel index="02" title="Public Preview">
+        <EditorPreview
+          title={name || "Unnamed skill"}
+          image={null}
+          iconSrc={iconSrc || null}
+          imageAlt={name}
+          eyebrow={formatCategory(category)}
+          badges={[]}
+          path="/about"
+          href={isEdit && isVisible ? "/about" : undefined}
+          draft={!isVisible}
+          emptyLabel="Select an icon to preview this skill."
+        />
+      </EditorPanel>
+
+      <EditorPanel index="03" title="Record">
+        <dl className="space-y-2 font-sans text-[12px]">
+          <div className="flex justify-between gap-3">
+            <dt className="font-jet text-[9px] font-bold uppercase tracking-[.08em] text-muted">Mode</dt>
+            <dd className="text-foreground">{isEdit ? "Edit" : "New"}</dd>
+          </div>
+          <div className="flex justify-between gap-3">
+            <dt className="font-jet text-[9px] font-bold uppercase tracking-[.08em] text-muted">ID</dt>
+            <dd className="font-jet text-[11px] text-foreground">
+              {isEdit ? shortRecordId(skill!.id) : "-"}
+            </dd>
+          </div>
+          <div className="flex justify-between gap-3">
+            <dt className="font-jet text-[9px] font-bold uppercase tracking-[.08em] text-muted">Created</dt>
+            <dd className="text-foreground">
+              {isEdit ? formatDate(skill!.createdAt) : "Created when saved"}
+            </dd>
+          </div>
+          <div className="flex justify-between gap-3">
+            <dt className="font-jet text-[9px] font-bold uppercase tracking-[.08em] text-muted">Updated</dt>
+            <dd className="text-foreground">
+              {isEdit ? formatRelativeTime(skill!.updatedAt) : "-"}
+            </dd>
+          </div>
+        </dl>
+      </EditorPanel>
+    </EditorRail>
+  );
+
+  return (
+    <EditorShell
+      section="Skills"
+      mode={isEdit ? "edit" : "new"}
+      recordId={skill?.id}
+      onSubmit={handleSubmit}
+      error={error}
+      dirty={dirty}
+      saving={saving}
+      submitLabel={isEdit ? "Update Skill" : "Create Skill"}
+      onCancel={handleCancel}
+      header={header}
+      rail={rail}
+    >
+      <EditorSection index="01" title="Identity" meta="Required fields">
+        <div className="grid gap-5 md:grid-cols-2">
+          <EditorField id="skill-name" label="Name" required>
+            <input
+              id="skill-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. JavaScript"
+              className={editorInputClass}
+              required
+            />
+          </EditorField>
+          <EditorField label="Category" required>
+            <EditorSelect
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            >
+              {skillCategories.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
+                </option>
+              ))}
+            </EditorSelect>
+          </EditorField>
+        </div>
+      </EditorSection>
+
+      <EditorSection index="02" title="Icon" meta="Select an icon">
+        <EditorField label="Icon" required>
+          <div className="grid grid-cols-4 gap-2 sm:grid-cols-7">
+            {ICON_OPTIONS.map((key) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => selectIcon(key)}
+                aria-pressed={iconKey === key}
+                aria-label={`Use ${key} icon`}
+                className={`flex h-14 items-center justify-center border-2 transition-colors ${
+                  iconKey === key
+                    ? "border-line bg-purple shadow-[2px_2px_0_var(--foreground)]"
+                    : "border-line bg-background hover:bg-admin-wash"
+                }`}
+                title={key}
+              >
+                <Image
+                  src={`/icons/skills/${key}.svg`}
+                  alt=""
+                  width={26}
+                  height={26}
+                  className="h-6.5 w-6.5"
+                  unoptimized
+                />
+                {iconKey === key && (
+                  <span className="absolute top-1 right-1 grid size-5 place-items-center bg-foreground text-background rounded-full">
+                    <Check size={10} aria-hidden="true" />
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+          {iconSrc ? (
+            <div className="mt-3 flex items-center gap-2 font-jet text-[10px] text-muted">
+              <Image
+                src={iconSrc}
+                alt=""
+                width={18}
+                height={18}
+                className="h-4.5 w-4.5"
+                unoptimized
+              />
+              <code className="break-all">{iconSrc}</code>
+            </div>
+          ) : (
+            <p className="mt-2 font-jet text-[9px] uppercase tracking-[.08em] text-muted">
+              Select an icon for this skill.
+            </p>
+          )}
+        </EditorField>
+      </EditorSection>
+    </EditorShell>
   );
 }
