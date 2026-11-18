@@ -62,7 +62,16 @@ export function EditorPreview({
             {eyebrow}
           </p>
         )}
-        <h4 className="m-0 font-space text-[15px] font-bold leading-tight">
+        <h4
+          className="font-space font-bold"
+          style={{
+            margin: 0,
+            fontSize: "15px",
+            lineHeight: "1.25",
+            fontWeight: 700,
+            letterSpacing: "-.01em",
+          }}
+        >
           {title}
         </h4>
         {description && (

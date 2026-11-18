@@ -44,7 +44,14 @@ export function EditorPanel({
           </span>
           <h3
             id={headingId}
-            className="m-0 font-space text-[12px] font-bold uppercase tracking-[.04em]"
+            className="font-space font-bold uppercase"
+            style={{
+              margin: 0,
+              fontSize: "12px",
+              lineHeight: "16px",
+              fontWeight: 700,
+              letterSpacing: ".04em",
+            }}
           >
             {title}
           </h3>
