@@ -62,7 +62,16 @@ export function Modal({
         {/* Header */}
         <div className="flex items-center justify-between gap-4 border-b-2 border-line px-5 py-4">
           {title && (
-            <h2 className="m-0 font-space text-base font-bold tracking-[-.02em] text-foreground">
+            <h2
+              className="m-0 font-space text-base font-bold tracking-[-.02em] text-foreground"
+              style={{
+                margin: 0,
+                fontSize: "16px",
+                lineHeight: "1.25",
+                fontWeight: 700,
+                letterSpacing: "-.02em",
+              }}
+            >
               {title}
             </h2>
           )}
