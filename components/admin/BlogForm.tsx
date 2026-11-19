@@ -3,8 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useState, useMemo } from "react";
 import type { BlogPost } from "@prisma/client";
-import dynamic from "next/dynamic";
+import { Maximize2 } from "lucide-react";
 import slugify from "@/src/lib/slugify";
+import { BodyEditor, type BodyMode } from "@/components/admin/blog/BodyEditor";
+import { FocusEditor } from "@/components/admin/blog/FocusEditor";
 import { useToast } from "@/components/ui/Toast";
 import { ImageUploader } from "./ImageUploader";
 import { EditorShell } from "@/components/admin/editor/EditorShell";
@@ -27,11 +29,6 @@ import {
   shortRecordId,
 } from "@/components/admin/workspace/utils";
 
-const LexKitEditor = dynamic(
-  () => import("./LexKitEditor").then((m) => m.LexKitEditor),
-  { ssr: false }
-);
-
 const CATEGORIES = [
   "Sharing Information",
   "Personal",
@@ -53,7 +50,12 @@ export function BlogForm({ post }: Props) {
   const [slug, setSlug] = useState(post?.slug ?? "");
   const [excerpt, setExcerpt] = useState(post?.excerpt ?? "");
   const [body, setBody] = useState(post?.body ?? "");
-  const bodyFormat = (post?.bodyFormat as "html" | "markdown") ?? "html";
+  const [bodyFormat, setBodyFormat] = useState<"html" | "markdown">(
+    post?.bodyFormat === "markdown" ? "markdown" : "html"
+  );
+  const [bodyMode, setBodyMode] = useState<BodyMode>("visual");
+  const [focusOpen, setFocusOpen] = useState(false);
+  const [editorEpoch, setEditorEpoch] = useState(0);
   const [category, setCategory] = useState(post?.category ?? "");
   const [tags, setTags] = useState<string[]>(post?.tags ?? []);
   const [tagInput, setTagInput] = useState("");
@@ -75,6 +77,16 @@ export function BlogForm({ post }: Props) {
   function handleTitleChange(val: string) {
     setTitle(val);
     if (!isEdit) setSlug(slugify(val));
+  }
+
+  function handleBodyChange(value: string) {
+    setBody(value);
+    setBodyFormat("html");
+  }
+
+  function handleFocusClose() {
+    setFocusOpen(false);
+    setEditorEpoch((n) => n + 1);
   }
 
   function addTag() {
@@ -423,16 +435,61 @@ export function BlogForm({ post }: Props) {
         </EditorField>
       </EditorSection>
 
-      <EditorSection index="04" title="Body" meta="Rich text content">
+      <EditorSection
+        index="04"
+        title="Body"
+        meta={bodyFormat === "markdown" ? "Markdown (legacy)" : "HTML"}
+        actions={
+          <button
+            type="button"
+            onClick={() => setFocusOpen(true)}
+            className="inline-flex h-7 items-center gap-1.5 border border-line bg-surface px-2 font-jet text-[8px] font-bold uppercase tracking-[.08em] transition-colors hover:bg-background"
+          >
+            <Maximize2 size={11} aria-hidden="true" />
+            Focus
+          </button>
+        }
+      >
         <EditorField
-          id="blog-body"
           label="Body"
           required
-          hint={`Format: ${bodyFormat.toUpperCase()}. Rich text. Read time and word count update automatically.`}
+          hint={
+            bodyMode === "visual"
+              ? `Visual editor. Saved as ${bodyFormat.toUpperCase()}. Read time and word count update automatically.`
+              : `Raw HTML source. Saved as ${bodyFormat.toUpperCase()}. Public output is sanitized on render.`
+          }
         >
-          <LexKitEditor key={post?.id ?? "new"} content={body} onChange={setBody} />
+          {bodyFormat === "markdown" && (
+            <p className="mb-2 border-2 border-line bg-admin-wash px-3 py-2 font-jet text-[8px] font-bold uppercase leading-4 tracking-[.08em] text-muted">
+              This record is stored as Markdown. Editing the body will save it
+              as HTML.
+            </p>
+          )}
+          <BodyEditor
+            content={body}
+            onChange={handleBodyChange}
+            mode={bodyMode}
+            onModeChange={setBodyMode}
+            editorKey={editorEpoch}
+          />
         </EditorField>
       </EditorSection>
+
+      <FocusEditor
+        open={focusOpen}
+        onClose={handleFocusClose}
+        title={title}
+        body={body}
+        onBodyChange={handleBodyChange}
+        mode={bodyMode}
+        onModeChange={setBodyMode}
+        editorKey={editorEpoch}
+        readTime={computedReadTime}
+        wordCount={words}
+        bodyFormat={bodyFormat}
+        saving={saving}
+        error={error}
+      />
     </EditorShell>
   );
 }

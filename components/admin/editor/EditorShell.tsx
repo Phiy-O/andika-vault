@@ -50,7 +50,10 @@ export function EditorShell({
     function handleKeyDown(event: KeyboardEvent) {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "s") {
         event.preventDefault();
-        if (!saving && !document.querySelector("dialog[open]")) {
+        const blockingDialog = document.querySelector(
+          "dialog[open]:not([data-editor-shortcut='allow'])"
+        );
+        if (!saving && !blockingDialog) {
           formRef.current?.requestSubmit();
         }
       }
