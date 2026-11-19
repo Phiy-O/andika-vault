@@ -9,9 +9,15 @@ import type {
 } from "@/src/types";
 import type { BlogPost } from "@prisma/client";
 import { requireAdmin } from "@/src/lib/auth";
+import { buildArticleContent, type TocHeading } from "@/src/lib/article-content";
+import { z } from "zod";
 import { actionError } from "./action-error";
 
 type ActionResult<T> = { data?: T; error?: string };
+
+const previewBodySchema = z.object({
+  body: z.string().max(1_000_000, "Body is too large to preview"),
+});
 
 export async function getAllBlogPosts(): Promise<
   ActionResult<BlogPostListItem[]>
@@ -44,6 +50,18 @@ export async function getBlogPost(
     return { data: post ?? null };
   } catch (e) {
     return { error: actionError(e, "Failed to fetch post") };
+  }
+}
+
+export async function previewBlogArticle(input: {
+  body: string;
+}): Promise<ActionResult<{ html: string; headings: TocHeading[] }>> {
+  if (!(await requireAdmin())) return { error: "Unauthorized" };
+  try {
+    const parsed = previewBodySchema.parse(input);
+    return { data: buildArticleContent(parsed.body) };
+  } catch (e) {
+    return { error: actionError(e, "Failed to render preview") };
   }
 }
 
