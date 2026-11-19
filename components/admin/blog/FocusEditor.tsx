@@ -21,6 +21,7 @@ interface FocusEditorProps {
   wordCount: number;
   bodyFormat: "html" | "markdown";
   saving: boolean;
+  canSave: boolean;
   error?: string;
 }
 
@@ -37,6 +38,7 @@ export function FocusEditor({
   wordCount,
   bodyFormat,
   saving,
+  canSave,
   error,
 }: FocusEditorProps) {
   return (
@@ -101,9 +103,16 @@ export function FocusEditor({
           </p>
         )}
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="font-jet text-[8px] uppercase tracking-[.08em] text-muted">
-            Esc exits · Ctrl/Cmd + S saves
-          </p>
+          <div className="min-w-0">
+            <p className="font-jet text-[8px] uppercase tracking-[.08em] text-muted">
+              Esc exits · Ctrl/Cmd + S saves
+            </p>
+            {!canSave && (
+              <p className="mt-1 font-jet text-[8px] font-bold uppercase tracking-[.08em] text-admin-alert">
+                Complete the required fields in the editor before saving.
+              </p>
+            )}
+          </div>
           <div className="flex shrink-0 flex-wrap items-center gap-3">
             <button
               type="button"
@@ -115,7 +124,7 @@ export function FocusEditor({
             </button>
             <button
               type="submit"
-              disabled={saving}
+              disabled={saving || !canSave}
               className={editorButtonPrimaryClass}
             >
               {saving && (

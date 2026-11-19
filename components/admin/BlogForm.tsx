@@ -183,6 +183,13 @@ export function BlogForm({
 
   const words = body.replace(/<[^>]*>/g, "").trim().split(/\s+/).filter(Boolean).length;
 
+  const requiredFieldsComplete =
+    title.trim().length > 0 &&
+    slug.trim().length > 0 &&
+    excerpt.trim().length > 0 &&
+    category.trim().length > 0 &&
+    publishedAt.trim().length > 0;
+
   const metaChips = (
     <>
       <EditorMetaChip>{category || "Article"}</EditorMetaChip>
@@ -503,6 +510,7 @@ export function BlogForm({
         wordCount={words}
         bodyFormat={bodyFormat}
         saving={saving}
+        canSave={requiredFieldsComplete}
         error={error}
       />
 
