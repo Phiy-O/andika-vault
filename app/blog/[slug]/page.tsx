@@ -8,11 +8,13 @@ import { ArticleSidebar } from "@/components/blog/detail/ArticleSidebar";
 import { ArticleFooter } from "@/components/blog/detail/ArticleFooter";
 import { RelatedDispatches } from "@/components/blog/detail/RelatedDispatches";
 import {
-  buildArticleContent,
   formatArticleDate,
   formatReadTime,
-  type TocHeading,
 } from "@/components/blog/detail/article-content";
+import {
+  buildArticleContent,
+  type TocHeading,
+} from "@/src/lib/article-content";
 import { blogPostService } from "@/src/services";
 import { getSiteSettings } from "@/src/actions/site-setting";
 import { authOptions } from "@/src/lib/auth";

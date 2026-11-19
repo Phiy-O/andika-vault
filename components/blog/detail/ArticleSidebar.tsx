@@ -2,7 +2,7 @@
 
 import { Rss } from "lucide-react";
 import { useEffect, useState } from "react";
-import type { TocHeading } from "./article-content";
+import type { TocHeading } from "@/src/lib/article-content";
 
 type ArticleSidebarProps = {
   headings: TocHeading[];
