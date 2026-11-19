@@ -7,6 +7,7 @@ interface EditorSectionProps {
   index: string;
   title: string;
   meta?: string;
+  actions?: ReactNode;
   children: ReactNode;
 }
 
@@ -14,6 +15,7 @@ export function EditorSection({
   index,
   title,
   meta,
+  actions,
   children,
 }: EditorSectionProps) {
   const headingId = useId();
@@ -45,10 +47,15 @@ export function EditorSection({
             {title}
           </h2>
         </div>
-        {meta && (
-          <span className="font-jet text-[8px] font-bold uppercase tracking-[.1em] text-muted">
-            {meta}
-          </span>
+        {(meta || actions) && (
+          <div className="flex flex-wrap items-center gap-2">
+            {meta && (
+              <span className="font-jet text-[8px] font-bold uppercase tracking-[.1em] text-muted">
+                {meta}
+              </span>
+            )}
+            {actions}
+          </div>
         )}
       </div>
       <div className="p-4 sm:p-5">{children}</div>
