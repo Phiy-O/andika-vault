@@ -7,6 +7,10 @@ import { Maximize2 } from "lucide-react";
 import slugify from "@/src/lib/slugify";
 import { BodyEditor, type BodyMode } from "@/components/admin/blog/BodyEditor";
 import { FocusEditor } from "@/components/admin/blog/FocusEditor";
+import {
+  PreviewArticle,
+  type PreviewAuthor,
+} from "@/components/admin/blog/PreviewArticle";
 import { useToast } from "@/components/ui/Toast";
 import { ImageUploader } from "./ImageUploader";
 import { EditorShell } from "@/components/admin/editor/EditorShell";
@@ -37,11 +41,20 @@ const CATEGORIES = [
   "Artificial Intelligence",
 ];
 
+const DEFAULT_PREVIEW_AUTHOR: PreviewAuthor = {
+  name: "Andika",
+  role: "Software Engineer",
+};
+
 interface Props {
   post?: BlogPost | null;
+  previewAuthor?: PreviewAuthor;
 }
 
-export function BlogForm({ post }: Props) {
+export function BlogForm({
+  post,
+  previewAuthor = DEFAULT_PREVIEW_AUTHOR,
+}: Props) {
   const router = useRouter();
   const isEdit = !!post;
   const showToast = useToast();
@@ -55,6 +68,7 @@ export function BlogForm({ post }: Props) {
   );
   const [bodyMode, setBodyMode] = useState<BodyMode>("visual");
   const [focusOpen, setFocusOpen] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const [editorEpoch, setEditorEpoch] = useState(0);
   const [category, setCategory] = useState(post?.category ?? "");
   const [tags, setTags] = useState<string[]>(post?.tags ?? []);
@@ -193,6 +207,7 @@ export function BlogForm({ post }: Props) {
           publicHref={isEdit && slug ? `/blog/${slug}` : null}
           publicLabel={isVisible ? "View Article" : "Preview Draft"}
           publicDisabledReason="Save the article before previewing it."
+          onPreview={() => setPreviewOpen(true)}
           submitLabel={isEdit ? "Update Post" : "Create Post"}
           saving={saving}
         />
@@ -489,6 +504,24 @@ export function BlogForm({ post }: Props) {
         bodyFormat={bodyFormat}
         saving={saving}
         error={error}
+      />
+
+      <PreviewArticle
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        title={title}
+        slug={slug}
+        excerpt={excerpt}
+        category={category}
+        tags={tags}
+        thumbnail={thumbnail || null}
+        body={body}
+        readTime={computedReadTime}
+        publishedAt={publishedAt}
+        isVisible={isVisible}
+        bodyFormat={bodyFormat}
+        publicHref={isEdit && slug ? `/blog/${slug}` : null}
+        author={previewAuthor}
       />
     </EditorShell>
   );

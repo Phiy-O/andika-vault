@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { getCategoryTheme, slugFileName } from "./article-content";
 
 type ArticleHeaderProps = {
@@ -10,7 +11,31 @@ type ArticleHeaderProps = {
   readTime: string;
   author: string;
   format: string;
+  breadcrumbLinks?: boolean;
 };
+
+function BreadcrumbLink({
+  href,
+  enabled,
+  children,
+}: {
+  href: string;
+  enabled: boolean;
+  children: ReactNode;
+}) {
+  if (!enabled) {
+    return <span className="text-[#58413f]">{children}</span>;
+  }
+
+  return (
+    <Link
+      href={href}
+      className="text-[#58413f] transition-colors hover:text-[#a9362e]"
+    >
+      {children}
+    </Link>
+  );
+}
 
 function MetaItem({
   label,
@@ -46,6 +71,7 @@ export function ArticleHeader({
   readTime,
   author,
   format,
+  breadcrumbLinks = true,
 }: ArticleHeaderProps) {
   const theme = getCategoryTheme(category);
   const fileName = `${slugFileName(slug)}.MD`;
@@ -57,23 +83,17 @@ export function ArticleHeader({
           <nav aria-label="Breadcrumb">
             <ol className="flex flex-wrap items-center gap-2 font-mono text-[12px] uppercase tracking-[.08em]">
               <li>
-                <Link
-                  href="/"
-                  className="text-[#58413f] transition-colors hover:text-[#a9362e]"
-                >
+                <BreadcrumbLink href="/" enabled={breadcrumbLinks}>
                   ROOT
-                </Link>
+                </BreadcrumbLink>
               </li>
               <li aria-hidden="true" className="text-[#8b716e]">
                 /
               </li>
               <li>
-                <Link
-                  href="/blog"
-                  className="text-[#58413f] transition-colors hover:text-[#a9362e]"
-                >
+                <BreadcrumbLink href="/blog" enabled={breadcrumbLinks}>
                   BLOG
-                </Link>
+                </BreadcrumbLink>
               </li>
               <li aria-hidden="true" className="text-[#8b716e]">
                 /

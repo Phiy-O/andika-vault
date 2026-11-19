@@ -2,27 +2,33 @@
 
 import { Rss } from "lucide-react";
 import { useEffect, useState } from "react";
+import type { RefObject } from "react";
 import type { TocHeading } from "@/src/lib/article-content";
 
 type ArticleSidebarProps = {
   headings: TocHeading[];
   readTime: string;
   context: { label: string; value: string }[];
+  scrollRootRef?: RefObject<HTMLElement | null>;
 };
 
 export function ArticleSidebar({
   headings,
   readTime,
   context,
+  scrollRootRef,
 }: ArticleSidebarProps) {
   const [activeId, setActiveId] = useState(headings[0]?.id ?? "");
 
   useEffect(() => {
     let frame = 0;
+    const scrollRoot = scrollRootRef?.current ?? null;
 
     const updateActiveHeading = () => {
       frame = 0;
-      const offset = 120;
+      const offset = scrollRoot
+        ? scrollRoot.getBoundingClientRect().top + 120
+        : 120;
       let current = headings[0]?.id ?? "";
 
       for (const heading of headings) {
@@ -41,15 +47,23 @@ export function ArticleSidebar({
     };
 
     updateActiveHeading();
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    if (scrollRoot) {
+      scrollRoot.addEventListener("scroll", handleScroll, { passive: true });
+    } else {
+      window.addEventListener("scroll", handleScroll, { passive: true });
+    }
     window.addEventListener("resize", handleScroll);
 
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      if (scrollRoot) {
+        scrollRoot.removeEventListener("scroll", handleScroll);
+      } else {
+        window.removeEventListener("scroll", handleScroll);
+      }
       window.removeEventListener("resize", handleScroll);
       if (frame) window.cancelAnimationFrame(frame);
     };
-  }, [headings]);
+  }, [headings, scrollRootRef]);
 
   return (
     <aside className="order-first space-y-6 lg:order-none lg:sticky lg:top-24 lg:col-span-4 lg:self-start">

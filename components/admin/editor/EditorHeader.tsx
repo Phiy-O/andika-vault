@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { ArrowLeft, Copy, ExternalLink, Loader2 } from "lucide-react";
+import { ArrowLeft, Copy, ExternalLink, Eye, Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 import { copyText } from "@/components/admin/workspace/utils";
 
@@ -126,6 +126,8 @@ interface EditorHeaderActionsProps {
   publicHref?: string | null;
   publicLabel: string;
   publicDisabledReason?: string;
+  onPreview?: () => void;
+  previewLabel?: string;
   submitLabel: string;
   saving: boolean;
 }
@@ -136,6 +138,8 @@ export function EditorHeaderActions({
   publicHref,
   publicLabel,
   publicDisabledReason,
+  onPreview,
+  previewLabel,
   submitLabel,
   saving,
 }: EditorHeaderActionsProps) {
@@ -167,6 +171,17 @@ export function EditorHeaderActions({
             <ExternalLink size={12} aria-hidden="true" />
           </button>
         </span>
+      )}
+      {onPreview && (
+        <button
+          type="button"
+          onClick={onPreview}
+          disabled={saving}
+          className={editorButtonSecondaryClass}
+        >
+          <Eye size={13} strokeWidth={2.2} aria-hidden="true" />
+          {previewLabel ?? "Preview"}
+        </button>
       )}
       <button type="submit" disabled={saving} className={editorButtonPrimaryClass}>
         {saving && (
