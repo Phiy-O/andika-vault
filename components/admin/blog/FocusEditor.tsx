@@ -49,11 +49,19 @@ export function FocusEditor({
   error,
 }: FocusEditorProps) {
   const titleRef = useRef<HTMLInputElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
     titleRef.current?.focus();
   }, [open]);
+
+  function focusBody() {
+    const target = bodyRef.current?.querySelector<HTMLElement>(
+      '[contenteditable="true"], textarea'
+    );
+    target?.focus();
+  }
 
   return (
     <FullscreenDialog
@@ -61,6 +69,7 @@ export function FocusEditor({
       onClose={onClose}
       label="Focus mode body editor"
       shortcut
+      closeDisabled={saving}
     >
       <header className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-line bg-surface px-4 py-3">
         <div className="flex min-w-0 flex-wrap items-center gap-2">
@@ -110,6 +119,7 @@ export function FocusEditor({
           <button
             type="submit"
             disabled={saving || !canSave}
+            aria-describedby={!canSave ? "focus-save-hint" : undefined}
             className={editorButtonPrimaryClass}
           >
             {saving && (
@@ -127,22 +137,27 @@ export function FocusEditor({
             value={title}
             onChange={(event) => onTitleChange(event.target.value)}
             onKeyDown={(event) => {
-              if (event.key === "Enter") event.preventDefault();
+              if (event.key !== "Enter" || event.nativeEvent.isComposing) return;
+              event.preventDefault();
+              focusBody();
             }}
             placeholder="Post title"
             aria-label="Post title"
             aria-required="true"
             autoComplete="off"
-            className="mb-5 w-full border-x-0 border-t-0 border-b-2 border-line bg-transparent px-0 py-3 font-space text-2xl font-bold tracking-[-.04em] text-foreground outline-none transition-colors placeholder:text-muted/40 focus:border-purple sm:text-3xl"
+            enterKeyHint="next"
+            className="mb-5 w-full border-x-0 border-t-0 border-b-2 border-line bg-transparent px-0 py-3 font-space text-2xl font-bold tracking-[-.04em] text-foreground outline-none transition-colors placeholder:text-muted/70 focus:border-purple focus-visible:outline-2 focus-visible:outline-purple focus-visible:outline-offset-0 sm:text-3xl"
           />
-          <BodyEditor
-            content={body}
-            onChange={onBodyChange}
-            mode={mode}
-            onModeChange={onModeChange}
-            editorKey={editorKey}
-            tall
-          />
+          <div ref={bodyRef}>
+            <BodyEditor
+              content={body}
+              onChange={onBodyChange}
+              mode={mode}
+              onModeChange={onModeChange}
+              editorKey={editorKey}
+              tall
+            />
+          </div>
         </div>
       </div>
 
@@ -160,7 +175,10 @@ export function FocusEditor({
             Esc exits · Ctrl/Cmd + S saves
           </p>
           {!canSave && (
-            <p className="font-jet text-[8px] font-bold uppercase tracking-[.08em] text-admin-alert">
+            <p
+              id="focus-save-hint"
+              className="font-jet text-[8px] font-bold uppercase tracking-[.08em] text-admin-alert"
+            >
               Complete the required fields in the editor before saving.
             </p>
           )}

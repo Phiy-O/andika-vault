@@ -187,6 +187,7 @@ export function BlogForm({
     title.trim().length > 0 &&
     slug.trim().length > 0 &&
     excerpt.trim().length > 0 &&
+    body.trim().length > 0 &&
     category.trim().length > 0 &&
     publishedAt.trim().length > 0;
 
@@ -312,6 +313,7 @@ export function BlogForm({
       dirty={dirty}
       saving={saving}
       submitLabel={isEdit ? "Update Post" : "Create Post"}
+      canSubmit={!focusOpen || requiredFieldsComplete}
       onCancel={handleCancel}
       header={header}
       rail={rail}

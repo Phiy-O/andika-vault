@@ -21,6 +21,7 @@ interface EditorShellProps {
   dirty: boolean;
   saving: boolean;
   submitLabel: string;
+  canSubmit?: boolean;
   cancelLabel?: string;
   onCancel: () => void;
   children: ReactNode;
@@ -37,6 +38,7 @@ export function EditorShell({
   dirty,
   saving,
   submitLabel,
+  canSubmit = true,
   cancelLabel,
   onCancel,
   children,
@@ -53,7 +55,7 @@ export function EditorShell({
         const blockingDialog = document.querySelector(
           "dialog[open]:not([data-editor-shortcut='allow'])"
         );
-        if (!saving && !blockingDialog) {
+        if (!saving && !blockingDialog && canSubmit) {
           formRef.current?.requestSubmit();
         }
       }
@@ -61,7 +63,7 @@ export function EditorShell({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [saving]);
+  }, [saving, canSubmit]);
 
   useEffect(() => {
     if (!error) return;
