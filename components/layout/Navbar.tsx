@@ -57,7 +57,7 @@ export function Navbar() {
         }`}
       >
         <Link className="text-foreground text-xl font-bold tracking-[-.06em] leading-none w-auto h-auto max-md:order-2" href="/" aria-label="Andika home" onClick={closeMenu}>
-          <Image src="/icons/navbar-logo.svg" alt="Andika Lab" width={162} height={32} priority />
+          <Image src="/icons/portfolio-logo.svg" alt="Andika Vault logo" width={32} height={32} priority />
         </Link>
 
         <button
