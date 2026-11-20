@@ -133,7 +133,7 @@ export function FocusEditor({
             aria-label="Post title"
             aria-required="true"
             autoComplete="off"
-            className="mb-5 w-full border-0 border-b-2 border-line bg-transparent px-0 py-3 font-space text-2xl font-bold tracking-[-.04em] text-foreground outline-none transition-colors placeholder:text-muted/40 focus:border-purple sm:text-3xl"
+            className="mb-5 w-full border-x-0 border-t-0 border-b-2 border-line bg-transparent px-0 py-3 font-space text-2xl font-bold tracking-[-.04em] text-foreground outline-none transition-colors placeholder:text-muted/40 focus:border-purple sm:text-3xl"
           />
           <BodyEditor
             content={body}
