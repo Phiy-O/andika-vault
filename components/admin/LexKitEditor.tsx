@@ -21,6 +21,8 @@ import {
     htmlEmbedExtension,
 } from "@lexkit/editor";
 import {
+    $createParagraphNode,
+    $getRoot,
     $getSelection,
     $isElementNode,
     $isRangeSelection,
@@ -65,7 +67,7 @@ const extensions = [
         placeholder: "Start writing...",
         classNames: {
             contentEditable:
-                "prose max-w-none focus:outline-none px-4 py-4 min-h-[360px] text-sm text-foreground bg-background cursor-text",
+                "lexkit-editor-content prose max-w-none focus:outline-none px-4 py-4 min-h-[360px] text-sm text-foreground bg-background cursor-text",
             placeholder: "text-muted text-sm px-4 py-4",
         },
         styles: {
@@ -141,7 +143,7 @@ function EditorShell({ content, onChange }: Props) {
         queueMicrotask(() => {
             try {
                 commands.importFromHTML(safeContent);
-            } catch (e) {
+            } catch {
                 // Fallback to empty paragraph on import error
                 try {
                     commands.importFromHTML("<p></p>");
@@ -259,6 +261,26 @@ function EditorShell({ content, onChange }: Props) {
         setPrompt({ mode: "image", value: "" });
     }, []);
 
+    // LexKit's insertTable requires a range selection. On a fresh body (or
+    // after a node is selected) there is none, so the toolbar button would
+    // silently do nothing. Focus the editor and create a caret first.
+    const insertTable = useCallback(() => {
+        if (!editor) return;
+
+        editor.focus();
+        editor.update(() => {
+            if ($isRangeSelection($getSelection())) return;
+
+            const root = $getRoot();
+            if (root.getChildrenSize() === 0) {
+                root.append($createParagraphNode());
+            }
+            root.selectEnd();
+        });
+
+        commands.insertTable({ rows: 3, columns: 3 });
+    }, [editor, commands]);
+
     function submitPrompt() {
         if (!prompt) return;
         if (prompt.value) {
@@ -348,7 +370,7 @@ function EditorShell({ content, onChange }: Props) {
 
                 {/* Insert items */}
                 <ToolbarGroup>
-                    <TbBtn label="Insert Table" icon={<Table size={14} />} action={() => commands.insertTable({ rows: 3, columns: 3 })} />
+                    <TbBtn label="Insert Table" icon={<Table size={14} />} action={insertTable} />
                     <TbBtn label="Insert Image" icon={<ImageIcon size={14} />} action={addImage} />
                     <TbBtn label="Horizontal Rule" icon={<Minus size={14} />} action={() => commands.insertHorizontalRule()} />
                     <TbBtn label="Code Block" icon={<Code2 size={14} />} active={a.isInCodeBlock} action={() => commands.toggleCodeBlock()} />
@@ -532,9 +554,11 @@ function TbBtn({
                 e.preventDefault();
                 action();
             }}
-            className={`border-2 border-transparent p-1.5 transition-colors ${active
-                    ? "bg-purple text-foreground"
-                    : "text-muted hover:bg-admin-wash hover:text-foreground"
+            aria-label={label}
+            aria-pressed={active === undefined ? undefined : active}
+            className={`border-2 p-1.5 transition-colors active:translate-y-px ${active
+                    ? "border-line bg-purple text-foreground hover:border-foreground hover:bg-purple/90"
+                    : "border-transparent text-muted hover:border-line hover:bg-surface hover:text-foreground"
                 }`}
             title={label}
         >

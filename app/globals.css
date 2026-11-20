@@ -188,6 +188,34 @@ em {
   font-weight: 600;
 }
 
+/* LexKit renders table nodes with its own classes but ships no visual theme.
+   Give the editor's cells visible borders so an inserted table is legible. */
+.lexkit-editor-content table {
+  width: 100%;
+  margin: 1rem 0;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.lexkit-editor-content th,
+.lexkit-editor-content td {
+  min-width: 4rem;
+  border: 1px solid var(--line);
+  padding: 8px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.lexkit-editor-content th {
+  background: var(--surface);
+  font-weight: 600;
+}
+
+.lexkit-editor-content th p,
+.lexkit-editor-content td p {
+  margin: 0;
+}
+
 .prose-content pre {
   background: var(--surface);
   border: 1px solid var(--line);
