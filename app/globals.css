@@ -528,21 +528,54 @@ em {
   justify-content: center;
   min-height: 100vh;
   overflow: hidden;
+  padding: 24px;
   position: fixed;
   z-index: 100;
 }
 
-.loading-content {
-  max-width: 420px;
-  padding: 24px;
-  width: 100%;
+.loading-card {
+  background: #fffdf7;
+  border: 2px solid var(--foreground);
+  box-shadow: 6px 6px 0 var(--foreground);
+  width: min(440px, 100%);
+}
+
+.loading-card-head {
+  align-items: center;
+  border-bottom: 2px solid var(--foreground);
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 16px;
+}
+
+.loading-label {
+  color: var(--muted);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.loading-label-accent {
+  color: var(--purple);
 }
 
 .loading-logo-wrap {
-  animation: loading-logo-in .7s ease both;
+  animation: loading-logo-in .5s cubic-bezier(.2, .8, .2, 1) both;
   display: flex;
   justify-content: center;
-  margin-bottom: 70px;
+  padding: 44px 24px 32px;
+}
+
+.loading-logo-box {
+  align-items: center;
+  background: var(--surface);
+  border: 2px solid var(--foreground);
+  box-shadow: 4px 4px 0 var(--foreground);
+  display: flex;
+  justify-content: center;
+  padding: 26px 32px;
 }
 
 .loading-logo {
@@ -553,10 +586,12 @@ em {
 .loading-status {
   color: var(--muted);
   display: flex;
+  font-family: var(--font-geist-mono), monospace;
   font-size: 10px;
+  font-weight: 700;
   justify-content: space-between;
-  letter-spacing: .14em;
-  margin-bottom: 12px;
+  letter-spacing: .1em;
+  padding: 0 16px 12px;
   text-transform: uppercase;
 }
 
@@ -565,38 +600,47 @@ em {
 }
 
 .loading-track {
-  background: var(--line);
-  height: 2px;
+  background: var(--surface);
+  border-top: 2px solid var(--foreground);
+  height: 16px;
   overflow: hidden;
   width: 100%;
 }
 
 .loading-progress {
-  animation: loading-progress 1.4s cubic-bezier(.65, 0, .35, 1) infinite;
-  background: linear-gradient(90deg, #8f6bff, #5c7cfa);
+  animation: loading-stripes .6s linear infinite;
+  background-image: linear-gradient(
+    -45deg,
+    var(--purple) 25%,
+    var(--amber) 25%,
+    var(--amber) 50%,
+    var(--purple) 50%,
+    var(--purple) 75%,
+    var(--amber) 75%,
+    var(--amber)
+  );
+  background-size: 28px 28px;
   display: block;
   height: 100%;
-  transform-origin: left;
   width: 100%;
 }
 
 .loading-corner {
-  border-color: var(--purple);
+  border-color: var(--foreground);
   border-style: solid;
-  height: 26px;
-  opacity: .7;
+  height: 22px;
   position: absolute;
-  width: 26px;
+  width: 22px;
 }
 
 .loading-corner-top {
-  border-width: 1px 0 0 1px;
+  border-width: 2px 0 0 2px;
   left: 5vw;
   top: 5vh;
 }
 
 .loading-corner-bottom {
-  border-width: 0 1px 1px 0;
+  border-width: 0 2px 2px 0;
   bottom: 5vh;
   right: 5vw;
 }
@@ -604,7 +648,7 @@ em {
 @keyframes loading-logo-in {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
   }
 
   to {
@@ -613,18 +657,13 @@ em {
   }
 }
 
-@keyframes loading-progress {
-  0% {
-    transform: scaleX(0);
+@keyframes loading-stripes {
+  from {
+    background-position: 0 0;
   }
 
-  45%,
-  65% {
-    transform: scaleX(.7);
-  }
-
-  100% {
-    transform: scaleX(1);
+  to {
+    background-position: 28px 0;
   }
 }
 
@@ -652,6 +691,6 @@ em {
   }
 
   .loading-progress {
-    transform: scaleX(1);
+    background-position: 0 0;
   }
 }
