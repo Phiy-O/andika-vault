@@ -26,8 +26,10 @@ import {
     $getSelection,
     $isElementNode,
     $isRangeSelection,
+    COMMAND_PRIORITY_EDITOR,
     COMMAND_PRIORITY_LOW,
     FORMAT_ELEMENT_COMMAND,
+    KEY_BACKSPACE_COMMAND,
     KEY_TAB_COMMAND,
     type ElementFormatType,
 } from "lexical";
@@ -169,6 +171,30 @@ function EditorShell({ content, onChange, variant = "default" }: Props) {
             COMMAND_PRIORITY_LOW
         );
     }, [editor, variant]);
+
+    useEffect(() => {
+        if (!editor) return;
+
+        return editor.registerCommand(
+            KEY_BACKSPACE_COMMAND,
+            (event: KeyboardEvent) => {
+                const selection = $getSelection();
+                if (!$isRangeSelection(selection) || !selection.isCollapsed()) return false;
+                if (selection.anchor.offset !== 0) return false;
+
+                const anchorNode = selection.anchor.getNode();
+                const element = anchorNode.getTopLevelElement();
+                if (!element || element.getType() !== "paragraph") return false;
+
+                const previous = element.getPreviousSibling();
+                if (!previous || previous.getType() !== "table") return false;
+
+                event.preventDefault();
+                return true;
+            },
+            COMMAND_PRIORITY_EDITOR
+        );
+    }, [editor]);
 
     // Inject initial HTML content once on mount, suppressing the import emissions
     useEffect(() => {
