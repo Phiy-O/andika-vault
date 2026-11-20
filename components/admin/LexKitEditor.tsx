@@ -24,9 +24,9 @@ import {
     $createParagraphNode,
     $getRoot,
     $getSelection,
+    $getNodeByKey,
     $isElementNode,
     $isRangeSelection,
-    COMMAND_PRIORITY_EDITOR,
     COMMAND_PRIORITY_LOW,
     FORMAT_ELEMENT_COMMAND,
     KEY_BACKSPACE_COMMAND,
@@ -215,12 +215,37 @@ function EditorShell({ content, onChange, variant = "default" }: Props) {
                 if (!element || element.getType() !== "paragraph") return false;
 
                 const previous = element.getPreviousSibling();
-                if (!previous || previous.getType() !== "table") return false;
+                if (!previous || previous.getType() !== "table" || !$isElementNode(previous)) {
+                    return false;
+                }
+
+                const tableHasContent = previous.getChildren().some(
+                    (row) =>
+                        $isElementNode(row) &&
+                        row.getChildren().some(
+                            (cell) =>
+                                $isElementNode(cell) &&
+                                cell.getTextContent().trim().length > 0
+                        )
+                );
+                if (!tableHasContent) {
+                    event.preventDefault();
+                    const tableKey = previous.getKey();
+                    const paragraphKey = element.getKey();
+                    editor.update(() => {
+                        $getNodeByKey(tableKey)?.remove();
+                        const paragraph = $getNodeByKey(paragraphKey);
+                        if (paragraph && $isElementNode(paragraph)) {
+                            paragraph.selectStart();
+                        }
+                    });
+                    return true;
+                }
 
                 event.preventDefault();
                 return true;
             },
-            COMMAND_PRIORITY_EDITOR
+            COMMAND_PRIORITY_LOW
         );
     }, [editor]);
 
