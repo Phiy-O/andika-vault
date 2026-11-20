@@ -1,6 +1,6 @@
 # Focus Writing Surface Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Give the Focus blog editor a white writing surface and make `Tab` insert indentation in both Visual and HTML typing modes, while keeping `Esc` as the exit and leaving the main form unchanged.
 
@@ -37,7 +37,7 @@
 - Produces: `LexKitEditorProps` gains `variant?: "default" | "focus"`.
 - Consumes: nothing new beyond existing `lexical` imports.
 
-- [ ] **Step 1: Extract the extension list into a factory**
+- [x] **Step 1: Extract the extension list into a factory**
 
 Replace the module-level `extensions` constant with a `buildExtensions(focus: boolean)` function that returns the same extension array, but sets the `contentEditable` class to:
 
@@ -55,11 +55,11 @@ const focusExtensions = buildExtensions(true);
 const { Provider, useEditor } = createEditorSystem<typeof extensions>();
 ```
 
-- [ ] **Step 2: Add the variant prop and select extensions**
+- [x] **Step 2: Add the variant prop and select extensions**
 
 Extend `Props` with `variant?: "default" | "focus"`. In `LexKitEditor`, pass `variant` into `EditorShell` and render `<Provider extensions={variant === "focus" ? focusExtensions : extensions}>`.
 
-- [ ] **Step 3: Register Tab indentation only in focus mode**
+- [x] **Step 3: Register Tab indentation only in focus mode**
 
 In `EditorShell`, destructure `variant`, import `KEY_TAB_COMMAND` and `COMMAND_PRIORITY_LOW` from `lexical`, and add:
 
@@ -87,12 +87,12 @@ useEffect(() => {
 
 Do not raise the priority: the table extension's higher-priority handler must still win inside table cells.
 
-- [ ] **Step 4: Verify TypeScript**
+- [x] **Step 4: Verify TypeScript**
 
 Run: `pnpm exec tsc --noEmit`
 Expected: no output.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add components/admin/LexKitEditor.tsx
@@ -111,15 +111,15 @@ git commit -m "feat: add focus variant with Tab indentation to LexKit editor"
 - Consumes: `LexKitEditor` variant from Task 1.
 - Produces: `BodyEditorProps` gains `variant?: "default" | "focus"`; `FocusEditor` passes `variant="focus"`.
 
-- [ ] **Step 1: Add variant to BodyEditorProps and destructure it**
+- [x] **Step 1: Add variant to BodyEditorProps and destructure it**
 
 Add `variant?: "default" | "focus"` to `BodyEditorProps` and to the destructured props with a default of `"default"`.
 
-- [ ] **Step 2: Pass variant to LexKitEditor**
+- [x] **Step 2: Pass variant to LexKitEditor**
 
 Change `<LexKitEditor key={editorKey} ... />` to also pass `variant={variant}`.
 
-- [ ] **Step 3: Style and handle Tab in the HTML textarea**
+- [x] **Step 3: Style and handle Tab in the HTML textarea**
 
 In the textarea branch, append the focus classes when `variant === "focus"`:
 
@@ -149,11 +149,11 @@ onKeyDown={(event) => {
 
 Keep all existing textarea attributes and classes otherwise unchanged.
 
-- [ ] **Step 4: Pass the variant from FocusEditor**
+- [x] **Step 4: Pass the variant from FocusEditor**
 
 In `FocusEditor`, add `variant="focus"` to the `<BodyEditor ... />` call. Do not change the main form's `BodyEditor` usage in `BlogForm.tsx`.
 
-- [ ] **Step 5: Verify TypeScript and lint**
+- [x] **Step 5: Verify TypeScript and lint**
 
 Run: `pnpm exec tsc --noEmit`
 Expected: no output.
@@ -161,7 +161,7 @@ Expected: no output.
 Run: `pnpm exec eslint components/admin/LexKitEditor.tsx components/admin/blog/BodyEditor.tsx components/admin/blog/FocusEditor.tsx`
 Expected: no output.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add components/admin/blog/BodyEditor.tsx components/admin/blog/FocusEditor.tsx
@@ -175,17 +175,17 @@ git commit -m "feat: use focus variant in the Focus body editor"
 **Files:**
 - No code changes expected.
 
-- [ ] **Step 1: Run full type check**
+- [x] **Step 1: Run full type check**
 
 Run: `pnpm exec tsc --noEmit`
 Expected: no output.
 
-- [ ] **Step 2: Run targeted lint**
+- [x] **Step 2: Run targeted lint**
 
 Run: `pnpm exec eslint components/admin/LexKitEditor.tsx components/admin/blog/BodyEditor.tsx components/admin/blog/FocusEditor.tsx`
 Expected: no output.
 
-- [ ] **Step 3: Browser smoke check**
+- [x] **Step 3: Browser smoke check**
 
 Using a temporary route that mounts the real `BlogForm`, verify:
 - Focus Visual editor contenteditable has computed `background-color: rgb(255, 255, 255)`.
@@ -196,7 +196,7 @@ Using a temporary route that mounts the real `BlogForm`, verify:
 - `Shift+Tab` is not swallowed by the editor.
 - `Esc` closes Focus.
 
-- [ ] **Step 4: Report**
+- [x] **Step 4: Report**
 
 Summarize changed files, verification output, and any checks that could not be performed.
 

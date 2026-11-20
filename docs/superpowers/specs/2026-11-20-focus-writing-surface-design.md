@@ -1,7 +1,7 @@
 # Focus Writing Surface and Tab Indentation — Design
 
 Date: 2026-11-20
-Status: Awaiting approval
+Status: Approved and implemented
 
 ## Intent
 
