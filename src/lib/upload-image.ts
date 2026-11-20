@@ -29,7 +29,7 @@ export async function uploadImageFile(file: File): Promise<string> {
 
   const signatureResponse = await fetch("/api/cloudinary/signature");
   if (!signatureResponse.ok) {
-    throw new Error("Session expired, please sign in again");
+    throw new Error("Sesi berakhir, login ulang");
   }
   const signature = await signatureResponse.json();
 
@@ -46,7 +46,7 @@ export async function uploadImageFile(file: File): Promise<string> {
     { method: "POST", body: form }
   );
   if (!uploadResponse.ok) {
-    throw new Error("Upload failed, please try again");
+    throw new Error("Upload gagal, coba lagi");
   }
 
   const data = await uploadResponse.json();

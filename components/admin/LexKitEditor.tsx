@@ -31,6 +31,7 @@ import {
     FORMAT_ELEMENT_COMMAND,
     KEY_BACKSPACE_COMMAND,
     KEY_TAB_COMMAND,
+    PASTE_COMMAND,
     type ElementFormatType,
 } from "lexical";
 import {
@@ -63,7 +64,10 @@ import {
     Table,
     ChevronDown,
 } from "lucide-react";
-import { uploadImageFile } from "@/src/lib/upload-image";
+import {
+    ACCEPTED_IMAGE_TYPES,
+    uploadImageFile,
+} from "@/src/lib/upload-image";
 
 const extensions = [
     richTextExtension.configure({
@@ -86,22 +90,7 @@ const extensions = [
         listExtension,
         linkExtension.configure({ autoLinkUrls: true }),
         imageExtension.configure({
-            uploadHandler: (file: File) =>
-                uploadImageFile(file).catch((error: unknown) => {
-                    if (typeof window !== "undefined") {
-                        window.dispatchEvent(
-                            new CustomEvent("lexkit-image-upload-error", {
-                                detail:
-                                    error instanceof Error
-                                        ? error.message
-                                        : "Image upload failed",
-                            })
-                        );
-                    }
-                    throw error;
-                }),
-            forceUpload: true,
-            pasteListener: { insert: true, replace: true },
+            pasteListener: { insert: false, replace: false },
         }),
         horizontalRuleExtension,
         historyExtension,
@@ -140,17 +129,56 @@ function EditorShell({ content, onChange, variant = "default" }: Props) {
     const [focused, setFocused] = useState(false);
 
     useEffect(() => {
-        const handleUploadError = (event: Event) => {
-            setUploadError((event as CustomEvent<string>).detail);
-        };
-        window.addEventListener("lexkit-image-upload-error", handleUploadError);
-        return () =>
-            window.removeEventListener("lexkit-image-upload-error", handleUploadError);
-    }, []);
-
-    useEffect(() => {
         onChangeRef.current = onChange;
     }, [onChange]);
+
+    const insertUploadedImage = useCallback(
+        (file: File) => {
+            if (!editor) return;
+            setUploadError("");
+            void uploadImageFile(file)
+                .then((url) => {
+                    editor.update(() => {
+                        const selection = $getSelection();
+                        if (!$isRangeSelection(selection)) {
+                            const paragraph = $createParagraphNode();
+                            $getRoot().append(paragraph);
+                            paragraph.select();
+                        }
+                        commands.insertImage({ src: url, alt: file.name });
+                    });
+                })
+                .catch((error: unknown) => {
+                    setUploadError(
+                        error instanceof Error ? error.message : "Upload gagal, coba lagi"
+                    );
+                });
+        },
+        [editor, commands]
+    );
+
+    useEffect(() => {
+        if (!editor) return;
+
+        return editor.registerCommand(
+            PASTE_COMMAND,
+            (event: ClipboardEvent) => {
+                const items = event.clipboardData?.items;
+                if (!items) return false;
+                const item = Array.from(items).find((candidate) =>
+                    candidate.type.startsWith("image/")
+                );
+                if (!item) return false;
+                const file = item.getAsFile();
+                if (!file) return false;
+
+                event.preventDefault();
+                insertUploadedImage(file);
+                return true;
+            },
+            COMMAND_PRIORITY_LOW
+        );
+    }, [editor, insertUploadedImage]);
 
     useEffect(() => {
         if (!editor || variant !== "focus") return;
@@ -452,14 +480,11 @@ function EditorShell({ content, onChange, variant = "default" }: Props) {
             <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*"
+                accept={ACCEPTED_IMAGE_TYPES.join(",")}
                 className="hidden"
                 onChange={(event) => {
                     const file = event.target.files?.[0];
-                    if (file) {
-                        setUploadError("");
-                        commands.insertImage({ file, alt: "" });
-                    }
+                    if (file) insertUploadedImage(file);
                     event.target.value = "";
                 }}
             />
