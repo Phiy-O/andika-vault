@@ -33,6 +33,7 @@ import {
     KEY_TAB_COMMAND,
     PASTE_COMMAND,
     type ElementFormatType,
+    type ElementNode,
 } from "lexical";
 import {
     AlignCenter,
@@ -101,6 +102,20 @@ const extensions = [
 ] as const;
 
 const { Provider, useEditor } = createEditorSystem<typeof extensions>();
+
+/** True when an element contains anything beyond empty paragraphs/linebreaks. */
+function elementHasContent(element: ElementNode): boolean {
+    return element.getChildren().some((child) => {
+        if ($isElementNode(child) && child.getType() === "paragraph") {
+            return elementHasContent(child);
+        }
+        if (child.getType() === "linebreak") return false;
+        if (child.getType() === "text") {
+            return child.getTextContent().trim().length > 0;
+        }
+        return true;
+    });
+}
 
 interface Props {
     content: string;
@@ -213,6 +228,7 @@ function EditorShell({ content, onChange, variant = "default" }: Props) {
                 const anchorNode = selection.anchor.getNode();
                 const element = anchorNode.getTopLevelElement();
                 if (!element || element.getType() !== "paragraph") return false;
+                if (element.getTextContent().trim().length > 0) return false;
 
                 const previous = element.getPreviousSibling();
                 if (!previous || previous.getType() !== "table" || !$isElementNode(previous)) {
@@ -223,9 +239,7 @@ function EditorShell({ content, onChange, variant = "default" }: Props) {
                     (row) =>
                         $isElementNode(row) &&
                         row.getChildren().some(
-                            (cell) =>
-                                $isElementNode(cell) &&
-                                cell.getTextContent().trim().length > 0
+                            (cell) => $isElementNode(cell) && elementHasContent(cell)
                         )
                 );
                 if (!tableHasContent) {

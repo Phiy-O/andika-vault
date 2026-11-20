@@ -19,11 +19,11 @@
 **Files:**
 - Modify: `components/admin/LexKitEditor.tsx`
 
-- [ ] **Step 1: Add an emptiness check**
+- [x] **Step 1: Add an emptiness check**
 
 Inside the existing `KEY_BACKSPACE_COMMAND` handler, after confirming the previous sibling is a table and `$isElementNode(previous)`, check every row and cell with `getTextContent().trim()`. If any cell has content, keep the existing `event.preventDefault(); return true;`. If all cells are empty, `return false;` so Lexical's default deletion runs.
 
-- [ ] **Step 2: Verify TypeScript and lint**
+- [x] **Step 2: Verify TypeScript and lint**
 
 Run: `pnpm exec tsc --noEmit`
 Expected: no output.
@@ -31,7 +31,7 @@ Expected: no output.
 Run: `pnpm exec eslint components/admin/LexKitEditor.tsx`
 Expected: no output.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add components/admin/LexKitEditor.tsx
@@ -42,13 +42,13 @@ git commit -m "fix: allow Backspace to delete empty tables"
 
 ### Task 2: Verify
 
-- [ ] **Step 1: Browser smoke**
+- [x] **Step 1: Browser smoke**
 
 With a temporary route mounting the real `BlogForm`, verify:
 - Insert an empty table; Backspace from the empty paragraph below removes it.
 - Type content into a cell; Backspace from the paragraph below leaves the table intact.
 - Normal Backspace text deletion still works.
 
-- [ ] **Step 2: Report**
+- [x] **Step 2: Report**
 
 Summarize changes, verification, and limitations.
