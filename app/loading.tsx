@@ -10,16 +10,14 @@ export default function Loading() {
         </div>
 
         <div className="loading-logo-wrap">
-          <div className="loading-logo-box">
-            <Image
-              className="loading-logo"
-              src="/icons/portfolio-logo.svg"
-              alt="Andika Vault logo"
-              width={88}
-              height={88}
-              priority
-            />
-          </div>
+          <Image
+            className="loading-logo"
+            src="/icons/portfolio-logo.svg"
+            alt="Andika Vault logo"
+            width={120}
+            height={120}
+            priority
+          />
         </div>
 
         <div className="loading-status">
