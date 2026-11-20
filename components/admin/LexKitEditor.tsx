@@ -26,7 +26,9 @@ import {
     $getSelection,
     $isElementNode,
     $isRangeSelection,
+    COMMAND_PRIORITY_LOW,
     FORMAT_ELEMENT_COMMAND,
+    KEY_TAB_COMMAND,
     type ElementFormatType,
 } from "lexical";
 import {
@@ -62,51 +64,58 @@ import {
 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 
-const extensions = [
-    richTextExtension.configure({
-        placeholder: "Start writing...",
-        classNames: {
-            contentEditable:
-                "lexkit-editor-content prose max-w-none focus:outline-none px-4 py-4 min-h-[360px] text-sm text-foreground bg-background cursor-text",
-            placeholder: "text-muted text-sm px-4 py-4",
-        },
-        styles: {
-            contentEditable: { caretColor: "#1b1b1b" },
-        },
-    }),
-    boldExtension,
-    italicExtension,
-    underlineExtension,
-    strikethroughExtension,
-    codeFormatExtension,
-    blockFormatExtension,
-    listExtension,
-    linkExtension.configure({ autoLinkUrls: true }),
-    imageExtension,
-    horizontalRuleExtension,
-    historyExtension,
-    htmlExtension,
-    codeExtension,
-    tableExtension,
-    htmlEmbedExtension,
-] as const;
+function buildExtensions(focus: boolean) {
+    return [
+        richTextExtension.configure({
+            placeholder: "Start writing...",
+            classNames: {
+                contentEditable: focus
+                    ? "lexkit-editor-content prose max-w-none focus:outline-none px-4 py-4 min-h-[360px] text-sm text-foreground cursor-text bg-white whitespace-pre-wrap [tab-size:2]"
+                    : "lexkit-editor-content prose max-w-none focus:outline-none px-4 py-4 min-h-[360px] text-sm text-foreground bg-background cursor-text",
+                placeholder: "text-muted text-sm px-4 py-4",
+            },
+            styles: {
+                contentEditable: { caretColor: "#1b1b1b" },
+            },
+        }),
+        boldExtension,
+        italicExtension,
+        underlineExtension,
+        strikethroughExtension,
+        codeFormatExtension,
+        blockFormatExtension,
+        listExtension,
+        linkExtension.configure({ autoLinkUrls: true }),
+        imageExtension,
+        horizontalRuleExtension,
+        historyExtension,
+        htmlExtension,
+        codeExtension,
+        tableExtension,
+        htmlEmbedExtension,
+    ] as const;
+}
+
+const extensions = buildExtensions(false);
+const focusExtensions = buildExtensions(true);
 
 const { Provider, useEditor } = createEditorSystem<typeof extensions>();
 
 interface Props {
     content: string;
     onChange: (html: string) => void;
+    variant?: "default" | "focus";
 }
 
-export function LexKitEditor({ content, onChange }: Props) {
+export function LexKitEditor({ content, onChange, variant = "default" }: Props) {
     return (
-        <Provider extensions={extensions}>
-            <EditorShell content={content} onChange={onChange} />
+        <Provider extensions={variant === "focus" ? focusExtensions : extensions}>
+            <EditorShell content={content} onChange={onChange} variant={variant} />
         </Provider>
     );
 }
 
-function EditorShell({ content, onChange }: Props) {
+function EditorShell({ content, onChange, variant = "default" }: Props) {
     const { editor, commands, activeStates } = useEditor();
     const wrapperRef = useRef<HTMLDivElement>(null);
     const initialized = useRef(false);
@@ -123,6 +132,26 @@ function EditorShell({ content, onChange }: Props) {
     useEffect(() => {
         onChangeRef.current = onChange;
     }, [onChange]);
+
+    useEffect(() => {
+        if (!editor || variant !== "focus") return;
+
+        return editor.registerCommand(
+            KEY_TAB_COMMAND,
+            (event: KeyboardEvent) => {
+                if (event.shiftKey) return false;
+                event.preventDefault();
+                editor.update(() => {
+                    const selection = $getSelection();
+                    if ($isRangeSelection(selection)) {
+                        selection.insertText("\t");
+                    }
+                });
+                return true;
+            },
+            COMMAND_PRIORITY_LOW
+        );
+    }, [editor, variant]);
 
     // Inject initial HTML content once on mount, suppressing the import emissions
     useEffect(() => {
