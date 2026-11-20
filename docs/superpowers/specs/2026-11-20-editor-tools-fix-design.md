@@ -1,7 +1,7 @@
 # Editor Tools Fix — Table Backspace, Image Upload, HTML Embed Removal
 
 Date: 2026-11-20
-Status: Awaiting approval
+Status: Approved and implemented
 
 ## Intent
 
@@ -61,6 +61,10 @@ Fix three editor-tool problems: a table disappearing when Backspace is pressed i
 - `components/admin/ImageUploader.tsx` — use the shared upload helper.
 - `src/lib/upload-image.ts` (new) — shared client-side Cloudinary upload helper.
 - `docs/superpowers/specs/2026-11-20-editor-tools-fix-design.md` — this document.
+
+## Revision After Review
+
+The final review found that LexKit's built-in `uploadHandler` inserts a `blob:` image node before the upload completes and leaves that `blob:` persisted on failure, and that its paste path uploads the same file twice. The implementation therefore uploads first at the app level (file picker and a `PASTE_COMMAND` handler) and only inserts an image node with the returned Cloudinary URL. LexKit's own image paste listener is disabled. This keeps failed or in-flight uploads out of saved content and performs one upload per image.
 
 ## Verification
 

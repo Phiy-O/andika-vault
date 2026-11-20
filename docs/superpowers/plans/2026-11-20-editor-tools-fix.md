@@ -1,6 +1,6 @@
 # Editor Tools Fix Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Prevent Backspace from deleting a table from the paragraph below it, replace the manual image URL prompt with local file upload plus clipboard paste through Cloudinary, and remove the HTML Embed toolbar button.
 
@@ -37,7 +37,7 @@
 **Interfaces:**
 - Produces: `export async function uploadImageFile(file: File): Promise<string>` and `export const ACCEPTED_IMAGE_TYPES: readonly string[]`, `export const MAX_IMAGE_SIZE_MB = 5`.
 
-- [ ] **Step 1: Create the helper**
+- [x] **Step 1: Create the helper**
 
 Move the existing constants and `handleFile` upload body from `ImageUploader` into `src/lib/upload-image.ts`:
 
@@ -88,7 +88,7 @@ export async function uploadImageFile(file: File): Promise<string> {
 
 Keep all behavior identical to the existing `ImageUploader` upload path.
 
-- [ ] **Step 2: Refactor ImageUploader to use it**
+- [x] **Step 2: Refactor ImageUploader to use it**
 
 In `ImageUploader.tsx`, import `uploadImageFile`, `ACCEPTED_IMAGE_TYPES`, `MAX_IMAGE_SIZE_MB`, and `isAcceptedImage`. Replace the local constants and the fetch/signature block in `handleFile` with:
 
@@ -99,12 +99,12 @@ onChange(url);
 
 Keep the existing user-facing Indonesian error messages by mapping helper errors, or keep validation in `ImageUploader` and call the helper only for the upload. Do not change the component's visible behavior.
 
-- [ ] **Step 3: Verify TypeScript**
+- [x] **Step 3: Verify TypeScript**
 
 Run: `pnpm exec tsc --noEmit`
 Expected: no output.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/lib/upload-image.ts components/admin/ImageUploader.tsx
@@ -122,7 +122,7 @@ git commit -m "refactor: extract shared Cloudinary image upload helper"
 - Consumes: `uploadImageFile` from Task 1.
 - Produces: no new exported API.
 
-- [ ] **Step 1: Configure the image extension**
+- [x] **Step 1: Configure the image extension**
 
 In the extension list, replace `imageExtension,` with:
 
@@ -134,7 +134,7 @@ imageExtension.configure({
 }),
 ```
 
-- [ ] **Step 2: Remove the prompt state and Modal**
+- [x] **Step 2: Remove the prompt state and Modal**
 
 Delete:
 - the `Modal` import,
@@ -143,7 +143,7 @@ Delete:
 - the `<Modal>` URL prompt block near the end of the JSX,
 - the `CodeXml` icon import if it becomes unused after the next step.
 
-- [ ] **Step 3: Add a hidden file input and file-picker action**
+- [x] **Step 3: Add a hidden file input and file-picker action**
 
 Add `const fileInputRef = useRef<HTMLInputElement>(null);` and replace the old `addImage` callback with:
 
@@ -172,7 +172,7 @@ Render near the end of the editor JSX:
 />
 ```
 
-- [ ] **Step 4: Add an inline upload error**
+- [x] **Step 4: Add an inline upload error**
 
 Add `const [uploadError, setUploadError] = useState("");`. In the image-extension config, wrap the upload handler:
 
@@ -186,11 +186,11 @@ uploadHandler: (file) =>
 
 Render a small alert above the toolbar when `uploadError` is non-empty. Clear it when a new file is picked.
 
-- [ ] **Step 5: Remove the HTML Embed toolbar button**
+- [x] **Step 5: Remove the HTML Embed toolbar button**
 
 Delete the `HTML Embed` `TbBtn` from the insert group. Keep `htmlEmbedExtension` in the extension array so existing embeds still render.
 
-- [ ] **Step 6: Verify TypeScript and lint**
+- [x] **Step 6: Verify TypeScript and lint**
 
 Run: `pnpm exec tsc --noEmit`
 Expected: no output.
@@ -198,7 +198,7 @@ Expected: no output.
 Run: `pnpm exec eslint components/admin/LexKitEditor.tsx components/admin/ImageUploader.tsx src/lib/upload-image.ts`
 Expected: no output.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add components/admin/LexKitEditor.tsx
@@ -215,7 +215,7 @@ git commit -m "feat: add image file picker and paste, remove embed tool"
 **Interfaces:**
 - Consumes: `KEY_BACKSPACE_COMMAND`, `COMMAND_PRIORITY_EDITOR`, `$getSelection`, `$isRangeSelection` (all already imported or to be added from `lexical`).
 
-- [ ] **Step 1: Register the guard**
+- [x] **Step 1: Register the guard**
 
 Add to `EditorShell` next to the existing Tab effect:
 
@@ -247,7 +247,7 @@ useEffect(() => {
 
 Do not modify the table extension or Lexical defaults. All non-boundary Backspace cases must return `false`.
 
-- [ ] **Step 2: Verify TypeScript and lint**
+- [x] **Step 2: Verify TypeScript and lint**
 
 Run: `pnpm exec tsc --noEmit`
 Expected: no output.
@@ -255,7 +255,7 @@ Expected: no output.
 Run: `pnpm exec eslint components/admin/LexKitEditor.tsx`
 Expected: no output.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add components/admin/LexKitEditor.tsx
@@ -269,17 +269,17 @@ git commit -m "fix: prevent Backspace from deleting a table"
 **Files:**
 - No code changes expected.
 
-- [ ] **Step 1: Run full type check**
+- [x] **Step 1: Run full type check**
 
 Run: `pnpm exec tsc --noEmit`
 Expected: no output.
 
-- [ ] **Step 2: Run targeted lint**
+- [x] **Step 2: Run targeted lint**
 
 Run: `pnpm exec eslint components/admin/LexKitEditor.tsx components/admin/ImageUploader.tsx src/lib/upload-image.ts`
 Expected: no output.
 
-- [ ] **Step 3: Browser smoke check**
+- [x] **Step 3: Browser smoke check**
 
 Using a temporary route that mounts the real `BlogForm`, verify:
 - Insert a table, place the caret in the empty paragraph below it, press Backspace — the table remains.
@@ -289,7 +289,7 @@ Using a temporary route that mounts the real `BlogForm`, verify:
 - Pasting a copied image inserts/uploads it.
 - The HTML Embed button is gone and existing embeds still render.
 
-- [ ] **Step 4: Report**
+- [x] **Step 4: Report**
 
 Summarize changed files, verification output, and any checks that could not be performed.
 
