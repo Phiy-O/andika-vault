@@ -59,10 +59,9 @@ import {
     Undo,
     Redo,
     Table,
-    CodeXml,
     ChevronDown,
 } from "lucide-react";
-import { Modal } from "@/components/ui/Modal";
+import { uploadImageFile } from "@/src/lib/upload-image";
 
 const extensions = [
     richTextExtension.configure({
@@ -84,7 +83,24 @@ const extensions = [
         blockFormatExtension,
         listExtension,
         linkExtension.configure({ autoLinkUrls: true }),
-        imageExtension,
+        imageExtension.configure({
+            uploadHandler: (file: File) =>
+                uploadImageFile(file).catch((error: unknown) => {
+                    if (typeof window !== "undefined") {
+                        window.dispatchEvent(
+                            new CustomEvent("lexkit-image-upload-error", {
+                                detail:
+                                    error instanceof Error
+                                        ? error.message
+                                        : "Image upload failed",
+                            })
+                        );
+                    }
+                    throw error;
+                }),
+            forceUpload: true,
+            pasteListener: { insert: true, replace: true },
+        }),
         horizontalRuleExtension,
         historyExtension,
         htmlExtension,
@@ -112,16 +128,23 @@ export function LexKitEditor({ content, onChange, variant = "default" }: Props) 
 function EditorShell({ content, onChange, variant = "default" }: Props) {
     const { editor, commands, activeStates } = useEditor();
     const wrapperRef = useRef<HTMLDivElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const initialized = useRef(false);
     const onChangeRef = useRef(onChange);
     const suppressChanges = useRef(false);
     const [currentBlock, setCurrentBlock] = useState<BlockFormat>("p");
     const [currentAlign, setCurrentAlign] = useState<ElementFormatType>("left");
-    const [prompt, setPrompt] = useState<null | {
-        mode: "link" | "image";
-        value: string;
-    }>(null);
+    const [uploadError, setUploadError] = useState("");
     const [focused, setFocused] = useState(false);
+
+    useEffect(() => {
+        const handleUploadError = (event: Event) => {
+            setUploadError((event as CustomEvent<string>).detail);
+        };
+        window.addEventListener("lexkit-image-upload-error", handleUploadError);
+        return () =>
+            window.removeEventListener("lexkit-image-upload-error", handleUploadError);
+    }, []);
 
     useEffect(() => {
         onChangeRef.current = onChange;
@@ -280,8 +303,9 @@ function EditorShell({ content, onChange, variant = "default" }: Props) {
         };
     }, []);
 
-    const addImage = useCallback(() => {
-        setPrompt({ mode: "image", value: "" });
+    const pickImage = useCallback(() => {
+        setUploadError("");
+        fileInputRef.current?.click();
     }, []);
 
     // LexKit's insertTable requires a range selection. On a fresh body (or
@@ -303,15 +327,6 @@ function EditorShell({ content, onChange, variant = "default" }: Props) {
 
         commands.insertTable({ rows: 3, columns: 3 });
     }, [editor, commands]);
-
-    function submitPrompt() {
-        if (!prompt) return;
-        if (prompt.value) {
-            if (prompt.mode === "link") commands.insertLink(prompt.value);
-            else commands.insertImage({ src: prompt.value, alt: "" });
-        }
-        setPrompt(null);
-    }
 
     // ── helpers ────────────────────────────────────────
     const a = activeStates as Record<string, boolean>;
@@ -335,6 +350,14 @@ function EditorShell({ content, onChange, variant = "default" }: Props) {
                     : "border-line"
                 } bg-background`}
         >
+            {uploadError && (
+                <p
+                    role="alert"
+                    className="border-b-2 border-admin-alert bg-[#f9e8e6] px-3 py-2 font-jet text-[9px] font-bold uppercase tracking-[.06em] text-admin-alert"
+                >
+                    {uploadError}
+                </p>
+            )}
             {/* Toolbar */}
             <div className="flex flex-wrap items-center gap-0.5 border-b-2 border-line bg-admin-wash px-2 py-1.5">
                 {/* Undo / Redo */}
@@ -394,43 +417,26 @@ function EditorShell({ content, onChange, variant = "default" }: Props) {
                 {/* Insert items */}
                 <ToolbarGroup>
                     <TbBtn label="Insert Table" icon={<Table size={14} />} action={insertTable} />
-                    <TbBtn label="Insert Image" icon={<ImageIcon size={14} />} action={addImage} />
+                    <TbBtn label="Insert Image" icon={<ImageIcon size={14} />} action={pickImage} />
                     <TbBtn label="Horizontal Rule" icon={<Minus size={14} />} action={() => commands.insertHorizontalRule()} />
                     <TbBtn label="Code Block" icon={<Code2 size={14} />} active={a.isInCodeBlock} action={() => commands.toggleCodeBlock()} />
-                    <TbBtn label="HTML Embed" icon={<CodeXml size={14} />} action={() => commands.insertHTMLEmbed()} />
                 </ToolbarGroup>
             </div>
 
-            {/* Link / Image URL prompt */}
-            <Modal
-                open={!!prompt}
-                onClose={() => setPrompt(null)}
-                title={prompt?.mode === "link" ? "Insert link" : "Insert image"}
-                confirmLabel="Insert"
-                onConfirm={submitPrompt}
-            >
-                <label className="block space-y-1.5">
-                    <span className="text-xs font-medium tracking-wider text-muted uppercase">
-                        {prompt?.mode === "link" ? "Link URL" : "Image URL"}
-                    </span>
-                    <input
-                        type="url"
-                        autoFocus
-                        value={prompt?.value ?? ""}
-                        onChange={(e) =>
-                            setPrompt((p) => (p ? { ...p, value: e.target.value } : p))
-                        }
-                        onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                                e.preventDefault();
-                                submitPrompt();
-                            }
-                        }}
-                        placeholder="https://..."
-                        className="w-full h-10 border-2 border-line bg-background px-3 font-sans text-sm text-foreground outline-none transition-colors focus:border-foreground focus-visible:outline-2 focus-visible:outline-purple focus-visible:outline-offset-0"
-                    />
-                </label>
-            </Modal>
+            <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (file) {
+                        setUploadError("");
+                        commands.insertImage({ file, alt: "" });
+                    }
+                    event.target.value = "";
+                }}
+            />
         </div>
     );
 }
