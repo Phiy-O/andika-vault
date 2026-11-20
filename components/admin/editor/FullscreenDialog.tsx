@@ -1,27 +1,15 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import type { ReactNode } from "react";
-
-let bodyScrollLocks = 0;
-
-function lockBodyScroll() {
-  bodyScrollLocks += 1;
-  document.body.style.overflow = "hidden";
-}
-
-function unlockBodyScroll() {
-  bodyScrollLocks = Math.max(0, bodyScrollLocks - 1);
-  if (bodyScrollLocks === 0) {
-    document.body.style.overflow = "";
-  }
-}
+import type { ReactNode, SyntheticEvent } from "react";
+import { useBodyScrollLock } from "@/components/ui/useBodyScrollLock";
 
 interface FullscreenDialogProps {
   open: boolean;
   onClose: () => void;
   label: string;
   shortcut?: boolean;
+  closeDisabled?: boolean;
   children: ReactNode;
 }
 
@@ -35,9 +23,13 @@ export function FullscreenDialog({
   onClose,
   label,
   shortcut,
+  closeDisabled = false,
   children,
 }: FullscreenDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const closedByEffectRef = useRef(false);
+
+  useBodyScrollLock(open);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -46,20 +38,28 @@ export function FullscreenDialog({
     if (open && !dialog.open) {
       dialog.showModal();
     } else if (!open && dialog.open) {
+      closedByEffectRef.current = true;
       dialog.close();
     }
   }, [open]);
 
-  useEffect(() => {
-    if (!open) return;
-    lockBodyScroll();
-    return unlockBodyScroll;
-  }, [open]);
+  function handleClose(event: SyntheticEvent<HTMLDialogElement>) {
+    if (event.target !== event.currentTarget) return;
+    if (closedByEffectRef.current) {
+      closedByEffectRef.current = false;
+      return;
+    }
+    onClose();
+  }
 
   return (
     <dialog
       ref={dialogRef}
-      onClose={onClose}
+      onClose={handleClose}
+      onCancel={(event) => {
+        if (event.target !== event.currentTarget) return;
+        if (closeDisabled) event.preventDefault();
+      }}
       aria-label={label}
       data-editor-shortcut={shortcut ? "allow" : undefined}
       className="fixed inset-0 z-50 m-0 h-dvh max-h-none w-screen max-w-none border-0 bg-background p-0 text-foreground backdrop:bg-foreground/60 open:flex open:flex-col"

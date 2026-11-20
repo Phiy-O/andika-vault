@@ -2,6 +2,7 @@
 
 import { X } from "lucide-react";
 import { useEffect, useRef } from "react";
+import { useBodyScrollLock } from "@/components/ui/useBodyScrollLock";
 
 type ModalProps = {
   open: boolean;
@@ -33,18 +34,16 @@ export function Modal({
 }: ModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
+  useBodyScrollLock(open);
+
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
     if (open) {
       if (!dialog.open) dialog.showModal();
-      document.body.style.overflow = "hidden";
     } else if (dialog.open) {
       dialog.close();
     }
-    return () => {
-      document.body.style.overflow = "";
-    };
   }, [open]);
 
   function handleBackdropClick(e: React.MouseEvent) {
