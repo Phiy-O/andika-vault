@@ -1,7 +1,7 @@
 # Focus Mode Writing Workflow — Design
 
 Date: 2026-11-20
-Status: Awaiting approval
+Status: Approved and implemented
 
 ## Intent
 

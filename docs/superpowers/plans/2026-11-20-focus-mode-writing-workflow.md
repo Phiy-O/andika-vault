@@ -1,6 +1,6 @@
 # Focus Mode Writing Workflow Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Turn the blog editor's Focus modal into a Blogger-style writing workflow with an editable title, top-bar Preview/Save/Exit, and preview stacking over the live draft.
 
@@ -38,7 +38,7 @@
 - Consumes: nothing.
 - Produces: unchanged `FullscreenDialog` props. Internal `lockBodyScroll()` / `unlockBodyScroll()` helpers are module-scoped and not exported.
 
-- [ ] **Step 1: Add the module-level lock counter and helpers**
+- [x] **Step 1: Add the module-level lock counter and helpers**
 
 Add above the component:
 
@@ -58,7 +58,7 @@ function unlockBodyScroll() {
 }
 ```
 
-- [ ] **Step 2: Split the dialog effect from the scroll-lock effect**
+- [x] **Step 2: Split the dialog effect from the scroll-lock effect**
 
 Keep one effect for `showModal()`/`close()` and add a separate effect:
 
@@ -72,12 +72,12 @@ useEffect(() => {
 
 Remove the `document.body.style.overflow` lines and the overflow cleanup from the existing dialog effect.
 
-- [ ] **Step 3: Verify TypeScript**
+- [x] **Step 3: Verify TypeScript**
 
 Run: `pnpm exec tsc --noEmit`
 Expected: no output.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add components/admin/editor/FullscreenDialog.tsx
@@ -100,11 +100,11 @@ git commit -m "fix: share body scroll lock across stacked dialogs"
   - `onPreview: () => void`
 - `BlogForm` passes `onTitleChange={handleTitleChange}`, `isVisible={isVisible}`, and `onPreview={() => setPreviewOpen(true)}`.
 
-- [ ] **Step 1: Extend `FocusEditorProps` and imports**
+- [x] **Step 1: Extend `FocusEditorProps` and imports**
 
 Add `useEffect`, `useRef`, and icons `ArrowLeft`, `Eye`, `Loader2`; remove the now-unused `X` import. Add the three props listed above and destructure them.
 
-- [ ] **Step 2: Focus the title when the dialog opens**
+- [x] **Step 2: Focus the title when the dialog opens**
 
 Add a title ref and effect:
 
@@ -117,7 +117,7 @@ useEffect(() => {
 }, [open]);
 ```
 
-- [ ] **Step 3: Replace the header with the writing top bar**
+- [x] **Step 3: Replace the header with the writing top bar**
 
 Left side:
 - `Exit` button (`type="button"`, `ArrowLeft`, `onClose`, disabled while saving).
@@ -131,7 +131,7 @@ Right side:
 
 Use `editorButtonSecondaryClass` for Exit/Preview and `editorButtonPrimaryClass` for Save.
 
-- [ ] **Step 4: Add the editable title above the body editor**
+- [x] **Step 4: Add the editable title above the body editor**
 
 Inside the existing `mx-auto w-full max-w-5xl` wrapper, before `BodyEditor`:
 
@@ -151,11 +151,11 @@ Inside the existing `mx-auto w-full max-w-5xl` wrapper, before `BodyEditor`:
 />
 ```
 
-- [ ] **Step 5: Simplify the footer**
+- [x] **Step 5: Simplify the footer**
 
 Keep the error block and keyboard/incomplete-fields hints. Remove the duplicate Exit and Save buttons from the footer.
 
-- [ ] **Step 6: Wire the new props in `BlogForm`**
+- [x] **Step 6: Wire the new props in `BlogForm`**
 
 Add to `<FocusEditor ...>`:
 
@@ -165,7 +165,7 @@ isVisible={isVisible}
 onPreview={() => setPreviewOpen(true)}
 ```
 
-- [ ] **Step 7: Verify TypeScript and lint**
+- [x] **Step 7: Verify TypeScript and lint**
 
 Run: `pnpm exec tsc --noEmit`
 Expected: no output.
@@ -173,7 +173,7 @@ Expected: no output.
 Run: `pnpm exec eslint components/admin/blog/FocusEditor.tsx components/admin/BlogForm.tsx components/admin/editor/FullscreenDialog.tsx`
 Expected: no output.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add components/admin/blog/FocusEditor.tsx components/admin/BlogForm.tsx
@@ -187,17 +187,17 @@ git commit -m "feat: add Blogger-style focus writing workflow"
 **Files:**
 - No code changes expected.
 
-- [ ] **Step 1: Run the full type check**
+- [x] **Step 1: Run the full type check**
 
 Run: `pnpm exec tsc --noEmit`
 Expected: no output.
 
-- [ ] **Step 2: Run targeted lint**
+- [x] **Step 2: Run targeted lint**
 
 Run: `pnpm exec eslint components/admin/blog/FocusEditor.tsx components/admin/BlogForm.tsx components/admin/editor/FullscreenDialog.tsx`
 Expected: no output.
 
-- [ ] **Step 3: Browser smoke check in the authenticated admin**
+- [x] **Step 3: Browser smoke check in the authenticated admin**
 
 Open `/admin/blog/new`, start Focus, then verify:
 - The title input is focused and editable; the header shows Exit, Draft, word count, read time, Preview, Save.
@@ -208,7 +208,7 @@ Open `/admin/blog/new`, start Focus, then verify:
 - `Ctrl/Cmd + S` is ignored while Preview is open and saves while Focus is open.
 - At a narrow viewport, the top bar wraps without horizontal overflow.
 
-- [ ] **Step 4: Report**
+- [x] **Step 4: Report**
 
 Summarize changed files, verification output, and any checks that could not be performed in this environment.
 
