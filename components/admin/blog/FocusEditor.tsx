@@ -156,6 +156,7 @@ export function FocusEditor({
               onModeChange={onModeChange}
               editorKey={editorKey}
               tall
+              variant="focus"
             />
           </div>
         </div>

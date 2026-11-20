@@ -57,6 +57,7 @@ interface BodyEditorProps {
   onModeChange: (mode: BodyMode) => void;
   editorKey: number;
   tall?: boolean;
+  variant?: "default" | "focus";
   className?: string;
 }
 
@@ -67,6 +68,7 @@ export function BodyEditor({
   onModeChange,
   editorKey,
   tall = false,
+  variant = "default",
   className,
 }: BodyEditorProps) {
   return (
@@ -92,7 +94,12 @@ export function BodyEditor({
               : undefined
           }
         >
-          <LexKitEditor key={editorKey} content={content} onChange={onChange} />
+          <LexKitEditor
+            key={editorKey}
+            content={content}
+            onChange={onChange}
+            variant={variant}
+          />
         </div>
       ) : (
         <textarea
@@ -102,7 +109,28 @@ export function BodyEditor({
           autoCapitalize="off"
           autoCorrect="off"
           aria-label="Body HTML source"
-          className={`w-full resize-y border-2 border-line bg-background px-3 py-3 font-jet text-[12px] leading-6 text-foreground outline-none transition-colors focus:border-foreground focus-visible:outline-2 focus-visible:outline-purple focus-visible:outline-offset-0 ${
+          onKeyDown={(event) => {
+            if (variant !== "focus" || event.key !== "Tab" || event.shiftKey) {
+              return;
+            }
+            event.preventDefault();
+            const textarea = event.currentTarget;
+            const { selectionStart, selectionEnd } = textarea;
+            const next =
+              content.slice(0, selectionStart) +
+              "\t" +
+              content.slice(selectionEnd);
+            onChange(next);
+            requestAnimationFrame(() => {
+              textarea.selectionStart = selectionStart + 1;
+              textarea.selectionEnd = selectionStart + 1;
+            });
+          }}
+          className={`w-full resize-y border-2 border-line px-3 py-3 font-jet text-[12px] leading-6 text-foreground outline-none transition-colors focus:border-foreground focus-visible:outline-2 focus-visible:outline-purple focus-visible:outline-offset-0 ${
+            variant === "focus"
+              ? "bg-white whitespace-pre-wrap [tab-size:2]"
+              : "bg-background"
+          } ${
             tall ? "min-h-[calc(100dvh-22rem)]" : "min-h-[420px]"
           }`}
         />
