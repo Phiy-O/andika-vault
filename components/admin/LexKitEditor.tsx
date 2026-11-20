@@ -64,20 +64,18 @@ import {
 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 
-function buildExtensions(focus: boolean) {
-    return [
-        richTextExtension.configure({
-            placeholder: "Start writing...",
-            classNames: {
-                contentEditable: focus
-                    ? "lexkit-editor-content prose max-w-none focus:outline-none px-4 py-4 min-h-[360px] text-sm text-foreground cursor-text bg-white whitespace-pre-wrap [tab-size:2]"
-                    : "lexkit-editor-content prose max-w-none focus:outline-none px-4 py-4 min-h-[360px] text-sm text-foreground bg-background cursor-text",
-                placeholder: "text-muted text-sm px-4 py-4",
-            },
-            styles: {
-                contentEditable: { caretColor: "#1b1b1b" },
-            },
-        }),
+const extensions = [
+    richTextExtension.configure({
+        placeholder: "Start writing...",
+        classNames: {
+            contentEditable:
+                "lexkit-editor-content prose max-w-none focus:outline-none px-4 py-4 min-h-[360px] text-sm text-foreground bg-background cursor-text",
+            placeholder: "text-muted text-sm px-4 py-4",
+        },
+        styles: {
+            contentEditable: { caretColor: "#1b1b1b" },
+        },
+    }),
         boldExtension,
         italicExtension,
         underlineExtension,
@@ -93,11 +91,7 @@ function buildExtensions(focus: boolean) {
         codeExtension,
         tableExtension,
         htmlEmbedExtension,
-    ] as const;
-}
-
-const extensions = buildExtensions(false);
-const focusExtensions = buildExtensions(true);
+] as const;
 
 const { Provider, useEditor } = createEditorSystem<typeof extensions>();
 
@@ -109,7 +103,7 @@ interface Props {
 
 export function LexKitEditor({ content, onChange, variant = "default" }: Props) {
     return (
-        <Provider extensions={variant === "focus" ? focusExtensions : extensions}>
+        <Provider extensions={extensions}>
             <EditorShell content={content} onChange={onChange} variant={variant} />
         </Provider>
     );

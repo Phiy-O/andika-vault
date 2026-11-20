@@ -88,11 +88,11 @@ export function BodyEditor({
 
       {mode === "visual" ? (
         <div
-          className={
-            tall
-              ? "[&_[contenteditable=true]]:min-h-[calc(100dvh-20rem)]"
-              : undefined
-          }
+          className={`${tall ? "[&_[contenteditable=true]]:min-h-[calc(100dvh-20rem)]" : ""} ${
+            variant === "focus"
+              ? "[&_.lexkit-editor-content]:bg-white [&_.lexkit-editor-content]:whitespace-pre-wrap [&_.lexkit-editor-content]:[tab-size:2]"
+              : ""
+          }`}
         >
           <LexKitEditor
             key={editorKey}
