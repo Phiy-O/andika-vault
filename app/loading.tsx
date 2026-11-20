@@ -15,8 +15,8 @@ export default function Loading() {
               className="loading-logo"
               src="/icons/portfolio-logo.svg"
               alt="Andika Vault logo"
-              width={72}
-              height={72}
+              width={88}
+              height={88}
               priority
             />
           </div>

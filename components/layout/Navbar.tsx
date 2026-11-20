@@ -56,8 +56,11 @@ export function Navbar() {
           isHidden ? "-translate-y-full" : "translate-y-0"
         }`}
       >
-        <Link className="text-foreground text-xl font-bold tracking-[-.06em] leading-none w-auto h-auto max-md:order-2" href="/" aria-label="Andika home" onClick={closeMenu}>
-          <Image src="/icons/portfolio-logo.svg" alt="Andika Vault logo" width={32} height={32} priority />
+        <Link className="inline-flex w-auto h-auto items-center gap-2.5 max-md:order-2" href="/" aria-label="Andika.dev home" onClick={closeMenu}>
+          <Image src="/icons/portfolio-logo.svg" alt="" width={40} height={40} priority />
+          <span className="whitespace-nowrap font-space text-[19px] font-bold leading-none tracking-[-.04em] text-foreground">
+            Andika.dev
+          </span>
         </Link>
 
         <button
