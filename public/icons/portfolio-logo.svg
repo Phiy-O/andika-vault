@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" width="72" height="72" role="img" aria-label="Andika Vault icon">
+  <rect x="14" y="14" width="48" height="48" fill="#1d1d1b"/>
+  <rect x="8" y="8" width="48" height="48" fill="#f46d66" stroke="#1d1d1b" stroke-width="4"/>
+  <g fill="none" stroke="#1d1d1b" stroke-width="5" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M27 21 L17 32 L27 43"/>
+    <path d="M37 21 L47 32 L37 43"/>
+    <path d="M35 19 L29 45"/>
+  </g>
+</svg>
