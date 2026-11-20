@@ -3,6 +3,20 @@
 import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 
+let bodyScrollLocks = 0;
+
+function lockBodyScroll() {
+  bodyScrollLocks += 1;
+  document.body.style.overflow = "hidden";
+}
+
+function unlockBodyScroll() {
+  bodyScrollLocks = Math.max(0, bodyScrollLocks - 1);
+  if (bodyScrollLocks === 0) {
+    document.body.style.overflow = "";
+  }
+}
+
 interface FullscreenDialogProps {
   open: boolean;
   onClose: () => void;
@@ -34,12 +48,12 @@ export function FullscreenDialog({
     } else if (!open && dialog.open) {
       dialog.close();
     }
+  }, [open]);
 
-    document.body.style.overflow = open ? "hidden" : "";
-
-    return () => {
-      document.body.style.overflow = "";
-    };
+  useEffect(() => {
+    if (!open) return;
+    lockBodyScroll();
+    return unlockBodyScroll;
   }, [open]);
 
   return (
