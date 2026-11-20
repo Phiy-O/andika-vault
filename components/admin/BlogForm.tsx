@@ -501,6 +501,7 @@ export function BlogForm({
         open={focusOpen}
         onClose={handleFocusClose}
         title={title}
+        onTitleChange={handleTitleChange}
         body={body}
         onBodyChange={handleBodyChange}
         mode={bodyMode}
@@ -509,8 +510,10 @@ export function BlogForm({
         readTime={computedReadTime}
         wordCount={words}
         bodyFormat={bodyFormat}
+        isVisible={isVisible}
         saving={saving}
         canSave={requiredFieldsComplete}
+        onPreview={() => setPreviewOpen(true)}
         error={error}
       />
 

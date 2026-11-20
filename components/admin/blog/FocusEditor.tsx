@@ -1,6 +1,7 @@
 "use client";
 
-import { Loader2, X } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { ArrowLeft, Eye, Loader2 } from "lucide-react";
 import { FullscreenDialog } from "@/components/admin/editor/FullscreenDialog";
 import {
   editorButtonPrimaryClass,
@@ -12,6 +13,7 @@ interface FocusEditorProps {
   open: boolean;
   onClose: () => void;
   title: string;
+  onTitleChange: (value: string) => void;
   body: string;
   onBodyChange: (html: string) => void;
   mode: BodyMode;
@@ -20,8 +22,10 @@ interface FocusEditorProps {
   readTime: string;
   wordCount: number;
   bodyFormat: "html" | "markdown";
+  isVisible: boolean;
   saving: boolean;
   canSave: boolean;
+  onPreview: () => void;
   error?: string;
 }
 
@@ -29,6 +33,7 @@ export function FocusEditor({
   open,
   onClose,
   title,
+  onTitleChange,
   body,
   onBodyChange,
   mode,
@@ -37,10 +42,19 @@ export function FocusEditor({
   readTime,
   wordCount,
   bodyFormat,
+  isVisible,
   saving,
   canSave,
+  onPreview,
   error,
 }: FocusEditorProps) {
+  const titleRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    titleRef.current?.focus();
+  }, [open]);
+
   return (
     <FullscreenDialog
       open={open}
@@ -49,17 +63,32 @@ export function FocusEditor({
       shortcut
     >
       <header className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-line bg-surface px-4 py-3">
-        <div className="min-w-0">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={saving}
+            className={editorButtonSecondaryClass}
+          >
+            <ArrowLeft size={13} strokeWidth={2.2} aria-hidden="true" />
+            Exit
+          </button>
           <p className="font-jet text-[9px] font-bold uppercase tracking-[.12em]">
-            <span className="text-purple">Focus // Body</span>
+            <span className="text-purple">Focus // Write</span>
             <span className="mx-2 text-muted/50" aria-hidden="true">
               /
             </span>
             <span className="text-muted">{bodyFormat.toUpperCase()}</span>
           </p>
-          <p className="mt-0.5 truncate font-space text-sm font-bold tracking-[-.02em] text-foreground">
-            {title || "Untitled post"}
-          </p>
+          <span
+            className={`inline-flex h-6 items-center border border-line px-2 font-jet text-[8px] font-bold uppercase tracking-[.06em] ${
+              isVisible
+                ? "bg-background text-foreground"
+                : "bg-admin-wash text-muted"
+            }`}
+          >
+            {isVisible ? "Published" : "Draft"}
+          </span>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -71,17 +100,41 @@ export function FocusEditor({
           </span>
           <button
             type="button"
-            onClick={onClose}
-            aria-label="Exit focus mode"
-            className="grid size-9 place-items-center border-2 border-line bg-background text-foreground transition-colors hover:bg-admin-wash"
+            onClick={onPreview}
+            disabled={saving}
+            className={editorButtonSecondaryClass}
           >
-            <X size={14} aria-hidden="true" />
+            <Eye size={13} strokeWidth={2.2} aria-hidden="true" />
+            Preview
+          </button>
+          <button
+            type="submit"
+            disabled={saving || !canSave}
+            className={editorButtonPrimaryClass}
+          >
+            {saving && (
+              <Loader2 size={13} className="animate-spin" aria-hidden="true" />
+            )}
+            {saving ? "Saving..." : "Save"}
           </button>
         </div>
       </header>
 
       <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
         <div className="mx-auto w-full max-w-5xl">
+          <input
+            ref={titleRef}
+            value={title}
+            onChange={(event) => onTitleChange(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") event.preventDefault();
+            }}
+            placeholder="Post title"
+            aria-label="Post title"
+            aria-required="true"
+            autoComplete="off"
+            className="mb-5 w-full border-0 border-b-2 border-line bg-transparent px-0 py-3 font-space text-2xl font-bold tracking-[-.04em] text-foreground outline-none transition-colors placeholder:text-muted/40 focus:border-purple sm:text-3xl"
+          />
           <BodyEditor
             content={body}
             onChange={onBodyChange}
@@ -103,36 +156,14 @@ export function FocusEditor({
           </p>
         )}
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="min-w-0">
-            <p className="font-jet text-[8px] uppercase tracking-[.08em] text-muted">
-              Esc exits · Ctrl/Cmd + S saves
+          <p className="font-jet text-[8px] uppercase tracking-[.08em] text-muted">
+            Esc exits · Ctrl/Cmd + S saves
+          </p>
+          {!canSave && (
+            <p className="font-jet text-[8px] font-bold uppercase tracking-[.08em] text-admin-alert">
+              Complete the required fields in the editor before saving.
             </p>
-            {!canSave && (
-              <p className="mt-1 font-jet text-[8px] font-bold uppercase tracking-[.08em] text-admin-alert">
-                Complete the required fields in the editor before saving.
-              </p>
-            )}
-          </div>
-          <div className="flex shrink-0 flex-wrap items-center gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={saving}
-              className={editorButtonSecondaryClass}
-            >
-              Exit focus
-            </button>
-            <button
-              type="submit"
-              disabled={saving || !canSave}
-              className={editorButtonPrimaryClass}
-            >
-              {saving && (
-                <Loader2 size={13} className="animate-spin" aria-hidden="true" />
-              )}
-              {saving ? "Saving..." : "Save"}
-            </button>
-          </div>
+          )}
         </div>
       </footer>
     </FullscreenDialog>
