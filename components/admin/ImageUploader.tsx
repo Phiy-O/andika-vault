@@ -3,15 +3,14 @@
 import { useRef, useState } from "react";
 import Image from "next/image";
 import { Upload, Loader2, RefreshCw } from "lucide-react";
+import {
+  ACCEPTED_IMAGE_TYPES,
+  MAX_IMAGE_SIZE_MB,
+  isAcceptedImage,
+  uploadImageFile,
+} from "@/src/lib/upload-image";
 
-const MAX_SIZE_MB = 5;
-const ACCEPTED = [
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/gif",
-  "image/svg+xml",
-];
+const MAX_SIZE_MB = MAX_IMAGE_SIZE_MB;
 
 const secondaryBtn =
   "inline-flex h-10 items-center gap-2 border-2 border-line bg-surface px-4 font-jet text-[9px] font-bold uppercase tracking-[.08em] shadow-[2px_2px_0_var(--foreground)] transition-transform hover:-translate-y-0.5 hover:bg-admin-wash disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transform-none";
@@ -37,7 +36,7 @@ export function ImageUploader({
 
   async function handleFile(file: File) {
     setError("");
-    if (!ACCEPTED.includes(file.type)) {
+    if (!isAcceptedImage(file)) {
       setError(`Tipe file tidak didukung (${file.type}). Gunakan JPG/PNG/WebP/GIF/SVG.`);
       return;
     }
@@ -47,23 +46,8 @@ export function ImageUploader({
     }
     setUploading(true);
     try {
-      const sigRes = await fetch("/api/cloudinary/signature");
-      if (!sigRes.ok) throw new Error("Sesi berakhir, login ulang");
-      const sig = await sigRes.json();
-      const form = new FormData();
-      form.append("file", file);
-      form.append("api_key", sig.apiKey);
-      form.append("timestamp", String(sig.timestamp));
-      form.append("signature", sig.signature);
-      form.append("folder", sig.folder);
-      form.append("resource_type", sig.resourceType ?? "image");
-      const res = await fetch(
-        `https://api.cloudinary.com/v1_1/${sig.cloudName}/image/upload`,
-        { method: "POST", body: form }
-      );
-      if (!res.ok) throw new Error("Upload gagal, coba lagi");
-      const data = await res.json();
-      onChange(data.secure_url);
+      const url = await uploadImageFile(file);
+      onChange(url);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Upload gagal");
     } finally {
@@ -169,7 +153,7 @@ export function ImageUploader({
       <input
         ref={inputRef}
         type="file"
-        accept={ACCEPTED.join(",")}
+        accept={ACCEPTED_IMAGE_TYPES.join(",")}
         className="hidden"
         onChange={(e) => {
           const file = e.target.files?.[0];
