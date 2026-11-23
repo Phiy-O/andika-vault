@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAdmin } from "@/src/lib/auth";
 import { skillService } from "@/src/services";
 import { updateSkill } from "@/src/actions/skill";
+import { revalidatePublicContent } from "@/src/lib/revalidate-public";
 
 export async function PATCH(
   req: Request,
@@ -27,6 +28,7 @@ export async function DELETE(
   const { id } = await params;
   try {
     await skillService.delete(id);
+    revalidatePublicContent();
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json(

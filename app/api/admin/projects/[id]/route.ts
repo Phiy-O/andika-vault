@@ -3,6 +3,7 @@ import { requireAdmin } from "@/src/lib/auth";
 import { projectService } from "@/src/services";
 import { updateProject } from "@/src/actions/project";
 import { cleanupCloudinaryImages } from "@/src/lib/cloudinary-cleanup";
+import { revalidatePublicContent } from "@/src/lib/revalidate-public";
 
 export async function PATCH(
   req: Request,
@@ -49,6 +50,7 @@ export async function DELETE(
   try {
     const old = await projectService.getById(id);
     await projectService.delete(id);
+    revalidatePublicContent({ project: old?.slug ? [old.slug] : [] });
     const oldUrls = [
       ...(old?.thumbnail ? [old.thumbnail] : []),
       ...(old?.screenshots ?? []),

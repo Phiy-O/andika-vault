@@ -3,6 +3,7 @@ import { requireAdmin } from "@/src/lib/auth";
 import { certificateService } from "@/src/services";
 import { updateCertificate } from "@/src/actions/certificate";
 import { cleanupCloudinaryImages } from "@/src/lib/cloudinary-cleanup";
+import { revalidatePublicContent } from "@/src/lib/revalidate-public";
 
 export async function PATCH(
   req: Request,
@@ -39,6 +40,7 @@ export async function DELETE(
   try {
     const old = await certificateService.getById(id);
     await certificateService.delete(id);
+    revalidatePublicContent();
     if (old?.image) await cleanupCloudinaryImages([old.image]);
     return NextResponse.json({ ok: true });
   } catch {

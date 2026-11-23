@@ -3,6 +3,7 @@ import { requireAdmin } from "@/src/lib/auth";
 import { blogPostService } from "@/src/services";
 import { updateBlogPost } from "@/src/actions/blog-post";
 import { cleanupCloudinaryImages } from "@/src/lib/cloudinary-cleanup";
+import { revalidatePublicContent } from "@/src/lib/revalidate-public";
 
 export async function PATCH(
   req: Request,
@@ -43,6 +44,7 @@ export async function DELETE(
   try {
     const old = await blogPostService.getById(id);
     await blogPostService.delete(id);
+    revalidatePublicContent({ blog: old?.slug ? [old.slug] : [] });
     if (old?.thumbnail) await cleanupCloudinaryImages([old.thumbnail]);
     return NextResponse.json({ ok: true });
   } catch {
