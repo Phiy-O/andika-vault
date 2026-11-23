@@ -11,6 +11,10 @@ export const projectRepo = {
     });
   },
 
+  async countVisible() {
+    return prisma.project.count({ where: { isVisible: true } });
+  },
+
   async findVisible() {
     return prisma.project.findMany({
       where: { isVisible: true },

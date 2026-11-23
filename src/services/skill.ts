@@ -6,6 +6,10 @@ export const skillService = {
     return skillRepo.findVisible();
   },
 
+  async countVisible() {
+    return skillRepo.countVisible();
+  },
+
   async getAll() {
     return skillRepo.findAll();
   },

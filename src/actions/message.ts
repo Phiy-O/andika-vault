@@ -1,7 +1,6 @@
 "use server";
 
 import { messageService } from "@/src/services";
-import { messageSchema } from "@/src/lib/validations";
 import type { MessageCreateInput } from "@/src/types";
 import type { Message } from "@prisma/client";
 import { requireAdmin } from "@/src/lib/auth";
@@ -19,11 +18,11 @@ export async function getAllMessages(): Promise<ActionResult<Message[]>> {
 }
 
 export async function createMessage(
-  input: MessageCreateInput
+  input: MessageCreateInput,
+  clientKey = "direct"
 ): Promise<ActionResult<Message>> {
   try {
-    const parsed = messageSchema.parse(input);
-    const message = await messageService.create(parsed as any);
+    const message = await messageService.create(input, clientKey);
     return { data: message as any };
   } catch (e: any) {
     if (e.issues)

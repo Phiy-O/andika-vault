@@ -11,6 +11,10 @@ export const certificateService = {
     return certificateRepo.findVisible();
   },
 
+  async countVisible() {
+    return certificateRepo.countVisible();
+  },
+
   async getById(id: string) {
     return certificateRepo.findById(id);
   },

@@ -11,6 +11,10 @@ export const certificateRepo = {
     });
   },
 
+  async countVisible() {
+    return prisma.certificate.count({ where: { isVisible: true } });
+  },
+
   async findVisible() {
     return prisma.certificate.findMany({
       where: { isVisible: true },

@@ -5,6 +5,10 @@ export const skillRepo = {
     return prisma.skill.findMany({ orderBy: { sortOrder: "asc" } });
   },
 
+  async countVisible() {
+    return prisma.skill.count({ where: { isVisible: true } });
+  },
+
   async findVisible() {
     return prisma.skill.findMany({
       where: { isVisible: true },

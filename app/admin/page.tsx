@@ -1,13 +1,22 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/src/lib/auth";
-import { blogPostService, projectService } from "@/src/services";
-import { prisma } from "@/lib/prisma";
+import {
+  blogPostService,
+  certificateService,
+  projectService,
+  skillService,
+} from "@/src/services";
 import { FileText, FolderKanban, Award, Wrench, ArrowUpRight, Plus } from "lucide-react";
 import Link from "next/link";
 
 async function getDashboardData() {
   const [blogCount, projectCount, certificateCount, skillCount, projects, posts] = await Promise.all([
-    prisma.blogPost.count(), prisma.project.count(), prisma.certificate.count(), prisma.skill.count(), projectService.getVisible(), blogPostService.getVisible(),
+    blogPostService.countVisible(),
+    projectService.countVisible(),
+    certificateService.countVisible(),
+    skillService.countVisible(),
+    projectService.getVisible(),
+    blogPostService.getVisible(),
   ]);
   return { counts: { blogCount, projectCount, certificateCount, skillCount }, projects: projects.slice(0, 4), posts: posts.slice(0, 4) };
 }

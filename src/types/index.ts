@@ -1,4 +1,6 @@
 import type { Prisma } from "@prisma/client";
+import type { z } from "zod";
+import type { messageSchema } from "@/src/lib/validations/message";
 
 // ── Re-export Prisma-generated types ──
 export type { BlogPost, Project, Certificate, Skill, Message } from "@prisma/client";
@@ -32,10 +34,7 @@ export type SkillCreateInput = Omit<
 
 export type SkillUpdateInput = Partial<SkillCreateInput>;
 
-export type MessageCreateInput = Omit<
-  Prisma.MessageCreateInput,
-  "id" | "createdAt" | "isRead"
->;
+export type MessageCreateInput = z.input<typeof messageSchema>;
 
 export type MessageUpdateInput = Partial<MessageCreateInput>;
 

@@ -11,6 +11,10 @@ export const blogPostRepo = {
     });
   },
 
+  async countVisible() {
+    return prisma.blogPost.count({ where: { isVisible: true } });
+  },
+
   async findVisible() {
     return prisma.blogPost.findMany({
       where: { isVisible: true },

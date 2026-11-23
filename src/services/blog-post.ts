@@ -12,6 +12,10 @@ export const blogPostService = {
     return blogPostRepo.findVisible();
   },
 
+  async countVisible() {
+    return blogPostRepo.countVisible();
+  },
+
   async getBySlug(slug: string) {
     return blogPostRepo.findBySlug(slug);
   },

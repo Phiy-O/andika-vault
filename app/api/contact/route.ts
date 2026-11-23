@@ -1,11 +1,7 @@
 import { NextResponse } from "next/server";
 import { createMessage } from "@/src/actions/message";
 
-const WINDOW_MS = 10 * 60 * 1000;
-const MAX_REQUESTS = 5;
-const requests = new Map<string, { count: number; resetAt: number }>();
-
-function getClientIp(req: Request) {
+function getClientIp(req: Request): string {
   return (
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     req.headers.get("x-real-ip") ||
@@ -14,33 +10,27 @@ function getClientIp(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const body = await req.json();
-  if (typeof body.website === "string" && body.website.trim()) {
+  const body: unknown = await req.json().catch(() => null);
+  if (typeof body !== "object" || body === null) {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
+
+  const payload = body as Record<string, unknown>;
+  // Honeypot: bots fill the hidden field; real users never see it.
+  if (typeof payload.website === "string" && payload.website.trim()) {
     return NextResponse.json({ ok: true }, { status: 200 });
   }
 
-  const now = Date.now();
-  if (requests.size > 1000) {
-    for (const [key, value] of requests) {
-      if (value.resetAt <= now) requests.delete(key);
-    }
-  }
-  const ip = getClientIp(req);
-  const current = requests.get(ip);
-  if (current && current.resetAt > now && current.count >= MAX_REQUESTS) {
-    return NextResponse.json(
-      { error: "Too many messages. Please try again later." },
-      { status: 429, headers: { "Retry-After": String(Math.ceil((current.resetAt - now) / 1000)) } }
-    );
-  }
-  requests.set(ip, {
-    count: current && current.resetAt > now ? current.count + 1 : 1,
-    resetAt: current && current.resetAt > now ? current.resetAt : now + WINDOW_MS,
-  });
-
-  const result = await createMessage(body);
+  const result = await createMessage(
+    payload as Parameters<typeof createMessage>[0],
+    getClientIp(req)
+  );
   if (result.error) {
-    return NextResponse.json({ error: result.error }, { status: 400 });
+    const limited = result.error === "Too many messages. Please try again later.";
+    return NextResponse.json(
+      { error: result.error },
+      { status: limited ? 429 : 400, headers: limited ? { "Retry-After": "600" } : undefined }
+    );
   }
   return NextResponse.json(result.data, { status: 201 });
 }
