@@ -31,7 +31,7 @@ const TRANSIENT_DRIVER_CODES = new Set([
 // pg pool/adapter failures can arrive as plain Errors with no `code` at all,
 // so the message must be checked as well.
 const TRANSIENT_CONNECTION_MESSAGE =
-  /can'?t reach database|connection (terminated|timeout|timed out|reset|refused|lost|closed|unavailable)|could not connect|unable to connect|too many (clients|connections)|remaining connection slots|socket hang up|network error/i;
+  /can'?t reach database|connection (terminated|timeout|timed out|reset|refused|lost|closed|unavailable)|timeout exceeded|could not connect|unable to connect|too many (clients|connections)|remaining connection slots|socket hang up|network error/i;
 
 /**
  * Detects connection-level failures that are safe to retry. With the pg driver
@@ -40,14 +40,19 @@ const TRANSIENT_CONNECTION_MESSAGE =
  */
 export function isTransientConnectionError(error: unknown): boolean {
   const seen = new Set<object>();
-  let current = error;
+  const queue: unknown[] = [error];
 
-  while (current !== null && typeof current === "object" && !seen.has(current)) {
+  while (queue.length > 0) {
+    const current = queue.shift();
+    if (current === null || typeof current !== "object" || seen.has(current)) {
+      continue;
+    }
     seen.add(current);
     const candidate = current as {
       code?: unknown;
       message?: unknown;
       cause?: unknown;
+      errors?: unknown;
     };
 
     if (typeof candidate.code === "string") {
@@ -59,8 +64,8 @@ export function isTransientConnectionError(error: unknown): boolean {
       }
     }
 
-    // P2010 and raw pg errors have no reliable code, so inspect the message
-    // of every error in the cause chain as well.
+    // P2010, raw pg errors and pool timeouts have no reliable code, so inspect
+    // the message of every error in the chain.
     if (
       typeof candidate.message === "string" &&
       TRANSIENT_CONNECTION_MESSAGE.test(candidate.message)
@@ -68,7 +73,9 @@ export function isTransientConnectionError(error: unknown): boolean {
       return true;
     }
 
-    current = candidate.cause;
+    if (candidate.cause) queue.push(candidate.cause);
+    // Dual-stack DNS / autoSelectFamily failures are wrapped in AggregateError.
+    if (Array.isArray(candidate.errors)) queue.push(...candidate.errors);
   }
 
   return false;

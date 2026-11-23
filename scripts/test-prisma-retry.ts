@@ -61,6 +61,17 @@ async function main(): Promise<void> {
   );
   assert.equal(isTransientConnectionError(timeoutError), true);
 
+  // pg pool-queue timeout: no code, plain Error.
+  const poolTimeout = new Error("timeout exceeded when trying to connect");
+  assert.equal(isTransientConnectionError(poolTimeout), true);
+
+  // Dual-stack DNS failures can surface as AggregateError with children.
+  const aggregate = new AggregateError(
+    [Object.assign(new Error("connect failed"), { code: "ECONNREFUSED" })],
+    "connect failed"
+  );
+  assert.equal(isTransientConnectionError(aggregate), true);
+
   // Non-connection errors must never be retried.
   assert.equal(isTransientConnectionError({ code: "P2002" }), false);
   assert.equal(isTransientConnectionError({ code: "P2025" }), false);
@@ -70,6 +81,8 @@ async function main(): Promise<void> {
   assert.equal(await countAttempts({ code: "P1001" }, 4), 4);
   assert.equal(await countAttempts({ code: "53300" }, 4), 4);
   assert.equal(await countAttempts(timeoutError, 4), 4);
+  assert.equal(await countAttempts(poolTimeout, 4), 4);
+  assert.equal(await countAttempts(aggregate, 4), 4);
   assert.equal(await countAttempts({ code: "P2002" }, 4), 1);
 
   let succeededAfter = 0;
@@ -84,4 +97,7 @@ async function main(): Promise<void> {
   console.log("prisma retry tests passed");
 }
 
-void main();
+main().catch((error: unknown) => {
+  console.error(error);
+  process.exitCode = 1;
+});
