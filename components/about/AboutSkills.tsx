@@ -25,6 +25,7 @@ export function AboutSkills({ skills }: { skills: Skill[] }) {
         {skillCategories.map((cat) => (
           <button
             key={cat.value}
+            aria-pressed={activeCategory === cat.value}
             onClick={() => setActiveCategory(cat.value)}
             className={`border rounded-none text-xs px-4 py-2 transition-all duration-200 cursor-pointer ${
               activeCategory === cat.value

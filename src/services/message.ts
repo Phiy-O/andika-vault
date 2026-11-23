@@ -16,8 +16,8 @@ export const messageService = {
     return messageRepo.create(parsed as any);
   },
 
-  async markRead(id: string) {
-    return messageRepo.markRead(id);
+  async markRead(id: string, isRead = true) {
+    return messageRepo.markRead(id, isRead);
   },
 
   async delete(id: string) {

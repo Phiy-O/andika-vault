@@ -32,10 +32,13 @@ export async function createMessage(
   }
 }
 
-export async function markMessageRead(id: string): Promise<ActionResult<void>> {
+export async function markMessageRead(
+  id: string,
+  isRead = true
+): Promise<ActionResult<void>> {
   if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
-    await messageService.markRead(id);
+    await messageService.markRead(id, isRead);
     return {};
   } catch (e: any) {
     return { error: e.message ?? "Failed to update message" };

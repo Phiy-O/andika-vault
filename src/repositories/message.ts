@@ -16,8 +16,8 @@ export const messageRepo = {
     return prisma.message.create({ data });
   },
 
-  async markRead(id: string) {
-    return prisma.message.update({ where: { id }, data: { isRead: true } });
+  async markRead(id: string, isRead = true) {
+    return prisma.message.update({ where: { id }, data: { isRead } });
   },
 
   async delete(id: string) {

@@ -3,7 +3,7 @@ import { Footer } from "./Footer";
 
 export function PublicShell({ children }: { children: React.ReactNode }) {
   return (
-    <main>
+    <main id="top">
       <Navbar />
       {children}
       <Footer />

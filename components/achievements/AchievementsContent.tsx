@@ -6,26 +6,23 @@ import { CertificateModal } from "../certificates/CertificateModal";
 import type { Certificate } from "@prisma/client";
 import type { CertificateListItem } from "@/src/types";
 
-type Category = "all" | "certificate";
 const ITEMS_PER_PAGE = 6;
 const dateFormatter = new Intl.DateTimeFormat("en", { month: "short", year: "numeric" });
 const mono = "font-mono text-[10px] font-bold uppercase tracking-[.1em]";
 const border = "border-2 border-[#1b1b1b]";
-const categories = [{ value: "all" as const, label: "ALL" }, { value: "certificate" as const, label: "CERTIFICATIONS" }];
 
 function yearOf(date: Date) { return new Date(date).getFullYear(); }
 
 export function AchievementsContent({ certificates }: { certificates: CertificateListItem[] }) {
   const [search, setSearch] = useState("");
-  const [activeCategory, setActiveCategory] = useState<Category>("all");
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
   const [modalCert, setModalCert] = useState<CertificateListItem | null>(null);
   const items = useMemo(() => certificates.filter((cert) => cert.isVisible).sort((a, b) => a.sortOrder - b.sortOrder), [certificates]);
   const filtered = useMemo(() => items.filter((cert) => {
     const query = search.toLowerCase();
-    return (activeCategory === "all" || activeCategory === "certificate") && (!query || `${cert.title} ${cert.description} ${cert.issuer}`.toLowerCase().includes(query));
-  }), [activeCategory, items, search]);
-  const featured = filtered[0] ?? items[0];
+    return !query || `${cert.title} ${cert.description} ${cert.issuer}`.toLowerCase().includes(query);
+  }), [items, search]);
+  const featured = filtered[0];
   const archive = filtered.slice(1, visibleCount + 1);
   const groups = [...new Set(archive.map((cert) => yearOf(cert.issueDate)))];
   const reset = () => setVisibleCount(ITEMS_PER_PAGE);
@@ -33,7 +30,7 @@ export function AchievementsContent({ certificates }: { certificates: Certificat
   return <main className="min-h-screen bg-[#faf6ee] text-[#1b1b1b]"><div className="mx-auto w-full px-[5.5vw] py-10">
     <section className="grid gap-8 border-b-2 border-[#1b1b1b] pb-8 lg:grid-cols-[7fr_5fr]"><div className="flex flex-col justify-between gap-8"><div><div className="mb-4 flex flex-wrap gap-1"><span className={`${mono} bg-[#1b1b1b] px-2 py-1 text-[#faf6ee]`}>05 // MILESTONES</span><span className={`${mono} border-2 border-[#1b1b1b] bg-[#fffdf7] px-2 py-1 shadow-[2px_2px_0_#1b1b1b]`}>VERIFIED ARCHIVE // CONTINUOUS EVOLUTION</span></div><h1 className="font-serif text-4xl font-bold tracking-[-.04em] sm:text-5xl">Milestones worth remembering.</h1><p className="mt-4 max-w-xl font-serif text-lg leading-7 text-[#58413f]">A structured record of engineering achievements, certifications, and research fellowships that shaped my journey. Documenting cloud-native architecture, systems benchmarking, and verifiable open-source impact.</p></div><div className="grid grid-cols-3 gap-1"><Stat label="TOTAL LOGGED" value={`${items.length} UNITS`} color="text-[#a9362e]" /><Stat label="EPOCHS" value={`${items.length ? Math.min(...items.map((x) => yearOf(x.issueDate))) : "—"} — ${items.length ? Math.max(...items.map((x) => yearOf(x.issueDate))) : "—"}`} /><Stat label="INTEGRITY" value="100% VERIFIED" color="text-[#006c49]" /></div></div><ArchiveGraphic /></section>
     {featured && <section className="mt-8"><div className={`${mono} mb-2 text-[#a9362e]`}>★ LEAD RECOGNITION // HIGHEST DISTINCTION</div><article className={`${border} grid gap-6 bg-[#fffdf7] p-5 shadow-[4px_4px_0_#1b1b1b] lg:grid-cols-[5fr_7fr]`}><Verification cert={featured} /><div><span className={`${mono} inline-block border border-[#1b1b1b] bg-[#f16b5e] px-2 py-1 text-[#fffdf7]`}>DISTRIBUTED SYSTEMS ARCHITECTURE</span><h2 className="mt-3 font-serif text-3xl font-bold leading-tight">{featured.title}</h2><p className={`${mono} mt-2 text-[#a9362e]`}>{featured.issuer} / {dateFormatter.format(new Date(featured.issueDate))}</p><p className="mt-3 font-serif leading-6 text-[#58413f]">{featured.description}</p><button onClick={() => setModalCert(featured)} className={`${mono} mt-5 border-2 border-[#1b1b1b] bg-[#f16b5e] px-4 py-2 text-[#fffdf7] shadow-[3px_3px_0_#1b1b1b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2`}>VIEW CREDENTIAL ↗</button></div></article></section>}
-    <section className={`${border} mt-8 flex flex-col gap-3 bg-[#fffdf7] p-3 shadow-[3px_3px_0_#1b1b1b] md:flex-row md:items-center md:justify-between`}><div className="flex flex-wrap gap-1">{categories.map((category) => <button key={category.value} onClick={() => { setActiveCategory(category.value); reset(); }} className={`${mono} border-2 border-[#1b1b1b] px-3 py-2 ${activeCategory === category.value ? "bg-[#f16b5e] text-[#fffdf7] shadow-[2px_2px_0_#1b1b1b]" : "bg-[#fffdf7]"}`}>{category.label} [{category.value === "all" ? items.length : items.length}]</button>)}</div><label className="relative block w-full md:max-w-xs"><Search aria-hidden="true" className="absolute left-2 top-2.5 size-4" /><input aria-label="Search achievements" value={search} onChange={(event) => { setSearch(event.target.value); reset(); }} placeholder="Search achievements..." className={`${mono} h-10 w-full border-2 border-[#1b1b1b] bg-[#faf6ee] pl-8 pr-2 outline-none focus-visible:ring-2 focus-visible:ring-[#f16b5e]`} /></label></section>
+    <section className={`${border} mt-8 flex flex-col gap-3 bg-[#fffdf7] p-3 shadow-[3px_3px_0_#1b1b1b] md:flex-row md:items-center md:justify-between`}><span className={`${mono} text-[#58413f]`}>VERIFIED ARCHIVE // {items.length} CREDENTIALS</span><label className="relative block w-full md:max-w-xs"><Search aria-hidden="true" className="absolute left-2 top-2.5 size-4" /><input aria-label="Search achievements" value={search} onChange={(event) => { setSearch(event.target.value); reset(); }} placeholder="Search achievements..." className={`${mono} h-10 w-full border-2 border-[#1b1b1b] bg-[#faf6ee] pl-8 pr-2 outline-none focus-visible:ring-2 focus-visible:ring-[#f16b5e]`} /></label></section>
     {filtered.length === 0 ? <div className={`${border} mt-8 bg-[#fffdf7] p-10 text-center text-[#58413f]`}>No achievements match your search.</div> : <section className="mt-10">{groups.map((year) => <div key={year} className="mb-8"><div className="mb-3 flex items-end justify-between border-b-2 border-[#1b1b1b] pb-1"><h2 className={`${mono} text-sm`}>■ {year} {"//"} RECENT MILESTONES</h2><span className={mono}>{archive.filter((x) => yearOf(x.issueDate) === year).length} RECORDS</span></div><div className="grid gap-4 md:grid-cols-2">{archive.filter((cert) => yearOf(cert.issueDate) === year).map((cert, index) => <CertificateCard key={cert.id} cert={cert} index={index} onSelect={setModalCert} />)}</div></div>)}</section>}
     {visibleCount < filtered.length - 1 && <button onClick={() => setVisibleCount((count) => count + ITEMS_PER_PAGE)} className={`${mono} mx-auto block border-2 border-[#1b1b1b] bg-[#fffdf7] px-5 py-2 shadow-[2px_2px_0_#1b1b1b]`}>LOAD MORE MILESTONES [↙]</button>}
     <div className={`${border} mt-12 flex flex-col gap-3 bg-[#fffdf7] p-4 shadow-[3px_3px_0_#1b1b1b] sm:flex-row sm:items-center sm:justify-between`}><span className="font-serif text-lg">The journey continues.</span><span className={mono}>MORE CREDENTIALS IN PROGRESS ↗</span></div>

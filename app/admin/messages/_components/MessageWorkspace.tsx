@@ -40,11 +40,13 @@ function MessageBulkBar({
   selectedIds,
   bulkBusy,
   runBulkRead,
+  requestBulkDelete,
   clearSelection,
 }: {
   selectedIds: ReadonlySet<string>;
   bulkBusy: boolean;
   runBulkRead: (read: boolean) => void;
+  requestBulkDelete: () => void;
   clearSelection: () => void;
 }) {
   if (selectedIds.size === 0) return null;
@@ -93,20 +95,12 @@ function MessageBulkBar({
         </button>
         <button
           type="button"
-          disabled={true}
-          className="inline-flex h-7 items-center gap-1.5 border border-line bg-admin-alert px-2.5 font-jet text-[8px] font-bold uppercase tracking-[.06em] text-white transition-colors disabled:cursor-wait disabled:opacity-60"
+          onClick={requestBulkDelete}
+          disabled={bulkBusy}
+          className="inline-flex h-7 items-center gap-1.5 border border-line bg-admin-alert px-2.5 font-jet text-[8px] font-bold uppercase tracking-[.06em] text-white transition-colors hover:bg-admin-alert/80 disabled:cursor-wait disabled:opacity-60"
         >
           <Trash2 size={11} aria-hidden="true" />
           Delete
-        </button>
-        <button
-          type="button"
-          onClick={clearSelection}
-          disabled={false}
-          className="inline-flex h-7 items-center gap-1.5 border border-line bg-background px-2.5 font-jet text-[8px] font-bold uppercase tracking-[.06em] transition-colors hover:bg-admin-wash"
-        >
-          <X size={11} aria-hidden="true" />
-          Clear selection
         </button>
       </div>
     </div>
@@ -235,6 +229,8 @@ function MessageWorkspaceInner({
       try {
         const response = await fetch("/api/admin/messages/" + message.id, {
           method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isRead: !message.isRead }),
         });
         if (!response.ok) {
           throw new Error("The message could not be updated.");
@@ -265,6 +261,8 @@ function MessageWorkspaceInner({
           ids.map(async (id) => {
             const response = await fetch("/api/admin/messages/" + id, {
               method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ isRead: read }),
             });
             if (!response.ok) {
               throw new Error("The message could not be updated.");
@@ -614,6 +612,7 @@ function MessageWorkspaceInner({
         selectedIds={selectedIds}
         bulkBusy={bulkBusy}
         runBulkRead={runBulkRead}
+        requestBulkDelete={requestBulkDelete}
         clearSelection={clearSelection}
       />
 

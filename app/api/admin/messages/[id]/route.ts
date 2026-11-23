@@ -1,15 +1,20 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/src/lib/auth";
 import { markMessageRead, deleteMessage } from "@/src/actions/message";
+import { z } from "zod";
+
+const patchSchema = z.object({ isRead: z.boolean().optional() });
 
 export async function PATCH(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   if (!(await requireAdmin())) return new NextResponse("Unauthorized", { status: 401 });
 
   const { id } = await params;
-  const result = await markMessageRead(id);
+  const parsed = patchSchema.safeParse(await req.json().catch(() => ({})));
+  const isRead = parsed.success ? (parsed.data.isRead ?? true) : true;
+  const result = await markMessageRead(id, isRead);
   if (result.error) {
     return NextResponse.json({ error: result.error }, { status: 400 });
   }
