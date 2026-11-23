@@ -5,6 +5,7 @@ import { projectSchema, projectUpdateSchema } from "@/src/lib/validations";
 import type { ProjectCreateInput, ProjectUpdateInput } from "@/src/types";
 import type { Project } from "@prisma/client";
 import { requireAdmin } from "@/src/lib/auth";
+import { revalidatePublicContent } from "@/src/lib/revalidate-public";
 
 type ActionResult<T> = { data?: T; error?: string };
 
@@ -45,6 +46,7 @@ export async function createProject(
   try {
     const parsed = projectSchema.parse(input);
     const project = await projectService.create(parsed as any);
+    revalidatePublicContent({ project: [project.slug] });
     return { data: project as any };
   } catch (e: any) {
     if (e.issues) return { error: e.issues.map((i: any) => i.message).join(", ") };
@@ -59,7 +61,13 @@ export async function updateProject(
   if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
     const parsed = projectUpdateSchema.parse(input);
+    const existing = await projectService.getById(id);
     const project = await projectService.update(id, parsed as any);
+    revalidatePublicContent({
+      project: [existing?.slug, project.slug].filter(
+        (slug): slug is string => Boolean(slug)
+      ),
+    });
     return { data: project as any };
   } catch (e: any) {
     if (e.issues) return { error: e.issues.map((i: any) => i.message).join(", ") };
@@ -72,7 +80,9 @@ export async function deleteProject(
 ): Promise<ActionResult<void>> {
   if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
+    const existing = await projectService.getById(id);
     await projectService.delete(id);
+    revalidatePublicContent({ project: existing?.slug ? [existing.slug] : [] });
     return {};
   } catch (e: any) {
     return { error: e.message ?? "Failed to delete project" };

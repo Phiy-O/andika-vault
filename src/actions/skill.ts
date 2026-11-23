@@ -5,6 +5,7 @@ import { skillSchema, skillUpdateSchema } from "@/src/lib/validations/skill";
 import type { SkillCreateInput, SkillUpdateInput } from "@/src/types";
 import type { Skill } from "@prisma/client";
 import { requireAdmin } from "@/src/lib/auth";
+import { revalidatePublicContent } from "@/src/lib/revalidate-public";
 
 type ActionResult<T> = { data?: T; error?: string };
 
@@ -42,6 +43,7 @@ export async function createSkill(
   try {
     const parsed = skillSchema.parse(input);
     const skill = await skillService.create(parsed as any);
+    revalidatePublicContent();
     return { data: skill as any };
   } catch (e: any) {
     if (e.issues) return { error: e.issues.map((i: any) => i.message).join(", ") };
@@ -57,6 +59,7 @@ export async function updateSkill(
   try {
     const parsed = skillUpdateSchema.parse(input);
     const skill = await skillService.update(id, parsed as any);
+    revalidatePublicContent();
     return { data: skill as any };
   } catch (e: any) {
     if (e.issues) return { error: e.issues.map((i: any) => i.message).join(", ") };
@@ -68,6 +71,7 @@ export async function deleteSkill(id: string): Promise<ActionResult<void>> {
   if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
     await skillService.delete(id);
+    revalidatePublicContent();
     return {};
   } catch (e: any) {
     return { error: e.message ?? "Failed to delete skill" };

@@ -12,6 +12,7 @@ import { requireAdmin } from "@/src/lib/auth";
 import { buildArticleContent, type TocHeading } from "@/src/lib/article-content";
 import { z } from "zod";
 import { actionError } from "./action-error";
+import { revalidatePublicContent } from "@/src/lib/revalidate-public";
 
 type ActionResult<T> = { data?: T; error?: string };
 
@@ -72,6 +73,7 @@ export async function createBlogPost(
   try {
     const parsed = blogPostSchema.parse(input);
     const post = await blogPostService.create(parsed);
+    revalidatePublicContent({ blog: [post.slug] });
     return { data: post };
   } catch (e) {
     return { error: actionError(e, "Failed to create post") };
@@ -85,7 +87,13 @@ export async function updateBlogPost(
   if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
     const parsed = blogPostUpdateSchema.parse(input);
+    const existing = await blogPostService.getById(id);
     const post = await blogPostService.update(id, parsed);
+    revalidatePublicContent({
+      blog: [existing?.slug, post.slug].filter(
+        (slug): slug is string => Boolean(slug)
+      ),
+    });
     return { data: post };
   } catch (e) {
     return { error: actionError(e, "Failed to update post") };
@@ -97,7 +105,9 @@ export async function deleteBlogPost(
 ): Promise<ActionResult<void>> {
   if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
+    const existing = await blogPostService.getById(id);
     await blogPostService.delete(id);
+    revalidatePublicContent({ blog: existing?.slug ? [existing.slug] : [] });
     return {};
   } catch (e) {
     return { error: actionError(e, "Failed to delete post") };

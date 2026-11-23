@@ -4,6 +4,7 @@ import { siteSettingService } from "@/src/services";
 import { siteSettingsSchema } from "@/src/lib/validations/site-settings";
 import type { SiteSettings } from "@/src/lib/validations/site-settings";
 import { requireAdmin } from "@/src/lib/auth";
+import { revalidatePublicContent } from "@/src/lib/revalidate-public";
 
 type ActionResult<T> = { data?: T; error?: string };
 
@@ -23,6 +24,7 @@ export async function updateSiteSettings(
   try {
     const parsed = siteSettingsSchema.parse(input);
     const settings = await siteSettingService.update(parsed);
+    revalidatePublicContent();
     return { data: settings };
   } catch (e: any) {
     if (e.issues) return { error: e.issues.map((i: any) => i.message).join(", ") };

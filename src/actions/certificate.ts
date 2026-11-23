@@ -13,6 +13,7 @@ import type {
 import type { Certificate } from "@prisma/client";
 import { requireAdmin } from "@/src/lib/auth";
 import { actionError } from "./action-error";
+import { revalidatePublicContent } from "@/src/lib/revalidate-public";
 
 type ActionResult<T> = { data?: T; error?: string };
 
@@ -46,6 +47,7 @@ export async function createCertificate(
   try {
     const parsed = certificateSchema.parse(input);
     const cert = await certificateService.create(parsed);
+    revalidatePublicContent();
     return { data: cert };
   } catch (e) {
     return { error: actionError(e, "Failed to create certificate") };
@@ -60,6 +62,7 @@ export async function updateCertificate(
   try {
     const parsed = certificateUpdateSchema.parse(input);
     const cert = await certificateService.update(id, parsed);
+    revalidatePublicContent();
     return { data: cert };
   } catch (e) {
     return { error: actionError(e, "Failed to update certificate") };
@@ -72,6 +75,7 @@ export async function deleteCertificate(
   if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
     await certificateService.delete(id);
+    revalidatePublicContent();
     return {};
   } catch (e) {
     return { error: actionError(e, "Failed to delete certificate") };
