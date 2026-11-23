@@ -6,6 +6,7 @@ import type { ProjectCreateInput, ProjectUpdateInput } from "@/src/types";
 import type { Project } from "@prisma/client";
 import { requireAdmin } from "@/src/lib/auth";
 import { revalidatePublicContent } from "@/src/lib/revalidate-public";
+import { actionError } from "./action-error";
 
 type ActionResult<T> = { data?: T; error?: string };
 
@@ -13,8 +14,8 @@ export async function getProjects(): Promise<ActionResult<Project[]>> {
   try {
     const projects = await projectService.getVisible();
     return { data: projects as any };
-  } catch (e: any) {
-    return { error: e.message ?? "Failed to fetch projects" };
+  } catch (e) {
+    return { error: actionError(e, "Failed to fetch projects") };
   }
 }
 
@@ -23,8 +24,8 @@ export async function getAllProjects(): Promise<ActionResult<Project[]>> {
   try {
     const projects = await projectService.getAll();
     return { data: projects as any };
-  } catch (e: any) {
-    return { error: e.message ?? "Failed to fetch projects" };
+  } catch (e) {
+    return { error: actionError(e, "Failed to fetch projects") };
   }
 }
 
@@ -35,8 +36,8 @@ export async function getProject(
   try {
     const project = await projectService.getBySlug(slug);
     return { data: project as any ?? null };
-  } catch (e: any) {
-    return { error: e.message ?? "Failed to fetch project" };
+  } catch (e) {
+    return { error: actionError(e, "Failed to fetch project") };
   }
 }
 
@@ -49,9 +50,8 @@ export async function createProject(
     const project = await projectService.create(parsed as any);
     revalidatePublicContent({ project: [project.slug] });
     return { data: project as any };
-  } catch (e: any) {
-    if (e.issues) return { error: e.issues.map((i: any) => i.message).join(", ") };
-    return { error: e.message ?? "Failed to create project" };
+  } catch (e) {
+    return { error: actionError(e, "Failed to create project") };
   }
 }
 
@@ -70,9 +70,8 @@ export async function updateProject(
       ),
     });
     return { data: project as any };
-  } catch (e: any) {
-    if (e.issues) return { error: e.issues.map((i: any) => i.message).join(", ") };
-    return { error: e.message ?? "Failed to update project" };
+  } catch (e) {
+    return { error: actionError(e, "Failed to update project") };
   }
 }
 
@@ -85,7 +84,7 @@ export async function deleteProject(
     await projectService.delete(id);
     revalidatePublicContent({ project: existing?.slug ? [existing.slug] : [] });
     return {};
-  } catch (e: any) {
-    return { error: e.message ?? "Failed to delete project" };
+  } catch (e) {
+    return { error: actionError(e, "Failed to delete project") };
   }
 }

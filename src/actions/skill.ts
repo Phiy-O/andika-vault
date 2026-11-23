@@ -6,6 +6,7 @@ import type { SkillCreateInput, SkillUpdateInput } from "@/src/types";
 import type { Skill } from "@prisma/client";
 import { requireAdmin } from "@/src/lib/auth";
 import { revalidatePublicContent } from "@/src/lib/revalidate-public";
+import { actionError } from "./action-error";
 
 type ActionResult<T> = { data?: T; error?: string };
 
@@ -13,8 +14,8 @@ export async function getSkills(): Promise<ActionResult<Skill[]>> {
   try {
     const skills = await skillService.getVisible();
     return { data: skills as any };
-  } catch (e: any) {
-    return { error: e.message ?? "Failed to fetch skills" };
+  } catch (e) {
+    return { error: actionError(e, "Failed to fetch skills") };
   }
 }
 
@@ -23,8 +24,8 @@ export async function getAllSkills(): Promise<ActionResult<Skill[]>> {
   try {
     const skills = await skillService.getAll();
     return { data: skills as any };
-  } catch (e: any) {
-    return { error: e.message ?? "Failed to fetch skills" };
+  } catch (e) {
+    return { error: actionError(e, "Failed to fetch skills") };
   }
 }
 
@@ -33,8 +34,8 @@ export async function getSkill(id: string): Promise<ActionResult<Skill | null>> 
   try {
     const skill = await skillService.getById(id);
     return { data: (skill as any) ?? null };
-  } catch (e: any) {
-    return { error: e.message ?? "Failed to fetch skill" };
+  } catch (e) {
+    return { error: actionError(e, "Failed to fetch skill") };
   }
 }
 
@@ -47,9 +48,8 @@ export async function createSkill(
     const skill = await skillService.create(parsed as any);
     revalidatePublicContent();
     return { data: skill as any };
-  } catch (e: any) {
-    if (e.issues) return { error: e.issues.map((i: any) => i.message).join(", ") };
-    return { error: e.message ?? "Failed to create skill" };
+  } catch (e) {
+    return { error: actionError(e, "Failed to create skill") };
   }
 }
 
@@ -63,9 +63,8 @@ export async function updateSkill(
     const skill = await skillService.update(id, parsed as any);
     revalidatePublicContent();
     return { data: skill as any };
-  } catch (e: any) {
-    if (e.issues) return { error: e.issues.map((i: any) => i.message).join(", ") };
-    return { error: e.message ?? "Failed to update skill" };
+  } catch (e) {
+    return { error: actionError(e, "Failed to update skill") };
   }
 }
 
@@ -75,7 +74,7 @@ export async function deleteSkill(id: string): Promise<ActionResult<void>> {
     await skillService.delete(id);
     revalidatePublicContent();
     return {};
-  } catch (e: any) {
-    return { error: e.message ?? "Failed to delete skill" };
+  } catch (e) {
+    return { error: actionError(e, "Failed to delete skill") };
   }
 }

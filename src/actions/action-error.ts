@@ -12,6 +12,7 @@ export function actionError(error: unknown, fallback: string) {
       )
       .join(", ");
   }
-  if (error instanceof Error && error.message) return error.message;
+  // Validation messages are safe to show; raw Error/Prisma/pg messages can
+  // disclose schema details and must never be returned to the client.
   return fallback;
 }
