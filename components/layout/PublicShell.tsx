@@ -3,10 +3,10 @@ import { Footer } from "./Footer";
 
 export function PublicShell({ children }: { children: React.ReactNode }) {
   return (
-    <main id="top">
+    <div id="top">
       <Navbar />
       {children}
       <Footer />
-    </main>
+    </div>
   );
 }

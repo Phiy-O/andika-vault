@@ -3,7 +3,8 @@
 import { ArrowUpRight, Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useDialogA11y } from "@/components/ui/useDialogA11y";
 
 const navigationItems = [
   { label: "Home", href: "/" },
@@ -19,8 +20,11 @@ const navLinkClasses = "font-mono text-[10px] font-bold uppercase tracking-[.08e
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
+  const panelRef = useRef<HTMLElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
 
-  const closeMenu = () => setIsMenuOpen(false);
+  const closeMenu = useCallback(() => setIsMenuOpen(false), []);
+  useDialogA11y(isMenuOpen, panelRef, closeRef, closeMenu);
 
   useEffect(() => {
     let lastScrollY = 0;
@@ -93,11 +97,16 @@ export function Navbar() {
 
       {/* Mobile sidebar — outside header so navbar scroll effect doesn't affect it */}
       <nav
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
         className={`hidden max-md:flex max-md:flex-col max-md:fixed max-md:left-0 max-md:top-0 max-md:z-50 max-md:bg-background max-md:border-l max-md:border-line max-md:min-h-screen max-md:py-[100px] max-md:px-8 max-md:w-[min(82vw,340px)] max-md:overflow-y-auto max-md:transition-transform max-md:duration-300 ${isMenuOpen ? "max-md:translate-x-0" : "max-md:-translate-x-full"}`}
         id="main-navigation"
-        aria-label="Main navigation"
+        aria-label="Mobile navigation"
+        aria-hidden={!isMenuOpen}
       >
         <button
+          ref={closeRef}
           className="flex items-center bg-transparent border-0 text-foreground cursor-pointer justify-center p-2 absolute right-[22px] top-[22px]"
           type="button"
           aria-label="Close navigation menu"

@@ -3,9 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Menu, Search, X } from "lucide-react";
 import { AdminSidebar, type AdminProfile } from "./AdminSidebar";
+import { useDialogA11y } from "@/components/ui/useDialogA11y";
 
 const labels: Array<[string, string]> = [
   ["/admin/projects", "Projects"],
@@ -46,39 +47,8 @@ export function AdminNavbar({ profile }: { profile: AdminProfile }) {
   const label = currentLabel(pathname);
   const search = searchTarget(pathname);
 
-  useEffect(() => {
-    if (!mobileOpen) return;
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    closeRef.current?.focus();
-
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        setMobileOpen(false);
-        return;
-      }
-      if (event.key !== "Tab" || !panelRef.current) return;
-      const focusable = panelRef.current.querySelectorAll<HTMLElement>(
-        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-      );
-      if (focusable.length === 0) return;
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
-    }
-
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.body.style.overflow = previous;
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [mobileOpen]);
+  const closeMobile = useCallback(() => setMobileOpen(false), []);
+  useDialogA11y(mobileOpen, panelRef, closeRef, closeMobile);
 
   function submitSearch(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
