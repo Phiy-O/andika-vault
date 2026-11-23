@@ -46,6 +46,7 @@ export async function getBlogPosts(): Promise<
 export async function getBlogPost(
   slug: string
 ): Promise<ActionResult<BlogPost | null>> {
+  if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
     const post = await blogPostService.getBySlug(slug);
     return { data: post ?? null };

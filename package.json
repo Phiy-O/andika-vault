@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test:retry": "tsx scripts/test-prisma-retry.ts",
-    "test:validation": "tsx scripts/test-validation.ts"
+    "test:validation": "tsx scripts/test-validation.ts",
+    "test:guards": "tsx scripts/test-action-guards.ts"
   },
   "dependencies": {
     "@lexical/html": "^0.48.0",

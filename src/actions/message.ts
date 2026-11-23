@@ -9,6 +9,7 @@ import { requireAdmin } from "@/src/lib/auth";
 type ActionResult<T> = { data?: T; error?: string };
 
 export async function getAllMessages(): Promise<ActionResult<Message[]>> {
+  if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
     const messages = await messageService.getAll();
     return { data: messages as any };

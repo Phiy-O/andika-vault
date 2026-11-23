@@ -19,6 +19,7 @@ export async function getSkills(): Promise<ActionResult<Skill[]>> {
 }
 
 export async function getAllSkills(): Promise<ActionResult<Skill[]>> {
+  if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
     const skills = await skillService.getAll();
     return { data: skills as any };
@@ -28,6 +29,7 @@ export async function getAllSkills(): Promise<ActionResult<Skill[]>> {
 }
 
 export async function getSkill(id: string): Promise<ActionResult<Skill | null>> {
+  if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
     const skill = await skillService.getById(id);
     return { data: (skill as any) ?? null };
