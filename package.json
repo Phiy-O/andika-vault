@@ -10,7 +10,8 @@
     "test:retry": "tsx scripts/test-prisma-retry.ts",
     "test:validation": "tsx scripts/test-validation.ts",
     "test:guards": "tsx scripts/test-action-guards.ts",
-    "test:revalidation": "tsx scripts/test-revalidation-wiring.ts"
+    "test:revalidation": "tsx scripts/test-revalidation-wiring.ts",
+    "test:db-pool": "tsx scripts/test-db-pool.ts"
   },
   "dependencies": {
     "@lexical/html": "^0.48.0",
