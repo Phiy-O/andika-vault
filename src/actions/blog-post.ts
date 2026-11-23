@@ -12,6 +12,7 @@ import { requireAdmin } from "@/src/lib/auth";
 import { buildArticleContent, type TocHeading } from "@/src/lib/article-content";
 import { z } from "zod";
 import { actionError } from "./action-error";
+import { idSchema } from "@/src/lib/validations/id";
 import { revalidatePublicContent } from "@/src/lib/revalidate-public";
 
 type ActionResult<T> = { data?: T; error?: string };
@@ -87,6 +88,7 @@ export async function updateBlogPost(
 ): Promise<ActionResult<BlogPost>> {
   if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
+    idSchema.parse(id);
     const parsed = blogPostUpdateSchema.parse(input);
     const existing = await blogPostService.getById(id);
     const post = await blogPostService.update(id, parsed);
@@ -106,6 +108,7 @@ export async function deleteBlogPost(
 ): Promise<ActionResult<void>> {
   if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
+    idSchema.parse(id);
     const existing = await blogPostService.getById(id);
     await blogPostService.delete(id);
     revalidatePublicContent({ blog: existing?.slug ? [existing.slug] : [] });

@@ -7,6 +7,7 @@ import type { Project } from "@prisma/client";
 import { requireAdmin } from "@/src/lib/auth";
 import { revalidatePublicContent } from "@/src/lib/revalidate-public";
 import { actionError } from "./action-error";
+import { idSchema } from "@/src/lib/validations/id";
 
 type ActionResult<T> = { data?: T; error?: string };
 
@@ -61,6 +62,7 @@ export async function updateProject(
 ): Promise<ActionResult<Project>> {
   if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
+    idSchema.parse(id);
     const parsed = projectUpdateSchema.parse(input);
     const existing = await projectService.getById(id);
     const project = await projectService.update(id, parsed as any);
@@ -80,6 +82,7 @@ export async function deleteProject(
 ): Promise<ActionResult<void>> {
   if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
+    idSchema.parse(id);
     const existing = await projectService.getById(id);
     await projectService.delete(id);
     revalidatePublicContent({ project: existing?.slug ? [existing.slug] : [] });

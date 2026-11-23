@@ -13,6 +13,7 @@ import type {
 import type { Certificate } from "@prisma/client";
 import { requireAdmin } from "@/src/lib/auth";
 import { actionError } from "./action-error";
+import { idSchema } from "@/src/lib/validations/id";
 import { revalidatePublicContent } from "@/src/lib/revalidate-public";
 
 type ActionResult<T> = { data?: T; error?: string };
@@ -60,6 +61,7 @@ export async function updateCertificate(
 ): Promise<ActionResult<Certificate>> {
   if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
+    idSchema.parse(id);
     const parsed = certificateUpdateSchema.parse(input);
     const cert = await certificateService.update(id, parsed);
     revalidatePublicContent();
@@ -74,6 +76,7 @@ export async function deleteCertificate(
 ): Promise<ActionResult<void>> {
   if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
+    idSchema.parse(id);
     await certificateService.delete(id);
     revalidatePublicContent();
     return {};

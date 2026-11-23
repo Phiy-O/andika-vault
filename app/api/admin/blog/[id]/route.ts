@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { readJsonObject } from "@/src/lib/api-request";
 import { requireAdmin } from "@/src/lib/auth";
 import { blogPostService } from "@/src/services";
 import { updateBlogPost } from "@/src/actions/blog-post";
@@ -12,7 +13,8 @@ export async function PATCH(
   if (!(await requireAdmin())) return new NextResponse("Unauthorized", { status: 401 });
 
   const { id } = await params;
-  const body = await req.json();
+  const body = await readJsonObject(req);
+  if (!body) return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   const old = await blogPostService.getById(id);
   const result = await updateBlogPost(id, body);
   if (result.error) {

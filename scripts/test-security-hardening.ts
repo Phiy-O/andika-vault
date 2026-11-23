@@ -84,6 +84,53 @@ async function main(): Promise<void> {
   assert.equal(safeUrlString.safeParse("/local/path").success, true);
   assert.equal(safeUrlString.safeParse("https://example.com").success, true);
 
+  // #7 — robustness: IDs, JSON bodies, body size, and JSON config parsing.
+  const { idSchema } = await import("../src/lib/validations/id");
+  assert.equal(idSchema.safeParse("").success, false);
+  assert.equal(idSchema.safeParse("abc123".repeat(20)).success, false);
+  assert.equal(idSchema.safeParse("clh1234567890abcdefghijk").success, true);
+  for (const file of [
+    "src/actions/blog-post.ts",
+    "src/actions/project.ts",
+    "src/actions/skill.ts",
+    "src/actions/certificate.ts",
+    "src/actions/message.ts",
+  ]) {
+    assert.match(source(file), /idSchema\.parse\(id\)/, `${file} must validate IDs`);
+  }
+  const adminRoutes = [
+    "app/api/admin/blog/route.ts",
+    "app/api/admin/blog/[id]/route.ts",
+    "app/api/admin/projects/route.ts",
+    "app/api/admin/projects/[id]/route.ts",
+    "app/api/admin/certificates/route.ts",
+    "app/api/admin/certificates/[id]/route.ts",
+    "app/api/admin/skills/route.ts",
+    "app/api/admin/skills/[id]/route.ts",
+  ];
+  for (const file of adminRoutes) {
+    assert.doesNotMatch(
+      source(file),
+      /await req\.json\(\);/,
+      `${file} must guard JSON body parsing`
+    );
+  }
+
+  const { siteSettingsSchema, SITE_SETTINGS_DEFAULTS } = await import(
+    "../src/lib/validations/site-settings"
+  );
+  assert.equal(
+    siteSettingsSchema.safeParse({
+      ...SITE_SETTINGS_DEFAULTS,
+      aboutJourney: "{bad json",
+    }).success,
+    false
+  );
+  assert.doesNotMatch(
+    source("src/lib/validations/site-settings.ts"),
+    /JSON\.parse\(value\)/
+  );
+
   console.log("security hardening tests (part 1) passed");
 }
 

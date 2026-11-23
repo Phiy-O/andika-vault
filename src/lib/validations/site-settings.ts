@@ -5,6 +5,18 @@ const aboutJourneyItem = z.object({ title: z.string().min(1), body: z.string().m
 const aboutPillar = z.object({ title: z.string().min(1), description: z.string().min(1), tag: z.string().min(1) });
 const aboutTimelineItem = z.object({ title: z.string().min(1), description: z.string().min(1) });
 
+// Guard JSON parsing so malformed config returns a validation issue instead
+// of throwing a raw SyntaxError out of the schema.
+function jsonArray(value: z.ZodTypeAny, message: string) {
+  return z.string().refine((input) => {
+    try {
+      return z.array(value).safeParse(JSON.parse(input)).success;
+    } catch {
+      return false;
+    }
+  }, message);
+}
+
 export const siteSettingsSchema = z.object({
   // Social & Contact
   email: z.string().email("Email tidak valid"),
@@ -22,9 +34,9 @@ export const siteSettingsSchema = z.object({
   aboutDiscipline: z.string().min(1),
   aboutPhilosophy: z.string().min(1),
   aboutRuntime: z.string().min(1),
-  aboutJourney: z.string().refine((value) => aboutJourneyItem.array().safeParse(JSON.parse(value)).success, "Journey JSON tidak valid"),
-  aboutPillars: z.string().refine((value) => aboutPillar.array().safeParse(JSON.parse(value)).success, "Pillars JSON tidak valid"),
-  aboutTimeline: z.string().refine((value) => aboutTimelineItem.array().safeParse(JSON.parse(value)).success, "Timeline JSON tidak valid"),
+  aboutJourney: jsonArray(aboutJourneyItem, "Journey JSON tidak valid"),
+  aboutPillars: jsonArray(aboutPillar, "Pillars JSON tidak valid"),
+  aboutTimeline: jsonArray(aboutTimelineItem, "Timeline JSON tidak valid"),
   aboutQuote: z.string().min(1),
 });
 

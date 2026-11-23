@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { readJsonObject } from "@/src/lib/api-request";
 import { requireAdmin } from "@/src/lib/auth";
 import { projectService } from "@/src/services";
 import { updateProject } from "@/src/actions/project";
@@ -12,7 +13,8 @@ export async function PATCH(
   if (!(await requireAdmin())) return new NextResponse("Unauthorized", { status: 401 });
 
   const { id } = await params;
-  const body = await req.json();
+  const body = await readJsonObject(req);
+  if (!body) return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   const old = await projectService.getById(id);
   const result = await updateProject(id, body);
   if (result.error) {
@@ -33,7 +35,7 @@ export async function PATCH(
   ];
   const newUrls = [
     ...(thumbnailProvided && body.thumbnail ? [body.thumbnail] : []),
-    ...(screenshotsProvided ? body.screenshots : []),
+    ...(screenshotsProvided ? (body.screenshots as string[]) : []),
   ];
   const removed = oldUrls.filter((u) => !newUrls.includes(u));
   if (removed.length) await cleanupCloudinaryImages(removed);

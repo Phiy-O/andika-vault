@@ -10,7 +10,7 @@ const fields = {
   issueDate: z.string().datetime().or(z.date()),
   credentialUrl: safeUrl,
   image: safeUrl,
-  description: z.string().min(1, "Description is required"),
+  description: z.string().min(1, "Description is required").max(20_000, "Description is too large"),
   isVisible,
   sortOrder,
 };

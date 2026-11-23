@@ -15,7 +15,8 @@
     "test:batch1": "tsx scripts/test-batch1.ts",
     "test:batch2": "tsx scripts/test-batch2.ts",
     "test:batch3": "tsx scripts/test-batch3.ts",
-    "test": "pnpm run test:retry && pnpm run test:validation && pnpm run test:guards && pnpm run test:revalidation && pnpm run test:db-pool && pnpm run test:batch1 && pnpm run test:batch2 && pnpm run test:batch3"
+    "test:security": "tsx scripts/test-security-hardening.ts",
+    "test": "pnpm run test:retry && pnpm run test:validation && pnpm run test:guards && pnpm run test:revalidation && pnpm run test:db-pool && pnpm run test:batch1 && pnpm run test:batch2 && pnpm run test:batch3 && pnpm run test:security"
   },
   "dependencies": {
     "@lexical/html": "^0.48.0",

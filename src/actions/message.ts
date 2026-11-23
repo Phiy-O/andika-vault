@@ -6,6 +6,7 @@ import type { Message } from "@prisma/client";
 import { requireAdmin } from "@/src/lib/auth";
 import { RateLimitError } from "@/src/lib/rate-limit";
 import { actionError } from "./action-error";
+import { idSchema } from "@/src/lib/validations/id";
 
 type ActionResult<T> = { data?: T; error?: string };
 
@@ -39,6 +40,7 @@ export async function markMessageRead(
 ): Promise<ActionResult<void>> {
   if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
+    idSchema.parse(id);
     await messageService.markRead(id, isRead);
     return {};
   } catch (e) {
@@ -49,6 +51,7 @@ export async function markMessageRead(
 export async function deleteMessage(id: string): Promise<ActionResult<void>> {
   if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
+    idSchema.parse(id);
     await messageService.delete(id);
     return {};
   } catch (e) {

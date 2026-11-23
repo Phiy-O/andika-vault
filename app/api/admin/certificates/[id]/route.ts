@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { readJsonObject } from "@/src/lib/api-request";
 import { requireAdmin } from "@/src/lib/auth";
 import { certificateService } from "@/src/services";
 import { updateCertificate } from "@/src/actions/certificate";
@@ -12,7 +13,8 @@ export async function PATCH(
   if (!(await requireAdmin())) return new NextResponse("Unauthorized", { status: 401 });
 
   const { id } = await params;
-  const body = await req.json();
+  const body = await readJsonObject(req);
+  if (!body) return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   const old = await certificateService.getById(id);
   const result = await updateCertificate(id, body);
   if (result.error) {

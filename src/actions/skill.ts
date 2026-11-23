@@ -7,6 +7,7 @@ import type { Skill } from "@prisma/client";
 import { requireAdmin } from "@/src/lib/auth";
 import { revalidatePublicContent } from "@/src/lib/revalidate-public";
 import { actionError } from "./action-error";
+import { idSchema } from "@/src/lib/validations/id";
 
 type ActionResult<T> = { data?: T; error?: string };
 
@@ -59,6 +60,7 @@ export async function updateSkill(
 ): Promise<ActionResult<Skill>> {
   if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
+    idSchema.parse(id);
     const parsed = skillUpdateSchema.parse(input);
     const skill = await skillService.update(id, parsed as any);
     revalidatePublicContent();
@@ -71,6 +73,7 @@ export async function updateSkill(
 export async function deleteSkill(id: string): Promise<ActionResult<void>> {
   if (!(await requireAdmin())) return { error: "Unauthorized" };
   try {
+    idSchema.parse(id);
     await skillService.delete(id);
     revalidatePublicContent();
     return {};

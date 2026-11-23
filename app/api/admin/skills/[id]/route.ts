@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { readJsonObject } from "@/src/lib/api-request";
 import { requireAdmin } from "@/src/lib/auth";
 import { skillService } from "@/src/services";
 import { updateSkill } from "@/src/actions/skill";
@@ -11,7 +12,8 @@ export async function PATCH(
   if (!(await requireAdmin())) return new NextResponse("Unauthorized", { status: 401 });
 
   const { id } = await params;
-  const body = await req.json();
+  const body = await readJsonObject(req);
+  if (!body) return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   const result = await updateSkill(id, body);
   if (result.error) {
     return NextResponse.json({ error: result.error }, { status: 400 });
