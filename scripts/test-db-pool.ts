@@ -14,6 +14,13 @@ async function main(): Promise<void> {
   process.env.PRISMA_POOL_MAX = "abc";
   assert.equal(resolvePoolMax(), 10, "non-numeric pool size must fall back to default");
 
+  delete process.env.PRISMA_POOL_MAX;
+  process.env.NEXT_PHASE = "phase-production-build";
+  assert.equal(resolvePoolMax(), 2, "build workers must use a small pool");
+  process.env.PRISMA_POOL_MAX = "4";
+  assert.equal(resolvePoolMax(), 4, "explicit override must win during build");
+  delete process.env.NEXT_PHASE;
+
   console.log("db pool config tests passed");
 }
 

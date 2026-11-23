@@ -21,6 +21,21 @@ async function countAttempts(
 async function main(): Promise<void> {
   // Prisma codes surfaced by model queries with @prisma/adapter-pg.
   assert.equal(isTransientConnectionError({ code: "P1001" }), true);
+  assert.equal(isTransientConnectionError({ code: "P2039" }), true);
+
+  // Pool exhaustion arrives as P2039 with the real code inside meta.
+  assert.equal(
+    isTransientConnectionError({
+      code: "P2039",
+      meta: {
+        driverAdapterError: Object.assign(
+          new Error("(EMAXCONNSESSION) max clients reached in session mode"),
+          { code: "EMAXCONNSESSION" }
+        ),
+      },
+    }),
+    true
+  );
   assert.equal(isTransientConnectionError({ code: "P1002" }), true);
   assert.equal(isTransientConnectionError({ code: "P1008" }), true);
   assert.equal(isTransientConnectionError({ code: "P1017" }), true);

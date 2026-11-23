@@ -9,7 +9,11 @@ import { withTransientRetry } from "@/src/lib/prisma-retry";
  */
 export function resolvePoolMax(): number {
   const configured = Number(process.env.PRISMA_POOL_MAX);
-  return Number.isInteger(configured) && configured > 0 ? configured : 10;
+  if (Number.isInteger(configured) && configured > 0) return configured;
+  // Supabase's session pooler allows only 15 clients. Build workers are the
+  // only phase that opens several clients in one process, so keep them small.
+  if (process.env.NEXT_PHASE === "phase-production-build") return 2;
+  return 10;
 }
 
 const connectionString = process.env.DATABASE_URL;

@@ -3,6 +3,7 @@ const TRANSIENT_PRISMA_CODES = new Set([
   "P1002", // Database server timed out
   "P1008", // Operations timed out
   "P1017", // Server closed the connection
+  "P2039", // Driver adapter error (e.g. pooler connection limit)
 ]);
 
 const TRANSIENT_DRIVER_CODES = new Set([
@@ -53,6 +54,7 @@ export function isTransientConnectionError(error: unknown): boolean {
       message?: unknown;
       cause?: unknown;
       errors?: unknown;
+      meta?: unknown;
     };
 
     if (typeof candidate.code === "string") {
@@ -74,6 +76,8 @@ export function isTransientConnectionError(error: unknown): boolean {
     }
 
     if (candidate.cause) queue.push(candidate.cause);
+    // Prisma stores driver-adapter failures (EMAXCONNSESSION, etc.) in meta.
+    if (candidate.meta) queue.push(candidate.meta);
     // Dual-stack DNS / autoSelectFamily failures are wrapped in AggregateError.
     if (Array.isArray(candidate.errors)) queue.push(...candidate.errors);
   }
