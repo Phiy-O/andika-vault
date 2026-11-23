@@ -5,6 +5,10 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { ADMIN_ROLE, isBcryptHash, normalizeAdminEmail } from "./auth-config";
 
+// Vercel/Auth.js uses AUTH_SECRET while older deployments use NEXTAUTH_SECRET.
+// NextAuth already accepts either, so the credentials guard must as well.
+const authSecret = process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET;
+
 export async function requireAdmin(): Promise<boolean> {
   const session = await getServerSession(authOptions);
   return session?.user?.role === ADMIN_ROLE;
@@ -12,7 +16,7 @@ export async function requireAdmin(): Promise<boolean> {
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(basePrisma),
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: authSecret,
   session: { strategy: "jwt" },
   providers: [
     CredentialsProvider({
@@ -26,7 +30,7 @@ export const authOptions: NextAuthOptions = {
 
         const adminEmail = process.env.ADMIN_EMAIL;
         const passwordHash = process.env.ADMIN_PASSWORD_HASH;
-        if (!adminEmail || !passwordHash || !process.env.NEXTAUTH_SECRET) return null;
+        if (!adminEmail || !passwordHash || !authSecret) return null;
         if (!isBcryptHash(passwordHash)) return null;
         if (normalizeAdminEmail(String(credentials.email)) !== normalizeAdminEmail(adminEmail)) return null;
 
