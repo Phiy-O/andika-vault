@@ -41,4 +41,8 @@ yarn-error.log*
 next-env.d.ts
 node_modules
 
-docs/.
+# scratch / local tooling output
+*.log
+
+# stale git worktrees (not part of the project)
+.worktrees/

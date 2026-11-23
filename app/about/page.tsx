@@ -15,7 +15,7 @@ export const metadata = {
 };
 
 function SectionHeader({ index, label, note, color = "#f16b5e" }: { index: string; label: string; note: string; color?: string }) {
-  return <div className="mb-6 flex items-center justify-between border-b-2 border-foreground pb-3 max-md:items-start max-md:gap-4"><div className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[.08em]"><span className="h-3 w-3 border-2 border-foreground" style={{ backgroundColor: color }} />{index} // {label}</div><span className="font-mono text-[9px] uppercase tracking-[.1em] text-muted max-md:text-right">[ {note} ]</span></div>;
+  return <div className="mb-6 flex items-center justify-between border-b-2 border-foreground pb-3 max-md:items-start max-md:gap-4"><div className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[.08em]"><span className="h-3 w-3 border-2 border-foreground" style={{ backgroundColor: color }} />{`${index} // ${label}`}</div><span className="font-mono text-[9px] uppercase tracking-[.1em] text-muted max-md:text-right">[ {note} ]</span></div>;
 }
 
 export default async function AboutPage() {

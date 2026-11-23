@@ -11,7 +11,8 @@
     "test:validation": "tsx scripts/test-validation.ts",
     "test:guards": "tsx scripts/test-action-guards.ts",
     "test:revalidation": "tsx scripts/test-revalidation-wiring.ts",
-    "test:db-pool": "tsx scripts/test-db-pool.ts"
+    "test:db-pool": "tsx scripts/test-db-pool.ts",
+    "test": "pnpm run test:retry && pnpm run test:validation && pnpm run test:guards && pnpm run test:revalidation && pnpm run test:db-pool"
   },
   "dependencies": {
     "@lexical/html": "^0.48.0",
