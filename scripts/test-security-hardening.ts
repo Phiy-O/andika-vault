@@ -50,6 +50,21 @@ async function main(): Promise<void> {
   assert.doesNotMatch(source("app/api/cron/cloudinary-cleanup/route.ts"), /Bearer \$\{undefined\}/);
   assert.match(source("app/api/cloudinary/delete/route.ts"), /cleanupCloudinaryImages/);
 
+  // #4 — inline style must be narrowed and raw HTML embeds disabled.
+  const { sanitizeContent } = await import("../src/lib/sanitize");
+  const styled = sanitizeContent(
+    '<p style="position:fixed;background-image:url(https://evil.example/x.png)">hi</p>'
+  );
+  assert.doesNotMatch(styled, /position|background-image/i);
+  assert.doesNotMatch(
+    sanitizeContent('<a href="//evil.example">link</a>'),
+    /href="\/\//
+  );
+  assert.doesNotMatch(
+    source("components/admin/LexKitEditor.tsx"),
+    /htmlEmbedExtension/
+  );
+
   console.log("security hardening tests (part 1) passed");
 }
 

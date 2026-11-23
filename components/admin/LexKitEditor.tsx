@@ -18,7 +18,6 @@ import {
     htmlExtension,
     codeExtension,
     tableExtension,
-    htmlEmbedExtension,
 } from "@lexkit/editor";
 import {
     $createParagraphNode,
@@ -98,7 +97,6 @@ const extensions = [
         htmlExtension,
         codeExtension,
         tableExtension,
-        htmlEmbedExtension,
 ] as const;
 
 const { Provider, useEditor } = createEditorSystem<typeof extensions>();

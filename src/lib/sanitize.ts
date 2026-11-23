@@ -46,6 +46,14 @@ export function sanitizeContent(dirtyHtml: string): string {
       "*": ["class", "style"],
     },
     allowedSchemes: ["http", "https", "mailto", "tel"],
+    allowProtocolRelative: false,
+    // Keep only harmless typographic styling; no positioning, backgrounds or
+    // remote URLs that could overlay the page or beacon to an external host.
+    allowedStyles: {
+      "*": {
+        "text-align": [/^(left|right|center|justify)$/],
+      },
+    },
     transformTags: {
       a: sanitizeHtml.simpleTransform("a", {
         rel: "noopener noreferrer nofollow",
