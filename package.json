@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:retry": "tsx scripts/test-prisma-retry.ts"
   },
   "dependencies": {
     "@lexical/html": "^0.48.0",

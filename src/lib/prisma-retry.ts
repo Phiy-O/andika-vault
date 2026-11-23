@@ -1,24 +1,88 @@
-const TRANSIENT_CONNECTION_CODES = new Set([
+const TRANSIENT_PRISMA_CODES = new Set([
   "P1001", // Can't reach database server
   "P1002", // Database server timed out
   "P1008", // Operations timed out
   "P1017", // Server closed the connection
 ]);
 
+const TRANSIENT_DRIVER_CODES = new Set([
+  // PostgreSQL connection / shutdown states (including pool exhaustion).
+  "08000", // connection_exception
+  "08001", // sqlclient_unable_to_establish_sqlconnection
+  "08004", // sqlserver_rejected_establishment_of_sqlconnection
+  "08006", // connection_failure
+  "08007", // transaction_resolution_unknown
+  "53300", // too_many_connections
+  "57P01", // admin_shutdown
+  "57P02", // crash_shutdown
+  "57P03", // cannot_connect_now
+  // Supabase pooler.
+  "EMAXCONNSESSION",
+  // Node.js / pg socket failures.
+  "ECONNREFUSED",
+  "ECONNRESET",
+  "ENOTFOUND",
+  "EAI_AGAIN",
+  "ETIMEDOUT",
+  "ECONNABORTED",
+  "EPIPE",
+]);
+
+// pg pool/adapter failures can arrive as plain Errors with no `code` at all,
+// so the message must be checked as well.
+const TRANSIENT_CONNECTION_MESSAGE =
+  /can'?t reach database|connection (terminated|timeout|timed out|reset|refused|lost|closed|unavailable)|could not connect|unable to connect|too many (clients|connections)|remaining connection slots|socket hang up|network error/i;
+
+/**
+ * Detects connection-level failures that are safe to retry. With the pg driver
+ * adapter the same failure can surface as a Prisma code (P1001), as a raw
+ * Postgres/pg code (53300, ECONNREFUSED, ...), or one level down in `cause`.
+ */
 export function isTransientConnectionError(error: unknown): boolean {
-  if (typeof error !== "object" || error === null) return false;
-  const code = (error as { code?: unknown }).code;
-  return typeof code === "string" && TRANSIENT_CONNECTION_CODES.has(code);
+  const seen = new Set<object>();
+  let current = error;
+
+  while (current !== null && typeof current === "object" && !seen.has(current)) {
+    seen.add(current);
+    const candidate = current as {
+      code?: unknown;
+      message?: unknown;
+      cause?: unknown;
+    };
+
+    if (typeof candidate.code === "string") {
+      if (
+        TRANSIENT_PRISMA_CODES.has(candidate.code) ||
+        TRANSIENT_DRIVER_CODES.has(candidate.code)
+      ) {
+        return true;
+      }
+    }
+
+    // P2010 and raw pg errors have no reliable code, so inspect the message
+    // of every error in the cause chain as well.
+    if (
+      typeof candidate.message === "string" &&
+      TRANSIENT_CONNECTION_MESSAGE.test(candidate.message)
+    ) {
+      return true;
+    }
+
+    current = candidate.cause;
+  }
+
+  return false;
 }
 
 /**
  * Retries read-only queries that fail because the database connection is
- * temporarily unavailable (for example a flaky DNS lookup or pooler reset).
+ * temporarily unavailable (for example a flaky DNS lookup, a pooler reset,
+ * or exhausted connection slots during a parallel build).
  * Non-connection errors are rethrown immediately.
  */
 export async function withTransientRetry<T>(
   operation: () => Promise<T>,
-  maxAttempts = 3
+  maxAttempts = 4
 ): Promise<T> {
   let lastError: unknown;
 
@@ -30,7 +94,11 @@ export async function withTransientRetry<T>(
       if (!isTransientConnectionError(error) || attempt === maxAttempts) {
         throw error;
       }
-      await new Promise((resolve) => setTimeout(resolve, attempt * 200));
+      // Jittered exponential backoff so parallel build workers do not retry
+      // in lockstep against an already saturated pooler.
+      const baseDelay = Math.min(200 * 2 ** (attempt - 1), 2000);
+      const jitter = Math.floor(Math.random() * baseDelay * 0.25);
+      await new Promise((resolve) => setTimeout(resolve, baseDelay + jitter));
     }
   }
 

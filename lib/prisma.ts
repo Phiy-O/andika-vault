@@ -2,7 +2,16 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { withTransientRetry } from "@/src/lib/prisma-retry";
 
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
+// Bound the pool per process. Next.js prerenders several pages in parallel
+// workers, and Supabase's pooler has a hard connection limit. An unbounded
+// pool (pg defaults to 10) multiplied by every worker exhausts it during
+// `next build`, which makes otherwise healthy deployments fail.
+const adapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL!,
+  max: 2,
+  idleTimeoutMillis: 10_000,
+  connectionTimeoutMillis: 10_000,
+});
 
 const READ_OPERATIONS = new Set([
   "findMany",

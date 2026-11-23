@@ -1,6 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Static pages query Prisma at build time. Keep prerender workers low so a
+  // deploy cannot open dozens of database connections at once and exhaust the
+  // Supabase pooler (seen as EMAXCONNSESSION / P1001 on Vercel).
+  experimental: {
+    cpus: 2,
+  },
   async headers() {
     return [
       {
