@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import { getServerSession } from "next-auth";
 import type { Metadata } from "next";
 import { PublicShell } from "../../../components/layout/PublicShell";
 import { ArticleHeader } from "@/components/blog/detail/ArticleHeader";
@@ -17,7 +16,7 @@ import {
 } from "@/src/lib/article-content";
 import { blogPostService } from "@/src/services";
 import { getSiteSettings } from "@/src/actions/site-setting";
-import { authOptions } from "@/src/lib/auth";
+import { requireAdmin } from "@/src/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -27,8 +26,8 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const session = await getServerSession(authOptions);
-  const post = session
+  const canPreview = await requireAdmin();
+  const post = canPreview
     ? await blogPostService.getBySlug(slug)
     : await blogPostService.getVisibleBySlug(slug);
   if (!post) return { title: "Blog | Andika" };
@@ -65,8 +64,8 @@ export default async function BlogPostPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const session = await getServerSession(authOptions);
-  const post = session
+  const canPreview = await requireAdmin();
+  const post = canPreview
     ? await blogPostService.getBySlug(slug)
     : await blogPostService.getVisibleBySlug(slug);
   if (!post) notFound();

@@ -65,6 +65,25 @@ async function main(): Promise<void> {
     /htmlEmbedExtension/
   );
 
+  // #5 — draft previews must require admin role, not just any session.
+  for (const file of [
+    "app/blog/[slug]/page.tsx",
+    "app/projects/[slug]/page.tsx",
+  ]) {
+    assert.match(
+      source(file),
+      /requireAdmin\(\)|ADMIN_ROLE/,
+      `${file} must gate unfiltered previews on admin role`
+    );
+  }
+
+  // #6 — protocol-relative URLs must not pass URL validation.
+  const { safeUrlString } = await import("../src/lib/validations/url");
+  assert.equal(safeUrlString.safeParse("//evil.example/path").success, false);
+  assert.equal(safeUrlString.safeParse("/\\evil.example").success, false);
+  assert.equal(safeUrlString.safeParse("/local/path").success, true);
+  assert.equal(safeUrlString.safeParse("https://example.com").success, true);
+
   console.log("security hardening tests (part 1) passed");
 }
 

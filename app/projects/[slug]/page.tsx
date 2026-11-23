@@ -6,8 +6,7 @@ import { PublicShell } from "../../../components/layout/PublicShell";
 import { projectService } from "@/src/services";
 import { optimizeCloudinaryUrl } from "@/src/lib/cloudinary-url";
 import { ScreenshotSlider } from "@/components/projects/ScreenshotSlider";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/src/lib/auth";
+import { requireAdmin } from "@/src/lib/auth";
 import { sanitizeContent } from "@/src/lib/sanitize";
 import type { Metadata } from "next";
 
@@ -19,8 +18,8 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const session = await getServerSession(authOptions);
-  const project = session
+  const canPreview = await requireAdmin();
+  const project = canPreview
     ? await projectService.getBySlug(slug)
     : await projectService.getVisibleBySlug(slug);
   if (!project) return { title: "Projects | Andika" };
@@ -52,8 +51,8 @@ export default async function ProjectDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const session = await getServerSession(authOptions);
-  const project = session
+  const canPreview = await requireAdmin();
+  const project = canPreview
     ? await projectService.getBySlug(slug)
     : await projectService.getVisibleBySlug(slug);
   if (!project) notFound();

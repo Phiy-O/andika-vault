@@ -8,7 +8,9 @@ export const safeUrlString = z
     (v) =>
       v === "" ||
       v === "#" ||
-      v.startsWith("/") ||
+      (v.startsWith("/") &&
+        !v.startsWith("//") &&
+        !v.startsWith("/\\")) ||
       /^https?:\/\//i.test(v),
     "URL tidak valid"
   );
