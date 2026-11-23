@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import {
+  CLOUDINARY_FOLDER,
   deleteCloudinaryAsset,
   default as cloudinary,
   publicIdFromUrl,
@@ -35,16 +36,24 @@ export async function cleanupOrphanCloudinaryImages(minAgeHours = 24) {
     bodies.push(certificate.description);
   }
 
-  const resources = await cloudinary.api.resources({
-    type: "upload",
-    resource_type: "image",
-    prefix: "andika-vault/",
-    max_results: 500,
-  });
+  const allResources: Array<{ public_id: string; created_at: string }> = [];
+  let nextCursor: string | undefined;
+  do {
+    const page = await cloudinary.api.resources({
+      type: "upload",
+      resource_type: "image",
+      prefix: `${CLOUDINARY_FOLDER}/`,
+      max_results: 500,
+      ...(nextCursor ? { next_cursor: nextCursor } : {}),
+    });
+    allResources.push(...(page.resources as Array<{ public_id: string; created_at: string }>));
+    nextCursor = page.next_cursor;
+  } while (nextCursor);
+
   const cutoff = Date.now() - minAgeHours * 60 * 60 * 1000;
   let deleted = 0;
 
-  for (const resource of resources.resources) {
+  for (const resource of allResources) {
     const publicId = resource.public_id as string;
     const createdAt = Date.parse(resource.created_at as string);
     if (referenced.has(publicId) || bodies.some((body) => body.includes(publicId))) continue;
@@ -52,7 +61,7 @@ export async function cleanupOrphanCloudinaryImages(minAgeHours = 24) {
     if (await deleteCloudinaryAsset(publicId)) deleted++;
   }
 
-  return { scanned: resources.resources.length, deleted };
+  return { scanned: allResources.length, deleted };
 }
 
 // Delete Cloudinary assets that are no longer referenced by ANY entity.
@@ -73,25 +82,29 @@ export async function cleanupCloudinaryImages(urls: string[]) {
   ]);
 
   const inUse = new Set<string>();
+  const addReference = (url: string | null | undefined) => {
+    const publicId = url ? publicIdFromUrl(url) : null;
+    if (publicId) inUse.add(publicId);
+  };
   const bodies: string[] = [];
   for (const p of posts) {
-    if (p.thumbnail) inUse.add(p.thumbnail);
+    addReference(p.thumbnail);
     if (p.body) bodies.push(p.body);
   }
   for (const p of projects) {
-    if (p.thumbnail) inUse.add(p.thumbnail);
-    for (const s of p.screenshots) inUse.add(s);
+    addReference(p.thumbnail);
+    p.screenshots.forEach(addReference);
     if (p.body) bodies.push(p.body);
   }
   for (const c of certificates) {
-    if (c.image) inUse.add(c.image);
+    addReference(c.image);
     if (c.description) bodies.push(c.description);
   }
 
   for (const url of candidates) {
-    if (inUse.has(url)) continue;
-    if (bodies.some((b) => b.includes(url))) continue;
     const publicId = publicIdFromUrl(url);
-    if (publicId) await deleteCloudinaryAsset(publicId);
+    if (!publicId || inUse.has(publicId)) continue;
+    if (bodies.some((body) => body.includes(publicId) || body.includes(url))) continue;
+    await deleteCloudinaryAsset(publicId);
   }
 }

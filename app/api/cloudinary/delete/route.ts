@@ -1,24 +1,23 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/src/lib/auth";
-import {
-  deleteCloudinaryAsset,
-  publicIdFromUrl,
-} from "@/src/lib/cloudinary";
+import { publicIdFromUrl } from "@/src/lib/cloudinary";
+import { cleanupCloudinaryImages } from "@/src/lib/cloudinary-cleanup";
 
 export async function DELETE(req: Request) {
   if (!(await requireAdmin())) return new NextResponse("Unauthorized", { status: 401 });
 
-  const { url } = await req.json();
-  if (!url || typeof url !== "string") {
+  const body: unknown = await req.json().catch(() => null);
+  const url = body && typeof body === "object" && "url" in body
+    ? (body as { url?: unknown }).url
+    : null;
+  if (typeof url !== "string" || !url) {
     return NextResponse.json({ error: "url required" }, { status: 400 });
   }
-
-  const publicId = publicIdFromUrl(url);
-  if (!publicId) {
-    // Not a Cloudinary URL — nothing to delete server-side.
+  if (!publicIdFromUrl(url)) {
     return NextResponse.json({ ok: true });
   }
 
-  const deleted = await deleteCloudinaryAsset(publicId);
-  return NextResponse.json({ ok: deleted });
+  // Reuse the shared reference check so an in-use asset cannot be deleted.
+  await cleanupCloudinaryImages([url]);
+  return NextResponse.json({ ok: true });
 }
