@@ -4,7 +4,7 @@ import { basePrisma } from "@/lib/prisma";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { ADMIN_ROLE, isBcryptHash, normalizeAdminEmail } from "./auth-config";
-import { checkRateLimit } from "./rate-limit";
+import { isLoginAllowed } from "./login-rate-limit";
 
 // Vercel/Auth.js uses AUTH_SECRET while older deployments use NEXTAUTH_SECRET.
 // NextAuth already accepts either, so the credentials guard must as well.
@@ -29,18 +29,12 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials, req) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        // In-process fixed-window limiter. On serverless each instance has its
-        // own bucket, so this slows attacks but is not a distributed lockout.
         const forwarded = req?.headers?.["x-forwarded-for"];
         const ip =
           (Array.isArray(forwarded) ? forwarded[0] : forwarded) ||
           req?.headers?.["x-real-ip"] ||
           "unknown";
-        try {
-          checkRateLimit(`login:${ip}`, 5, 15 * 60 * 1000);
-        } catch {
-          return null;
-        }
+        if (!(await isLoginAllowed(ip))) return null;
 
         const adminEmail = process.env.ADMIN_EMAIL;
         const passwordHash = process.env.ADMIN_PASSWORD_HASH;

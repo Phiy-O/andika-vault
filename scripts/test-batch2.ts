@@ -36,7 +36,7 @@ async function main(): Promise<void> {
   assert.doesNotMatch(source("app/api/contact/route.ts"), /new Map/);
 
   // Login attempts must be rate limited using the shared limiter.
-  assert.match(source("src/lib/auth.ts"), /checkRateLimit/);
+  assert.match(source("src/lib/auth.ts"), /isLoginAllowed/);
 
   // Admin dashboard counters must use visible-only service counts and must
   // not reach into Prisma directly from the page.
