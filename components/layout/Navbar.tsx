@@ -56,7 +56,7 @@ export function Navbar() {
   return (
     <>
       <header
-        className={`flex items-center justify-between mx-auto max-w-full py-3 px-[5.5vw] z-50 border-b-2 border-[#1d1d1b] bg-[#f4ebdc] sticky top-0 left-0 w-full transition-transform duration-300 ease-in-out ${
+        className={`flex items-center justify-between mx-auto max-w-full py-3 px-[5.5vw] z-50 border-b-2 border-[#1d1d1b] bg-background sticky top-0 left-0 w-full transition-transform duration-300 ease-in-out ${
           isHidden ? "-translate-y-full" : "translate-y-0"
         }`}
       >

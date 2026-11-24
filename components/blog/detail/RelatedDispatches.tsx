@@ -77,7 +77,7 @@ function RelatedCard({ post }: { post: BlogPostListItem }) {
 
 export function RelatedDispatches({ posts }: RelatedDispatchesProps) {
   return (
-    <section className="border-t-2 border-[#1b1b1b] bg-[#fcf9f8] px-[5.5vw] pb-16 pt-14 max-md:pb-12 max-md:pt-10">
+    <section className="border-t-2 border-[#1b1b1b] bg-background px-[5.5vw] pb-16 pt-14 max-md:pb-12 max-md:pt-10">
       <div className="flex flex-col gap-5 border-b-2 border-[#1b1b1b] pb-6 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="font-mono text-[11px] font-bold uppercase tracking-[.06em] text-[#a9362e]">

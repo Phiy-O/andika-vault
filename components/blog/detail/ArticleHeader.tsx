@@ -77,7 +77,7 @@ export function ArticleHeader({
   const fileName = `${slugFileName(slug)}.MD`;
 
   return (
-    <header className="border-b-2 border-[#1b1b1b] bg-[#faf6ee] px-[5.5vw]">
+    <header className="border-b-2 border-[#1b1b1b] bg-background px-[5.5vw]">
       <div className="w-full py-8 sm:py-9">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <nav aria-label="Breadcrumb">

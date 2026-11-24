@@ -43,7 +43,7 @@ export function BlogContent({ posts }: { posts: BlogPost[] }) {
   const reset = () => setVisibleCount(ITEMS_PER_PAGE);
 
   return (
-    <main className="min-h-screen bg-[#fcf9f8] text-[#1b1b1b]"><div className={shell}>
+    <main className="min-h-screen bg-background text-[#1b1b1b]"><div className={shell}>
       <section className="grid gap-8 border-b-2 border-[#1b1b1b] pb-7 lg:grid-cols-[1fr_460px]">
         <div className="flex flex-col justify-between gap-8"><div>
           <div className="mb-3 flex flex-wrap items-center gap-2"><span className={`${mono} border border-[#1b1b1b] bg-[#faf6ee] px-2 py-1`}>03 // WRITING ARCHIVE</span><span className={`${mono} text-[#58413f]`}><i className="mr-2 inline-block size-1.5 rounded-full bg-[#006c49]" />{allPosts.length} PUBLISHED DISPATCHES // EDGE RSS ACTIVE</span></div>

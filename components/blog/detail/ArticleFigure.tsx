@@ -41,7 +41,7 @@ export function ArticleFigure({
 
   return (
     <section
-      className="border-b-2 border-[#1b1b1b] bg-[#fcf9f8] px-[5.5vw] py-12 max-md:py-8"
+      className="border-b-2 border-[#1b1b1b] bg-background px-[5.5vw] py-12 max-md:py-8"
       aria-label="Article cover figure"
     >
       <figure className="border-2 border-[#1b1b1b] bg-[#faf6ee] p-5 shadow-[4px_4px_0_#1b1b1b] sm:p-6 lg:p-8">
