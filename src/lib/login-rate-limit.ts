@@ -9,8 +9,11 @@ const WINDOW_SECONDS = 15 * 60;
  * The fallback is best-effort on serverless but better than no protection.
  */
 export async function isLoginAllowed(ip: string): Promise<boolean> {
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  // Vercel KV is Upstash under the hood and exposes these alternative names.
+  const url =
+    process.env.UPSTASH_REDIS_REST_URL ?? process.env.KV_REST_API_URL;
+  const token =
+    process.env.UPSTASH_REDIS_REST_TOKEN ?? process.env.KV_REST_API_TOKEN;
 
   if (!url || !token) {
     return allowLocally(`login:${ip}`);

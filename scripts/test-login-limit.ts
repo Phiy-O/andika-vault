@@ -46,6 +46,33 @@ async function main(): Promise<void> {
     delete process.env.UPSTASH_REDIS_REST_TOKEN;
   }
 
+  // Vercel KV integration names (already configured on the project).
+  process.env.KV_REST_API_URL = "https://kv-example.upstash.io/";
+  process.env.KV_REST_API_TOKEN = "kv-token";
+  let kvCalls = 0;
+  globalThis.fetch = (async (input: string | URL | Request, init?: RequestInit) => {
+    assert.equal(String(input), "https://kv-example.upstash.io/pipeline");
+    assert.equal(
+      (init?.headers as Record<string, string>).Authorization,
+      "Bearer kv-token"
+    );
+    kvCalls += 1;
+    return new Response(JSON.stringify([{ result: kvCalls }, { result: 1 }]), {
+      status: 200,
+    });
+  }) as typeof fetch;
+  try {
+    for (let i = 0; i < 5; i += 1) {
+      assert.equal(await isLoginAllowed("kv-ip"), true);
+    }
+    assert.equal(await isLoginAllowed("kv-ip"), false);
+    assert.equal(kvCalls, 6);
+  } finally {
+    globalThis.fetch = originalFetch;
+    delete process.env.KV_REST_API_URL;
+    delete process.env.KV_REST_API_TOKEN;
+  }
+
   console.log("login rate limit tests passed");
 }
 
