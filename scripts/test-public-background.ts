@@ -24,6 +24,14 @@ async function main(): Promise<void> {
     assert.ok(source.includes("bg-background"), `${file} must use bg-background`);
   }
 
+  // The article detail page has two full-width canvas bands; neither may
+  // keep the old cream, including the body section that has no text token.
+  const article = readFileSync("app/blog/[slug]/page.tsx", "utf8");
+  assert.ok(
+    !article.includes("bg-[#faf6ee]"),
+    "app/blog/[slug]/page.tsx must not keep any bg-[#faf6ee] canvas band"
+  );
+
   const globals = readFileSync("app/globals.css", "utf8");
   assert.ok(globals.includes(".admin-shell"), "admin shell must remain");
   assert.ok(

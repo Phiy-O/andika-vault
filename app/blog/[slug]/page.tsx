@@ -108,7 +108,7 @@ export default async function BlogPostPage({
 
   return (
     <PublicShell>
-      <main className="bg-[#faf6ee] text-[#1b1b1b]">
+      <main className="bg-background text-[#1b1b1b]">
         <ArticleHeader
           title={post.title}
           slug={post.slug}
@@ -132,7 +132,7 @@ export default async function BlogPostPage({
           thumbnail={post.thumbnail}
         />
 
-        <section className="bg-[#faf6ee] px-[5.5vw] py-16 max-md:py-10">
+        <section className="bg-background px-[5.5vw] py-16 max-md:py-10">
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
             <article className="min-w-0 lg:col-span-8">
               <div
