@@ -67,7 +67,9 @@ const globalForPrisma = globalThis as unknown as {
 export const basePrisma = globalForPrisma.basePrisma ?? createBasePrisma();
 export const prisma = globalForPrisma.prisma ?? extendPrisma(basePrisma);
 
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.basePrisma = basePrisma;
-  globalForPrisma.prisma = prisma;
-}
+// Cache unconditionally. Next bundles this module into several production
+// chunks; if the cache is dev-only, every chunk opens its own pg pool and the
+// parallel prerender workers exhaust Supabase's 15-client session limit.
+// globalThis is process-scoped, so this keeps exactly one pool per worker.
+globalForPrisma.basePrisma = basePrisma;
+globalForPrisma.prisma = prisma;
