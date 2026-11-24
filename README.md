@@ -1,36 +1,104 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Andika Vault
+
+Personal portfolio website of **Andika** — software engineer. A public site for projects, writing, skills, and certificates, backed by a private admin CMS so every piece of content can be managed without touching code.
+
+**Live site:** [andika-portfolio.my.id](https://andika-portfolio.my.id)
+
+## About
+
+Andika Vault is built with Next.js and TypeScript and styled in a "structured playful neobrutalism" direction — cream background, coral accents, strong black borders. The public site and the admin studio share one codebase and one PostgreSQL database via Prisma.
+
+## Features
+
+**Public site**
+- Home, About, Projects, Blog, and Contact pages
+- Blog ("dispatches") with categories, tags, cover art, and reading time
+- Project case studies, skills, and certificates
+- Contact form that lands in the admin inbox
+
+**Admin studio (login required)**
+- Manage blog posts with a rich-text editor (Lexical / TipTap), drafts, and publishing
+- Manage projects, skills, certificates, and site settings
+- Read and handle contact messages
+- NextAuth-protected access, with login rate limiting (Upstash Redis / Vercel KV) and hardened input validation
+
+## Tech Stack
+
+| Area | Technology |
+| --- | --- |
+| Framework | Next.js 16 (App Router), React 19, TypeScript |
+| Styling | Tailwind CSS v4, Framer Motion, Lucide icons |
+| Database | PostgreSQL with Prisma ORM |
+| Auth | NextAuth (Auth.js) with Prisma adapter |
+| Editors | Lexical and TipTap rich-text editors |
+| Media | Cloudinary image hosting |
+| Validation | Zod, sanitize-html |
+| Deployment | Vercel |
 
 ## Getting Started
 
-First, run the development server:
+Prerequisites: Node.js 20+ and [pnpm](https://pnpm.io), plus a PostgreSQL database.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/Phiy-O/andika-vault.git
+cd andika-vault
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Create a `.env` file with at least:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+DATABASE_URL="postgresql://user:password@localhost:5432/andika_vault"
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="your-secret"
+# Cloudinary (media uploads)
+CLOUDINARY_CLOUD_NAME=""
+CLOUDINARY_API_KEY=""
+CLOUDINARY_API_SECRET=""
+# Optional: distributed login rate limiting
+UPSTASH_REDIS_REST_URL=""
+UPSTASH_REDIS_REST_TOKEN=""
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Then set up the database and run the dev server:
 
-## Learn More
+```bash
+pnpm prisma migrate dev
+pnpm prisma db seed
+pnpm dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+Open [http://localhost:3000](http://localhost:3000) to view the site.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Scripts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Command | Description |
+| --- | --- |
+| `pnpm dev` | Start the development server |
+| `pnpm build` | Production build |
+| `pnpm start` | Start the production server |
+| `pnpm lint` | Run ESLint |
+| `pnpm test` | Run the full script-based test suite (Prisma retry, validation, guards, revalidation, db pool, security hardening, login limiting, and more) |
 
-## Deploy on Vercel
+## Project Structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```text
+app/          App Router pages (public site + admin studio)
+components/   UI components for the site and the studio
+lib/          Shared logic, validation, and utilities
+prisma/       Prisma schema, migrations, and seed
+public/       Static assets
+scripts/      Test and utility scripts
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deployment
+
+The site is deployed on Vercel. The production build runs:
+
+```bash
+pnpm prisma generate && pnpm run build
+```
+
+---
+
+Built and maintained by Andika. This repository is a personal portfolio; feel free to explore the code, but the content and branding are my own.
