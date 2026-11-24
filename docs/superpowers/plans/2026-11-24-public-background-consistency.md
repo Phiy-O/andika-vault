@@ -23,7 +23,7 @@
 ## Review Focus
 
 - **Navbar seam** — if the navbar keeps `#f4ebdc`, pages still show a band under it; Task 2 asserts the navbar no longer carries that hex.
-- **Blog article bands** — if only `<main>` changes, the full-width header/figure/body bands remain a different cream; Task 2 asserts all three band declarations change.
+- **Blog article bands** — if only `<main>` changes, the full-width header/figure/body/related bands remain a different cream; Task 2 asserts all four band declarations change.
 - **Over-broad replacement** — replacing every `#faf6ee`/`#fcf9f8` would flatten intentional cards and badges; Task 1's assertions target exact canvas strings only, and Task 2 touches only those strings.
 - **Admin palette isolation** — changing the root token or `.admin-shell` would alter the workspace colors; Task 1 asserts `.admin-shell` still declares `background: var(--background)` with its original hex tokens.
 - **Token availability at build** — `bg-background` must resolve under Tailwind v4; Task 2 runs `pnpm run build` after the swap.
@@ -50,9 +50,10 @@ Write a script using `node:assert/strict` and `node:fs` `readFileSync` that:
   - `components/blog/BlogContent.tsx` → `min-h-screen bg-[#fcf9f8]`
   - `app/contact/page.tsx` → `min-h-screen bg-[#fcf9f8]`
   - `components/projects/ProjectsContent.tsx` → `min-h-screen bg-[#faf6ee]`
-  - `app/blog/[slug]/page.tsx` → `bg-[#faf6ee] text-[#1b1b1b]` (appears twice: `<main>` and body `<section>`)
+  - `app/blog/[slug]/page.tsx` → `bg-[#faf6ee] text-[#1b1b1b]` (`<main>` only) and `bg-[#faf6ee] px-[5.5vw] py-16` (body `<section>`)
   - `components/blog/detail/ArticleHeader.tsx` → `bg-[#faf6ee] px-[5.5vw]`
   - `components/blog/detail/ArticleFigure.tsx` → `bg-[#fcf9f8] px-[5.5vw]`
+  - `components/blog/detail/RelatedDispatches.tsx` → `bg-[#fcf9f8] px-[5.5vw]` (related-dispatches band)
   - `components/layout/Navbar.tsx` → `bg-[#f4ebdc] sticky`
 - For each pair, assert `!source.includes(forbidden)` with a message naming the file.
 - Assert each of those files contains `bg-background`.
@@ -86,6 +87,7 @@ git commit -m "test: pin public page canvas backgrounds to bg-background"
 - Modify: `app/blog/[slug]/page.tsx`
 - Modify: `components/blog/detail/ArticleHeader.tsx`
 - Modify: `components/blog/detail/ArticleFigure.tsx`
+- Modify: `components/blog/detail/RelatedDispatches.tsx`
 - Modify: `components/layout/Navbar.tsx`
 
 **Interfaces:**
@@ -99,9 +101,11 @@ For each file in Task 1's list, replace only the exact forbidden string with the
 - Home: `min-h-screen bg-[#f4ebdc]` → `min-h-screen bg-background`
 - Achievements, projects list: `min-h-screen bg-[#faf6ee]` → `min-h-screen bg-background`
 - Blog list, contact: `min-h-screen bg-[#fcf9f8]` → `min-h-screen bg-background`
-- Blog detail: both `bg-[#faf6ee] text-[#1b1b1b]` → `bg-background text-[#1b1b1b]`
+- Blog detail `<main>`: `bg-[#faf6ee] text-[#1b1b1b]` → `bg-background text-[#1b1b1b]`
+- Blog detail body `<section>`: `bg-[#faf6ee] px-[5.5vw] py-16` → `bg-background px-[5.5vw] py-16`
 - Article header: `bg-[#faf6ee] px-[5.5vw]` → `bg-background px-[5.5vw]`
 - Article figure: `bg-[#fcf9f8] px-[5.5vw]` → `bg-background px-[5.5vw]`
+- Related dispatches: `bg-[#fcf9f8] px-[5.5vw]` → `bg-background px-[5.5vw]`
 - Navbar: `bg-[#f4ebdc] sticky` → `bg-background sticky`
 
 Do not touch any other hex value in these files (cards, badges, figure frames, terminal blocks, status strips).

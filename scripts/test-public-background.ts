@@ -11,6 +11,7 @@ const canvasStrings: Array<[string, string]> = [
   ["app/blog/[slug]/page.tsx", "bg-[#faf6ee] text-[#1b1b1b]"],
   ["components/blog/detail/ArticleHeader.tsx", "bg-[#faf6ee] px-[5.5vw]"],
   ["components/blog/detail/ArticleFigure.tsx", "bg-[#fcf9f8] px-[5.5vw]"],
+  ["components/blog/detail/RelatedDispatches.tsx", "bg-[#fcf9f8] px-[5.5vw]"],
   ["components/layout/Navbar.tsx", "bg-[#f4ebdc] sticky"],
 ];
 
